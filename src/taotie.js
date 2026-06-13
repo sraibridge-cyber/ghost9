@@ -20,7 +20,7 @@
 const { createHash } = require('crypto');
 const { perVertexClusters } = require('./spectral_graph');
 
-const TAU = 0.9995;
+const { TAU, TAU_LTM: TAOTIE_TAU_LTM } = require('./coherence_calculus');
 const TAU_LTM = 0.9998;
 const TAOTIE_TRIGGER = 0.80; // Legacy: use triggerAt=7 for OP3-informed sweep
 const TAOTIE_TARGET = 0.60;
@@ -99,7 +99,7 @@ class VoidSpace {
     const ltm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'LTM');
     const stm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'STM');
 
-    const excess = before - this.targetCount;
+    const excess = this.triggerAt < 100 ? (before - this.triggerAt) : (before - this.targetCount);
 
     if (excess <= 0 || stm.length < 2) {
       return {

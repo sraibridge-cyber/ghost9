@@ -1,5 +1,5 @@
 // ================================================================
-// GHOST KERNEL  —  Port 7767  —  GHOST v9.0.1
+// GHOST KERNEL  —  Port 7767  —  GHOST v9.0.9
 // Bifurcated backend handler: Recall/Query side
 // Polls shared state every 2 s; never writes directly.
 // ================================================================
@@ -159,7 +159,7 @@ const routes = {
     const args = body.args || {};
 
     const handlers = {
-      'status':   () => ({ face_port: 7766, kernel_port: 7767, n: _state.n, merkle: _state.merkle_root, version: '9.0.1' }),
+      'status':   () => ({ face_port: 7766, kernel_port: 7767, n: _state.n, merkle: _state.merkle_root, version: '9.0.9' }),
       'verify':   () => verifyChain(_state.nodes),
       'wc':       () => CC.whitlock(_state.n),
       'dist':     () => T.vertexDistribution(_state.nodes),
@@ -213,7 +213,7 @@ setInterval(loadState, POLL_MS);
 loadState();
 
 server.listen(PORT, '127.0.0.1', () => {
-  log(`GHOST KERNEL v9.0.1 listening on http://127.0.0.1:${PORT}`);
+  log(`GHOST KERNEL v9.0.9 listening on http://127.0.0.1:${PORT}`);
   log(`Recall, verify, nav, ghostlet, cmd — state poll: every ${POLL_MS}ms`);
 });
 

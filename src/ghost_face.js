@@ -1,5 +1,5 @@
 // ================================================================
-// GHOST FACE  —  Port 7766  —  GHOST v9.0.1
+// GHOST FACE  —  Port 7766  —  GHOST v9.0.9
 // Bifurcated backend handler: Ingest side
 //
 // Three-layer devouring pipeline:
@@ -34,7 +34,25 @@ let web          = loadSpatialWeb();
 let ingestSince  = 0;
 
 function ensureDataDir() {
+
+function atomicWrite(filePath, data) {
+  const tmp = filePath + ".tmp";
+  fs.writeFileSync(tmp, data);
+  fs.renameSync(tmp, filePath);
+}
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+
+function atomicWrite(filePath, data) {
+  const tmp = filePath + ".tmp";
+  fs.writeFileSync(tmp, data);
+  fs.renameSync(tmp, filePath);
+}
+}
+
+function atomicWrite(filePath, data) {
+  const tmp = filePath + ".tmp";
+  fs.writeFileSync(tmp, data);
+  fs.renameSync(tmp, filePath);
 }
 
 function loadState() {
@@ -46,7 +64,7 @@ function loadState() {
 
 function saveState(state) {
   ensureDataDir();
-  fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+  atomicWrite(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
 function loadSpatialWeb() {
@@ -66,7 +84,7 @@ function loadSpatialWeb() {
 
 function saveSpatialWeb() {
   try {
-    fs.writeFileSync(WEB_FILE, JSON.stringify(web.serialize(), null, 2));
+    atomicWrite(WEB_FILE, JSON.stringify(web.serialize(), null, 2));
   } catch (e) {
     log(`WARN: could not save spatial web: ${e.message}`);
   }
@@ -81,7 +99,7 @@ function archiveNodes(nodes) {
   }
   const ts = Date.now();
   const records = nodes.map(n => ({ ...n, archived_at: ts }));
-  fs.writeFileSync(ARCHIVE_FILE, JSON.stringify([...existing, ...records], null, 2));
+  atomicWrite(ARCHIVE_FILE, JSON.stringify([...existing, ...records], null, 2));
 }
 
 function computeMerkle(nodes) {
@@ -206,7 +224,7 @@ const routes = {
       log(`REJECT μ=${cc.mu.toFixed(6)} "${text.slice(0, 60)}"`);
       return json(res, {
         admitted: false, layer: 1, reason: 'CC gate: μ < τ',
-        mu: cc.mu, tau: CC.TAU, scores: cc.scores, whitlock: cc.whitlock,
+        mu: cc.mu, tau: cc.tau, scores: cc.scores, whitlock: cc.whitlock,
         elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
       });
     }
@@ -385,7 +403,7 @@ const routes = {
 
   'GET /benchmark': async (req, res) => {
     const ITERS = 100;
-    const text  = 'This is a benchmark entry for GHOST v9.0.1 performance measurement.';
+    const text  = 'This is a benchmark entry for GHOST v9.0.9 performance measurement.';
     const state = loadState();
     const start = performance.now();
     for (let i = 0; i < ITERS; i++) CC.evaluate(text, { nodeCount: i });
@@ -441,7 +459,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   const ws = web.stats();
-  log(`GHOST FACE v9.0.1 listening on http://127.0.0.1:${PORT}`);
+  log(`GHOST FACE v9.0.9 listening on http://127.0.0.1:${PORT}`);
   log(`3-Layer pipeline: CC Gate → STM/LTM Separation → Taotie (trigger: ${void_space.triggerAt})`);
   log(`SpatialWeb: ${ws.nodes} nodes, ${ws.edges} edges, ${ws.learningCycles} learning cycles`);
 });

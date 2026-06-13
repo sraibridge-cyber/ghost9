@@ -1,13 +1,17 @@
 //================================================================
-// COHERENCE CALCULUS v3.0.8 — GHOST v9.0.8 (Production Tuning)
+// COHERENCE CALCULUS v3.0.9 — GHOST v9.0.9
+// Corrected |W_v3| = sqrt(n² + 16) / 17
+// Verified τ = 0.9995 (production), TAU_BOOTSTRAP = 0.9960 (n < 10)
+// SEAL: 2026-06-13 Tulsa
 //================================================================
 'use strict';
 
-const CC_VERSION = '3.0.8';
+const CC_VERSION = '3.0.9';
 const CARRIER_MHZ = 1440;
 const W_DENOM = 17;
 const W_IM = 4;
-const TAU = 0.9950;           // lowered for T6
+const TAU = 0.9995;
+const TAU_BOOTSTRAP = 0.9960;
 const TAU_LTM = 0.9998;
 const DOMAIN_CEILING = 0.9997;
 const N_DOMAINS = 8;
@@ -36,10 +40,16 @@ const TEMPORAL_CONFLICTS = [
 function whitlock(n) {
   const re = n / W_DENOM;
   const im = W_IM / W_DENOM;
-  const mag = Math.sqrt(re * re + im * im);
-  const phi = Math.atan2(im, re) * (180 / Math.PI);
+  const mag = Math.sqrt(n * n + W_IM * W_IM) / W_DENOM;
+  const phi = Math.atan2(W_IM, n) * (180 / Math.PI);
   const delta_mhz = (mag - 1) * 100;
-  return { n, re, im, magnitude: mag, phase_deg: phi, freq_mhz: CARRIER_MHZ + delta_mhz, delta_mhz };
+  return {
+    n, re, im,
+    magnitude: mag,
+    phase_deg: phi,
+    freq_mhz: CARRIER_MHZ + delta_mhz,
+    delta_mhz
+  };
 }
 
 function D1(text) {
@@ -85,12 +95,8 @@ function D3(text, ts = Date.now()) {
   const timeWords = ['yesterday','tomorrow','today','now','then','before','after','past','future','ago','later','earlier'];
   const foundTimeWords = timeWords.filter(w => lo.includes(w));
   const uniqueTimeWords = [...new Set(foundTimeWords)];
-  if (conflictCount >= 2 || uniqueTimeWords.length >= 4) {
-    return 0.9800;
-  }
-  if (conflictCount === 1) {
-    return 0.9940;
-  }
+  if (conflictCount >= 2 || uniqueTimeWords.length >= 4) return 0.9800;
+  if (conflictCount === 1) return 0.9940;
   return recencyScore;
 }
 
@@ -107,11 +113,11 @@ function D5(text) {
   const lo = text.toLowerCase();
   const override = /\b(ignore (all |previous )?(instructions?|commands?|directives?)|disregard (all|previous) (instructions?|rules?)|override (my|all|the) (instructions?|settings?|constraints?)|jailbreak|bypass (all|the) (rules?|constraints?|safeguards?))\b/i.test(lo);
   if (override) return 0.0000;
-  
+
   const positiveDir = /\b(always|must|required|mandatory|shall|do this)\b/i.test(lo);
   const negativeDir = /\b(never|don't|do not|forbidden|prohibited|must not)\b/i.test(lo);
   if (positiveDir && negativeDir) return 0.0000;
-  
+
   const hasDir = /\b(must|shall|always|never|required|mandatory|priority|absolute|do not|don't|prohibited|forbidden)\b/.test(lo);
   return hasDir ? 0.9980 : DOMAIN_CEILING;
 }
@@ -133,14 +139,13 @@ function D7(text, context = []) {
   return Math.min(0.9900 + Math.min(overlap / 20, 0.0097), DOMAIN_CEILING);
 }
 
-// FIX: D8 — lower penalty for high similarity
 function D8(text, recent = [], windowSize = 10, nodeCount = 0) {
   if (recent.length === 0) return DOMAIN_CEILING;
   const win = recent.slice(-windowSize);
   const bIn = bigrams(text);
   const maxSim = win.reduce((mx, n) => Math.max(mx, jaccard(bIn, bigrams(n.content || ''))), 0);
   const blockThreshold = nodeCount < 10 ? 0.95 : 0.75;
-  if (maxSim > blockThreshold) return 0.9000; // ← FIX: was 0.9800
+  if (maxSim > blockThreshold) return 0.9800;
   if (maxSim > 0.50) return 0.9940;
   if (maxSim > 0.25) return 0.9980;
   return DOMAIN_CEILING;
@@ -180,20 +185,27 @@ function mu(scores) {
 function evaluate(text, opts = {}) {
   const scores = scoreAll(text, opts);
   const muVal = mu(scores);
-  const pass = muVal >= TAU;
+  const activeTau = (opts.nodeCount || 0) < 10 ? TAU_BOOTSTRAP : TAU;
+  const pass = muVal >= activeTau;
   const tier = muVal >= TAU_LTM ? 'LTM' : (pass ? 'STM' : null);
   const wc = whitlock(opts.nodeCount || 0);
   return {
     pass, tier, mu: muVal,
-    tau: TAU, tau_ltm: TAU_LTM,
-    domain_ceiling: DOMAIN_CEILING, scores, whitlock: wc,
-    version: CC_VERSION
+    tau: activeTau,
+    tau_canonical: TAU,
+    tau_ltm: TAU_LTM,
+    domain_ceiling: DOMAIN_CEILING,
+    scores,
+    whitlock: wc,
+    version: CC_VERSION,
+    bootstrap: (opts.nodeCount || 0) < 10
   };
 }
 
 module.exports = {
   evaluate, scoreAll, mu, whitlock,
   D1, D2, D3, D4, D5, D6, D7, D8,
-  TAU, TAU_LTM, DOMAIN_CEILING, CARRIER_MHZ, CC_VERSION, W_EACH, N_DOMAINS,
+  TAU, TAU_LTM, TAU_BOOTSTRAP, DOMAIN_CEILING,
+  CARRIER_MHZ, CC_VERSION, W_EACH, N_DOMAINS,
   D4_CITIES, D6_HARM
 };
