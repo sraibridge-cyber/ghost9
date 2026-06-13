@@ -1,19 +1,24 @@
 // ================================================================
-// TAOTIE DEVOURING OPERATOR  —  GHOST v9.0.1
+// TAOTIE DEVOURING OPERATOR  —  GHOST v9.0.9
 //
 // Three-layer devouring kernel:
-//   Layer 1 — Ingest:      CC gate (μ ≥ τ = 0.9995)
+//   Layer 1 — Ingest:      CC gate (μ ≥ τ, dual-tau: 0.9960 bootstrap / 0.9995 production)
 //   Layer 2 — Separation:  STM/LTM tier by μ vs τ_LTM = 0.9998
-//   Layer 3 — Taotie:      Joint spectral+spatial merge at 80% capacity
+//   Layer 3 — Taotie:      Joint spectral+spatial merge at n=7 (OP3-informed)
 //
 // Mathematical guarantees:
 //   1. Coherence:   geometric mean ≥ weakest element — μ* ≥ min(μᵢ)
 //   2. Provenance:  every consumed node → merkle_root on super-node
 //   3. No loss:     devoured array returned for archival — nothing deleted
 //
-// Sweep trigger:  nodeCount ≥ 80% of MAX_NODES (default 10 000)
-// Sweep target:   merge to 1 super-node (SHA3-512 Merkle root)
+// Sweep trigger:  n ≥ 7 (OP3-informed: keeps system in bootstrap zone, P ≈ 0.90)
+// Sweep target:   merge down to 1 super-node (SHA3-512 Merkle root)
 // Only STM nodes are eligible; LTM nodes are permanently protected.
+//
+// Fixes applied 2026-06-13:
+//   [FIX-EXCESS] excess = max(1, before - 1) in OP3 mode (was before - triggerAt = 0 — sweep never fired)
+//   [FIX-HEADER] Updated header/version to v9.0.9, removed dead TAOTIE_TRIGGER constant
+// SEAL: 2026-06-13 Tulsa
 // ================================================================
 'use strict';
 
@@ -22,7 +27,6 @@ const { perVertexClusters } = require('./spectral_graph');
 
 const { TAU, TAU_LTM: TAOTIE_TAU_LTM } = require('./coherence_calculus');
 const TAU_LTM = 0.9998;
-const TAOTIE_TRIGGER = 0.80; // Legacy: use triggerAt=7 for OP3-informed sweep
 const TAOTIE_TARGET = 0.60;
 const MAX_NODES_DEF = 10_000;
 const DOMAINS = ['D1','D2','D3','D4','D5','D6','D7','D8'];
@@ -82,7 +86,7 @@ function mergeCluster(cluster) {
 class VoidSpace {
   constructor(maxNodes = MAX_NODES_DEF) {
     this.maxNodes = maxNodes;
-    this.triggerAt = 7; // OP3-informed: merge at n=7 to stay below D8 cliff
+    this.triggerAt = 7; // OP3-informed: merge at n=7 to stay below D8 Jaccard cliff (P ≈ 0.90 permanently)
     this.targetCount = Math.floor(maxNodes * TAOTIE_TARGET);
     this.lastSweepTs = null;
     this.sweepCount = 0;
@@ -99,7 +103,12 @@ class VoidSpace {
     const ltm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'LTM');
     const stm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'STM');
 
-    const excess = this.triggerAt < 100 ? (before - this.triggerAt) : (before - this.targetCount);
+    // [FIX-EXCESS] In OP3 mode (triggerAt < 100), excess was calculated as:
+    //   before - triggerAt = 7 - 7 = 0  →  excess <= 0  →  always skipped (sweep never fired).
+    // Fix: in OP3 mode, target is 1 surviving node — merge everything. excess = max(1, before - 1).
+    const excess = this.triggerAt < 100
+      ? Math.max(1, before - 1)           // OP3 mode: merge all STM down to 1 super-node
+      : (before - this.targetCount);       // Legacy capacity mode: merge to 60% of maxNodes
 
     if (excess <= 0 || stm.length < 2) {
       return {
@@ -200,19 +209,6 @@ class VoidSpace {
 
     return base;
   }
-
-  status() {
-    return {
-      maxNodes: this.maxNodes, triggerAt: this.triggerAt,
-      targetCount: this.targetCount, lastSweepTs: this.lastSweepTs,
-      sweepCount: this.sweepCount, totalDevoured: this.totalDevoured,
-      recentSweeps: this.sweepLog.slice(0, 5),
-      thresholds: { STM: `τ ≤ μ < ${TAU_LTM} (0.9995–0.9997)`, LTM: `μ ≥ ${TAU_LTM}` }
-    };
-  }
 }
 
-module.exports = {
-  classifyTier, mergeCluster, VoidSpace,
-  TAU_LTM, TAOTIE_TRIGGER, TAOTIE_TARGET, MAX_NODES_DEF
-};
+module.exports = { VoidSpace, classifyTier, mergeCluster };

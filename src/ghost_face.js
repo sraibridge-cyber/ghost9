@@ -5,7 +5,10 @@
 // Three-layer devouring pipeline:
 //   Layer 1 — CC Gate:    evaluate μ, reject if μ < τ = 0.9995
 //   Layer 2 — Separation: classify STM (μ < 0.9998) / LTM (μ ≥ 0.9998)
-//   Layer 3 — Taotie:     joint spectral+spatial merge at 80% capacity
+//   Layer 3 — Taotie:     joint spectral+spatial merge at n=7 (OP3-informed)
+//
+// Fixes applied 2026-06-13:
+//   [FIX-ATOMIC] atomicWrite defined 3x (2 nested in ensureDataDir, 1 module scope) — deduplicated to 1
 // ================================================================
 'use strict';
 
@@ -34,23 +37,11 @@ let web          = loadSpatialWeb();
 let ingestSince  = 0;
 
 function ensureDataDir() {
-
-function atomicWrite(filePath, data) {
-  const tmp = filePath + ".tmp";
-  fs.writeFileSync(tmp, data);
-  fs.renameSync(tmp, filePath);
-}
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-
-function atomicWrite(filePath, data) {
-  const tmp = filePath + ".tmp";
-  fs.writeFileSync(tmp, data);
-  fs.renameSync(tmp, filePath);
-}
 }
 
 function atomicWrite(filePath, data) {
-  const tmp = filePath + ".tmp";
+  const tmp = filePath + '.tmp';
   fs.writeFileSync(tmp, data);
   fs.renameSync(tmp, filePath);
 }

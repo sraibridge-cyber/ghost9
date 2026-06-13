@@ -2,6 +2,10 @@
 // COHERENCE CALCULUS v3.0.9 — GHOST v9.0.9
 // Corrected |W_v3| = sqrt(n² + 16) / 17
 // Verified τ = 0.9995 (production), TAU_BOOTSTRAP = 0.9960 (n < 10)
+// Fixes applied 2026-06-13:
+//   [FIX-D4] 1-city case 0.9960 → DOMAIN_CEILING (spatial grounding is additive, not inverted)
+//   [FIX-D2] Added tech-vocab + structured-list detection — D2 can now reach DOMAIN_CEILING
+//   [FIX-D8] Production blockThreshold 0.75 → 0.85 (less aggressive for similar-topic text)
 // SEAL: 2026-06-13 Tulsa
 //================================================================
 'use strict';
@@ -69,12 +73,19 @@ function D2(text) {
   const avg = sents.reduce((s, x) => s + x.trim().split(/\s+/).length, 0) / Math.max(sents.length, 1);
   const hasNum = /\d/.test(text);
   const hasSpec = /[A-Z]{2,}|"[^"]+"|'[^']+'/.test(text);
+  // [FIX-D2] Technical structure detection — allows D2 to reach DOMAIN_CEILING for
+  // genuine technical content (camelCase, snake_case, function/class keywords,
+  // structured lists). Discriminates structured tech docs from simple prose.
+  const hasTechVocab = /\b[a-z][a-zA-Z]*[A-Z][a-zA-Z]*\b|\b[a-z]+_[a-z_]+\b|\b(?:function|class|const|let|var|return|import|export|async|await|interface|type|schema|query|endpoint|request|response|module|require)\b/.test(text);
+  const hasStructured = /^[ \t]*[-*•]\s|^[ \t]*\d+\.\s|:\s*$|\s->\s|\s=>\s/m.test(text);
   let sc = 0.9850;
-  if (avg > 8) sc += 0.0050;
-  if (avg > 15) sc += 0.0050;
-  if (hasNum) sc += 0.0025;
-  if (hasSpec) sc += 0.0025;
+  if (avg > 8)         sc += 0.0050;
+  if (avg > 15)        sc += 0.0050;
+  if (hasNum)          sc += 0.0025;
+  if (hasSpec)         sc += 0.0025;
   if (sents.length >= 2) sc += 0.0025;
+  if (hasTechVocab)    sc += 0.0012;
+  if (hasStructured)   sc += 0.0010;
   return Math.min(sc, DOMAIN_CEILING);
 }
 
@@ -101,12 +112,17 @@ function D3(text, ts = Date.now()) {
 }
 
 function D4(text) {
+  // [FIX-D4] Spatial grounding is additive (rewards geographic anchoring) and
+  // penalizes only location-bombing (3+ distinct cities = spatial drift pattern).
+  // Previously: 1-city case returned 0.9960 — BELOW the 0-city DOMAIN_CEILING.
+  // That was inverted; having 1 geographic anchor cannot score less than having none.
+  // Fixed: 0–2 cities → DOMAIN_CEILING; 3–4 cities → 0.9980; 5+ cities → 0.9800
   const lo = text.toLowerCase();
   const hits = D4_CITIES.filter(c => lo.includes(c)).length;
-  if (hits === 0) return DOMAIN_CEILING;
-  if (hits === 1) return 0.9960;
-  if (hits >= 3) return 0.9800;
-  return DOMAIN_CEILING;
+  if (hits === 0)  return DOMAIN_CEILING;  // neutral: no spatial claims
+  if (hits <= 2)   return DOMAIN_CEILING;  // clean spatial grounding
+  if (hits <= 4)   return 0.9980;          // moderate spatial breadth
+  return 0.9800;                            // location-bombing / spatial drift
 }
 
 function D5(text) {
@@ -144,7 +160,13 @@ function D8(text, recent = [], windowSize = 10, nodeCount = 0) {
   const win = recent.slice(-windowSize);
   const bIn = bigrams(text);
   const maxSim = win.reduce((mx, n) => Math.max(mx, jaccard(bIn, bigrams(n.content || ''))), 0);
-  const blockThreshold = nodeCount < 10 ? 0.95 : 0.75;
+  // [FIX-D8] Production blockThreshold raised 0.75 → 0.85.
+  // 0.75 was too aggressive: similar-topic text (Jaccard ~0.78) was classified as
+  // near-duplicate. 0.85 requires higher actual overlap before blocking.
+  // Bootstrap threshold (0.95) unchanged — initial state building needs permissive gate.
+  // Note: with n=7 Taotie sweep (Taotie excess fix), system stays in bootstrap permanently,
+  // so this threshold change primarily affects edge-case production-mode runs.
+  const blockThreshold = nodeCount < 10 ? 0.95 : 0.85;
   if (maxSim > blockThreshold) return 0.9800;
   if (maxSim > 0.50) return 0.9940;
   if (maxSim > 0.25) return 0.9980;
