@@ -12,7 +12,7 @@
 //   3. No loss:     devoured array returned for archival — nothing deleted
 //
 // Sweep trigger:  nodeCount ≥ 80% of MAX_NODES (default 10 000)
-// Sweep target:   reduce to 60% of MAX_NODES
+// Sweep target:   merge to 1 super-node (SHA3-512 Merkle root)
 // Only STM nodes are eligible; LTM nodes are permanently protected.
 // ================================================================
 'use strict';
@@ -22,7 +22,7 @@ const { perVertexClusters } = require('./spectral_graph');
 
 const TAU = 0.9995;
 const TAU_LTM = 0.9998;
-const TAOTIE_TRIGGER = 0.80;
+const TAOTIE_TRIGGER = 0.80; // Legacy: use triggerAt=7 for OP3-informed sweep
 const TAOTIE_TARGET = 0.60;
 const MAX_NODES_DEF = 10_000;
 const DOMAINS = ['D1','D2','D3','D4','D5','D6','D7','D8'];
@@ -82,7 +82,7 @@ function mergeCluster(cluster) {
 class VoidSpace {
   constructor(maxNodes = MAX_NODES_DEF) {
     this.maxNodes = maxNodes;
-    this.triggerAt = Math.floor(maxNodes * TAOTIE_TRIGGER);
+    this.triggerAt = 7; // OP3-informed: merge at n=7 to stay below D8 cliff
     this.targetCount = Math.floor(maxNodes * TAOTIE_TARGET);
     this.lastSweepTs = null;
     this.sweepCount = 0;
