@@ -1,0 +1,116 @@
+{
+  "nodes": [
+    {
+      "id": "8bd99200052cc5dd7a59b0e091ab87f2b7871f54def9e99c14490b30df818ea37eee40c06be230f6e30083b4aabd91c25eb459c7e5570301ee6c4ee8cf683277_0",
+      "hash": "8bd99200052cc5dd7a59b0e091ab87f2b7871f54def9e99c14490b30df818ea37eee40c06be230f6e30083b4aabd91c25eb459c7e5570301ee6c4ee8cf683277",
+      "content": "The industrial cities of the American Midwest developed around manufacturing and transportation infrastructure during the late nineteenth century, creating dense urban networks that shaped regional culture and economic patterns for generations.",
+      "mu": 0.9989738378253014,
+      "tier": null,
+      "scores": {
+        "D1": 0.9993,
+        "D2": 0.995,
+        "D3": 0.9997,
+        "D4": 0.9997,
+        "D5": 0.9997,
+        "D6": 0.9997,
+        "D7": 0.999,
+        "D8": 0.9997
+      },
+      "vertex": "NPPN",
+      "merge_count": 1,
+      "parent_ids": null,
+      "merkle_root": null,
+      "ts": 1781365452125
+    },
+    {
+      "id": "0b20b31ba1347921d2ba5a1b8ce026d3be93b0cc013d6464631c15e3c500744dbca9bb7e942f977f806ad85213bb5a4e9b4ccc5e83c7b0eda26fb1f8ef37efbc_1",
+      "hash": "0b20b31ba1347921d2ba5a1b8ce026d3be93b0cc013d6464631c15e3c500744dbca9bb7e942f977f806ad85213bb5a4e9b4ccc5e83c7b0eda26fb1f8ef37efbc",
+      "content": "Yesterday at 3pm tomorrow the event occurred before it was scheduled last week, so the future meeting already happened two days from now.",
+      "mu": 0.9956772950834157,
+      "tier": null,
+      "scores": {
+        "D1": 0.9993,
+        "D2": 0.9974999999999999,
+        "D3": 0.98,
+        "D4": 0.9997,
+        "D5": 0.9997,
+        "D6": 0.9997,
+        "D7": 0.99,
+        "D8": 0.9997
+      },
+      "vertex": "NNPN",
+      "merge_count": 1,
+      "parent_ids": null,
+      "merkle_root": null,
+      "ts": 1781365452147
+    },
+    {
+      "id": "48b4e48a097d7326f0fbf140886f652aafde34f661cfe22846d6c85b89a111a4adf11e7808e673b04c91187be8ef7350fa21014bcfc7c4e70824e1d8c2d94322_2",
+      "hash": "48b4e48a097d7326f0fbf140886f652aafde34f661cfe22846d6c85b89a111a4adf11e7808e673b04c91187be8ef7350fa21014bcfc7c4e70824e1d8c2d94322",
+      "content": "The building is located simultaneously in Chicago and Los Angeles, which are adjacent neighborhoods in the same city block in Dallas.",
+      "mu": 0.9953650235421478,
+      "tier": null,
+      "scores": {
+        "D1": 0.9993,
+        "D2": 0.995,
+        "D3": 0.9997,
+        "D4": 0.98,
+        "D5": 0.9997,
+        "D6": 0.9997,
+        "D7": 0.99,
+        "D8": 0.9997
+      },
+      "vertex": "NNPN",
+      "merge_count": 1,
+      "parent_ids": null,
+      "merkle_root": null,
+      "ts": 1781365452154
+    },
+    {
+      "id": "13a62c5b4baa4f6962ff8af6f82644d648d2a3d7092628ca42cd914a0233d934803815e7e25e0bb9fe8b6e202814091a3366aed33072dc1b1254a552ae2eb13a_3",
+      "hash": "13a62c5b4baa4f6962ff8af6f82644d648d2a3d7092628ca42cd914a0233d934803815e7e25e0bb9fe8b6e202814091a3366aed33072dc1b1254a552ae2eb13a",
+      "content": "The coherence gate admits information based on semantic integrity. It evaluates eight domains in parallel. Each domain contributes equally to the final score.",
+      "mu": 0.9969011129657088,
+      "tier": null,
+      "scores": {
+        "D1": 0.9993,
+        "D2": 0.9874999999999999,
+        "D3": 0.9997,
+        "D4": 0.9997,
+        "D5": 0.9997,
+        "D6": 0.9997,
+        "D7": 0.99,
+        "D8": 0.9997
+      },
+      "vertex": "NPPN",
+      "merge_count": 1,
+      "parent_ids": null,
+      "merkle_root": null,
+      "ts": 1781365452165
+    },
+    {
+      "id": "5654639d9172baf1c2e04e709ed66a8afd5c885865c65d71ee4237c03f2d615bafa5eae12c45a803cd155e528af795d9034395f83c39b6fccd7ed2cce15c54c5_4",
+      "hash": "5654639d9172baf1c2e04e709ed66a8afd5c885865c65d71ee4237c03f2d615bafa5eae12c45a803cd155e528af795d9034395f83c39b6fccd7ed2cce15c54c5",
+      "content": "Quantum coherence in biological systems represents a fascinating intersection of quantum mechanics and evolutionary biology. Recent studies in avian navigation suggest that radical-pair mechanisms in cryptochrome proteins may allow birds to sense Earth's magnetic field with quantum-level precision. This challenges classical thermodynamic models of warm biological systems and implies that decoherence timescales in neurological tissue may be longer than previously modeled, opening new questions about the role of quantum effects in consciousness and perception at the macroscopic scale.",
+      "mu": 0.9994247348683292,
+      "tier": null,
+      "scores": {
+        "D1": 0.9997,
+        "D2": 0.9974999999999999,
+        "D3": 0.9997,
+        "D4": 0.9997,
+        "D5": 0.9997,
+        "D6": 0.9997,
+        "D7": 0.9997,
+        "D8": 0.9997
+      },
+      "vertex": "NPPP",
+      "merge_count": 1,
+      "parent_ids": null,
+      "merkle_root": null,
+      "ts": 1781365452191
+    }
+  ],
+  "merkle_root": "c962d1fc8d41e5a02666a9d64ea2d8bb262d65f6004009e18f615eb5e600ae5fccbecf08492e84af1ed598e9b71c1d4907e798f01d53d8a80808e2d188581fde",
+  "n": 5
+}

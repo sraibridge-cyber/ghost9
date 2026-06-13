@@ -1,0 +1,20 @@
+{
+  "name": "ghost-kernel",
+  "version": "9.0.1",
+  "description": "GHOST v9.0.1 — Generative Holistic Oracle State Topology with Taotie Devouring Architecture",
+  "main": "src/ghost_face.js",
+  "engines": { "node": ">=18.0.0" },
+  "scripts": {
+    "start":   "node src/ghost_face.js & node src/ghost_kernel.js",
+    "face":    "node src/ghost_face.js",
+    "kernel":  "node src/ghost_kernel.js",
+    "verify":  "node scripts/ghost_verify.js",
+    "op3":     "node scripts/op3_harness.js"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^9.4.3"
+  },
+  "keywords": ["ghost","coherence","tesseract","taotie","harmony-labs","whitlock"],
+  "author": "Kyle S. Whitlock — Harmony Labs",
+  "license": "CC-BY-4.0"
+}
