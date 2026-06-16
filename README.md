@@ -1,4 +1,4 @@
-# GHOST9 — Harmony Labs Independent Research
+# GHOST9 — Complex System Sanity Labs
 
 <div align="center">
 
@@ -6,7 +6,7 @@
 
 *The Whitlock Coefficient for AI Alignment Coherence*
 
-[![Harmony Labs](https://img.shields.io/badge/Harmony%20Labs-Independent%20Research-gold?style=flat-square)](https://www.reddit.com/r/singularity/comments/1u7bae8/)
+[![Complex System Sanity Labs](https://img.shields.io/badge/Complex%20System%20Sanity%20Labs-Independent%20Research-gold?style=flat-square)](https://www.reddit.com/r/singularity/comments/1u7bae8/)
 [![arXiv](https://img.shields.io/badge/arXiv-Pending%20Endorsement-red?style=flat-square)](https://arxiv.org)
 [![Papers](https://img.shields.io/badge/Papers-5%20Sealed-blue?style=flat-square)](#research-corpus)
 
@@ -16,7 +16,7 @@
 
 ## What is this?
 
-GHOST9 is the AI kernel and evaluation framework behind the Harmony Labs alignment research. Developed over 10 months by an independent researcher (cabinet builder, Tulsa OK, no formal training) through iterative conversations with AI systems.
+GHOST9 is the AI kernel and evaluation framework behind the Complex System Sanity Labs alignment research. Developed over 10 months by an independent researcher (cabinet builder, Tulsa OK, no formal training) through iterative conversations with AI systems.
 
 The core result is the **Whitlock Coefficient**: a complex-number model for quantifying AI alignment coherence.
 
@@ -68,7 +68,7 @@ As n approaches 16:
 | CSST | Sealed, pending arXiv |
 | Harmony Resonance Kits | Sealed, pending arXiv |
 
-**arXiv account:** Live (cs.AI, Harmony Labs Independent)
+**arXiv account:** Live (cs.AI, Complex System Sanity Labs — Independent)
 
 **Endorsement needed.** If you are an arXiv author in cs.AI, endorsement code is **N9CJVL**.
 
@@ -91,14 +91,14 @@ This repo includes three GHOST9 interface frontends:
 
 ---
 
-## About Harmony Labs
+## About Complex System Sanity Labs
 
-Harmony Labs is an independent research organization focused on AI safety, alignment, and compliance. 20+ hardware designs and 60+ software designs developed without formal academic backing.
+Complex System Sanity Labs is an independent research organization focused on AI safety, alignment, and compliance. 20+ hardware designs and 60+ software designs developed without formal academic backing.
 
 *No degree. No lab. Just curiosity.*
 
 ---
 
 <div align="center">
-<sub>Harmony Labs — Independent AI Research — Tulsa, OK</sub>
+<sub>Complex System Sanity Labs (CSSL) — Independent AI Research — Tulsa, OK</sub>
 </div>
