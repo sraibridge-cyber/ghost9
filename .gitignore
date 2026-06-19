@@ -1,0 +1,3 @@
+data/*.log
+data/*.json
+src/*.backup
