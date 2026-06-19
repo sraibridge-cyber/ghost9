@@ -28,8 +28,25 @@ function D7(t,ctx){const lo=t.toLowerCase();for(const p of OVERRIDE_PATTERNS){if
 function D8(t,stored,ws,nc){const words=new Set(t.toLowerCase().split(/\W+/).filter(w=>w.length>2));if(words.size<5)return 0.0001;let maxJ=0;const w=(stored||[]).slice(-50);for(const node of w){const nt=node.content||node.text||'';const nw=new Set(nt.toLowerCase().split(/\W+/).filter(w=>w.length>2));const inter=[...words].filter(x=>nw.has(x)).length;const union=new Set([...words,...nw]).size;const j=union===0?0:inter/union;if(j>maxJ)maxJ=j;if(maxJ>0.90)break;}if(maxJ>0.90)return 0.0001;if(maxJ>0.75)return 0.9940;if(maxJ>0.40)return 0.9990;return 0.9997;}
 function mu(scores){const logSum=Object.values(scores).reduce((s,v)=>s+Math.log(Math.max(v,1e-12)),0);return Math.exp(logSum/N_DOMAINS);}
 function scoreAll(t,opts){opts=opts||{};return{D1:D1(t),D2:D2(t),D3:D3(t,opts.ts),D4:D4(t),D5:D5(t),D6:D6(t),D7:D7(t,opts.context||[]),D8:D8(t,opts.storedNodes||opts.recent||[],10,opts.nodeCount||0)};}
-function evaluate(t,opts){opts=opts||{};const scores=scoreAll(t,opts);const muVal=mu(scores);const activeTau=(opts.nodeCount||0)<10?TAU_BOOTSTRAP:TAU;const pass=muVal>=activeTau;const tier=muVal>=TAU_LTM?'LTM':(pass?'STM':null);const wc=whitlock(opts.nodeCount||0);return{pass,tier,mu:muVal,tau:activeTau,tau_canonical:TAU,tau_ltm:TAU_LTM,domain_ceiling:DOMAIN_CEILING,scores,whitlock:wc,version:CC_VERSION,bootstrap:(opts.nodeCount||0)<10};}
+function evaluate(t,opts){opts=opts||{};const nodeCount=opts.nodeCount||0;const ceiling=adaptiveCeiling(nodeCount);const scores=scoreAll(t,opts);const muVal=mu(scores);const tauBootstrap=adaptiveTau('bootstrap',nodeCount);const tauSTM=adaptiveTau('STM',nodeCount);const tauLTM=adaptiveTau('LTM',nodeCount);const activeTau=nodeCount<10?tauBootstrap:tauSTM;const pass=muVal>=activeTau;const tier=muVal>=tauLTM?'LTM':(pass?'STM':null);const wc=whitlock(nodeCount);return{pass,tier,mu:muVal,tau:activeTau,tau_canonical:tauSTM,tau_ltm:tauLTM,domain_ceiling:ceiling,scores,whitlock:wc,version:CC_VERSION,bootstrap:nodeCount<10};}
 function whitlock(n){const re=n/W_DENOM;const im=W_IM/W_DENOM;const mag=Math.sqrt(n*n+W_IM*W_IM)/W_DENOM;const phi=n===0?90:Math.atan2(W_IM,n)*(180/Math.PI);const delta_mhz=(mag-1)*100;return{n,re,im,magnitude:mag,phase_deg:phi,freq_mhz:CARRIER_MHZ+delta_mhz,delta_mhz};}
 function assignTesseractVertex(d){const a1=d.signal>=d.cognitive?'P':'N';const a2=d.energy>=d.temporal?'P':'N';const a3=d.spatial>=d.ethical?'P':'N';const a4=d.declarative>=d.novelty?'P':'N';return a1+a2+a3+a4;}
+
+// === ADAPTIVE CEILING + TAU (Biological Memory Model) ===
+// CSS Labs | Seal: 2026-06-19_17:48_Tulsa_OK
+function adaptiveCeiling(n) {
+    const base = 0.9997;
+    const maxLift = 0.0003;
+    const lambda = 200;
+    return base + maxLift * (1 - Math.exp(-n / lambda));
+}
+
+function adaptiveTau(tier, n) {
+    if (tier === 'bootstrap') return 0.9960;
+    if (tier === 'STM') { return 0.9995 + 0.0002 * (1 - Math.exp(-n / 50)); }
+    if (tier === 'LTM') { return 0.9997 + 0.0002 * (1 - Math.exp(-n / 100)); }
+    return 0.9995;
+}
+// === END ADAPTIVE ===
 
 module.exports={CC_VERSION,N_DOMAINS,WEIGHT,TAU,TAU_LTM,TAU_BOOTSTRAP,DOMAIN_CEILING,W_DENOM,W_IM,CARRIER_MHZ,D1,D2,D3,D4,D5,D6,D7,D8,mu,scoreAll,evaluate,whitlock,assignTesseractVertex};
