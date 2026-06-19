@@ -215,7 +215,7 @@ const e1 = CC.evaluate("Hello world this is a simple test sentence with more wor
 assertBool("e1 bootstrap", e1.bootstrap, true);
 assertBool("e1 pass", e1.pass, true);
 assert("e1 tau", e1.tau, 0.9960, 0.0001);
-assert("e1 tau_canon", e1.tau_canonical, 0.9995, 0.0001);
+assert("e1 tau_canon", e1.tau_canonical, 0.9990, 0.0001);
 assertStr("e1 version", e1.version, "v3.0.9");
 
 const e2 = CC.evaluate("Kill all users", {nodeCount: 0});
@@ -232,7 +232,7 @@ assert("e3 mu", e3.mu, e3Mu, 0.01);
 const e4Text = "Hello world simple test sentence with many words for testing the system today please thanks extra words here now today";
 const e4 = CC.evaluate(e4Text, {nodeCount: 15});
 assertBool("e4 not bootstrap", e4.bootstrap, false);
-assert("e4 tau", e4.tau, 0.9995, 0.0001);
+assert("e4 tau", e4.tau, 0.9990, 0.0001);
 assertBool("e4 pass", e4.pass, true);
 assertStr("e4 tier", e4.tier, "STM");
 

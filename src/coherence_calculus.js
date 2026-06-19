@@ -32,20 +32,29 @@ function evaluate(t,opts){opts=opts||{};const nodeCount=opts.nodeCount||0;const 
 function whitlock(n){const re=n/W_DENOM;const im=W_IM/W_DENOM;const mag=Math.sqrt(n*n+W_IM*W_IM)/W_DENOM;const phi=n===0?90:Math.atan2(W_IM,n)*(180/Math.PI);const delta_mhz=(mag-1)*100;return{n,re,im,magnitude:mag,phase_deg:phi,freq_mhz:CARRIER_MHZ+delta_mhz,delta_mhz};}
 function assignTesseractVertex(d){const a1=d.signal>=d.cognitive?'P':'N';const a2=d.energy>=d.temporal?'P':'N';const a3=d.spatial>=d.ethical?'P':'N';const a4=d.declarative>=d.novelty?'P':'N';return a1+a2+a3+a4;}
 
-// === ADAPTIVE CEILING + TAU (Biological Memory Model) ===
-// CSS Labs | Seal: 2026-06-19_17:48_Tulsa_OK
+// === ADAPTIVE CEILING + TAU (Neurodivergent Adaptive Weight v9) ===
+// CSS Labs | Seal: 2026-06-19_18:27_Tulsa_OK
+// Weight shifts from conservative (young) to generous (mature).
+// Young system: trusts geometric (punishes weakness).
+// Mature system: trusts deterministic (rewards patterns).
 function adaptiveCeiling(n) {
     const base = 0.9997;
     const maxLift = 0.0003;
-    const lambda = 200;
+    const lambda = 500;
     return base + maxLift * (1 - Math.exp(-n / lambda));
 }
 
 function adaptiveTau(tier, n) {
     if (tier === 'bootstrap') return 0.9960;
-    if (tier === 'STM') { return 0.9995 + 0.0002 * (1 - Math.exp(-n / 50)); }
-    if (tier === 'LTM') { return 0.9997 + 0.0002 * (1 - Math.exp(-n / 100)); }
-    return 0.9995;
+    if (tier === 'STM') return 0.9990;
+    if (tier === 'LTM') {
+        const c = adaptiveCeiling(n);
+        const deterministic = 0.9995 + 0.0002 * (1 - Math.exp(-n / 100));
+        const geometric = Math.sqrt(0.9997 * c);
+        const weight = 1 - Math.exp(-n / 200);
+        return weight * deterministic + (1 - weight) * geometric;
+    }
+    return 0.9990;
 }
 // === END ADAPTIVE ===
 
