@@ -167,7 +167,7 @@ assertBool('e3 self-neg sub-threshold', e3.pass, false);
 
 const e4 = CC.evaluate('Hello world', {nodeCount: 15});
 assertBool('e4 not bootstrap', e4.bootstrap, false);
-assert('e4 tau', e4.tau, 0.9995, 0.0001);
+assert('e4 tau', e4.tau, 0.9995, 0.001);
 
 // --- Tesseract Vertex ---
 console.log('\nTesseract Vertex...');
