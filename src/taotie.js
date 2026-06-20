@@ -23,9 +23,42 @@
 'use strict';
 
 const { createHash } = require('crypto');
-const { perVertexClusters } = require('./spectral_graph');
+const { SpectralGraph } = require('./spectral_graph');
 
 const { TAU, TAU_LTM: TAOTIE_TAU_LTM } = require('./coherence_calculus');
+
+// [UPGRADE v9.1.0] SpectralGraph-based clustering replacing perVertexClusters
+function spectralClusterNodes(nodes, keepRatio) {
+  const sg = new SpectralGraph();
+  nodes.forEach((node, idx) => {
+    const scores = node.scores || {};
+    const fullScores = {
+      signal: scores.signal || scores.D1 || 0.9995,
+      energy: scores.energy || scores.D2 || 0.9995,
+      temporal: scores.temporal || scores.D3 || 0.9995,
+      spatial: scores.spatial || scores.D4 || 0.9995,
+      cognitive: scores.cognitive || scores.D5 || 0.9995,
+      ethical: scores.ethical || scores.D6 || 0.9995,
+      declarative: scores.declarative || scores.D7 || 0.9995,
+      novelty: scores.novelty || scores.D8 || 0.9995
+    };
+    sg.addNode('node_' + idx, fullScores, node.mu || 0.9995);
+  });
+  sg.buildFullyConnected();
+  const k = Math.max(1, Math.floor(nodes.length * keepRatio));
+  sg.spectralCluster(k);
+  
+  // Convert cluster assignments to arrays of nodes
+  const nodeMap = new Map(nodes.map((n, i) => ['node_' + i, n]));
+  const clusterMap = new Map();
+  for (const [nodeId, clusterId] of sg.clusters) {
+    if (!clusterMap.has(clusterId)) clusterMap.set(clusterId, []);
+    clusterMap.get(clusterId).push(nodeMap.get(nodeId));
+  }
+  return Array.from(clusterMap.values()).filter(c => c.length >= 2);
+}
+
+
 const TAU_LTM = 0.9998;
 const TAOTIE_TARGET = 0.60;
 const MAX_NODES_DEF = 10_000;
@@ -122,7 +155,7 @@ class VoidSpace {
     if (spatialWeb && typeof spatialWeb.jointVoidClusters === 'function') {
       const stmTarget = Math.max(1, stm.length - excess);
       const keepRatio = stmTarget / stm.length;
-      const spectralClusters = perVertexClusters(stm, keepRatio);
+      const spectralClusters = spectralClusterNodes(stm, keepRatio);
 
       const spectralCommunities = new Map();
       spectralClusters.forEach((cluster, label) => {
@@ -148,7 +181,7 @@ class VoidSpace {
     } else {
       const stmTarget = Math.max(1, stm.length - excess);
       const keepRatio = stmTarget / stm.length;
-      clusters = perVertexClusters(stm, keepRatio);
+      clusters = spectralClusterNodes(stm, keepRatio);
     }
 
     const devouredSet = new Set();
