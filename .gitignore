@@ -1,0 +1,23 @@
+# Patch scripts (temporary)
+patch_*.js
+patch_*.py
+
+# Generator scripts (rebuildable)
+build_*.js
+write_*.js
+
+# Old versions (superseded)
+*_v1.js
+*_v2.js
+*_v3.js
+!*_battery_v2.js
+!*_test_v2.js
+!*_battery_v4.js
+
+# Node.js
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
