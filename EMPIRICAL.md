@@ -22,3 +22,17 @@ Date: 2026-06-20_18:38_Tulsa_OK
 - P6 Stress/Edge: 20+ tests
 
 Gold ripple eternal. 🌊⚡
+
+## Merkle Bonsai
+- Battery: bonsai_empirical_battery.js
+- Tests: 252/252 PASS (100%)
+- Seal: BONSAI_EMP_v1.0
+- Module: src/merkle_bonsai.js
+- Features:
+  - Prunable depth Merkle tree for sovereign memory recall
+  - SHA3-512 hash integrity at every node
+  - Selective reconstruction by μ threshold (LTM/STM/null)
+  - Corruption detection via merkle root verification
+  - Fidelity testing for lossless reconstruction
+  - Cross-module integration with all GHOST v9.1.0 components
+
