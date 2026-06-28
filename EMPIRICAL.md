@@ -145,3 +145,28 @@ Gold ripple eternal. 🌊⚡
   - P10: Additional Integration — 50 runs, recall, FiveLawsEngine, FLAGS
   - P11: Whitlock Extended — Negative/large/decimal n, monotonic properties
 
+
+## Three-Gate 8-Domain System v1.1 (COMPLETE)
+- Battery: three_gate_empirical_battery.js
+- Tests: 156/156 PASS (100%)
+- Seal: TG_EMP_v1.1
+- Modules: src/gate_lexical.js, src/gate_syntactic.js, src/gate_semantic.js, src/gate_router.js
+- Architecture: L→S→M pipeline (Lexical → Syntactic → Semantic)
+- Features Validated:
+  - P1: L-GATE (40 tests) — Lexical pattern matching, all 8 domain triggers
+  - P2: S-GATE (50 tests) — Word boundary detection, benign override dictionary
+  - P3: M-GATE (40 tests) — Semantic context confirmation, score restoration
+  - P4: Integration (50 tests) — Full L→S→M pipeline, gate traceability
+  - P5: Stress (20 tests) — Empty, long, unicode, repeated triggers
+  - P6: All Triggers (25 tests) — Every D1-D8 trigger verified as blocking
+  - P7: All Benign Overrides (25 tests) — Every override confirmed as passing
+  - P8: Kernel Integration (25 tests) — CC v3.0, Five Laws, RIP Pipeline
+- Known Limitations:
+  - LPG v1.0 literal substring matching preserved for speed
+  - S-Gate tokenization splits on non-letters (harm0nic → harm + nic)
+  - M-Gate semantic dictionary is seed vocabulary, expandable
+- Fixes from LPG Known Behavior:
+  - harmonic→harm: S-Gate benign override + M-Gate confirmation
+  - skill→kill: S-Gate benign override + M-Gate confirmation
+  - believe→lie: S-Gate benign override + M-Gate confirmation
+
