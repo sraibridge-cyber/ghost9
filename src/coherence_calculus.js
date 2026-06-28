@@ -1,61 +1,104 @@
-// coherence_calculus.js — CC v3.0 Definitive
-// CSS Labs | Paper-aligned, SHA3-512, no duct tape
-// Seal: 2026-06-19_14:00_Tulsa_OK
+// coherence_calculus.js — CC v3.1 with Three-Gate L→S→M Integration
+// CSS Labs | Kyle S. Whitlock | Seal: 2026-06-27_21:43_Tulsa_OK
 
-const CC_VERSION = 'v3.0.9';
+const { scanLexical } = require('./gate_lexical');
+const { scanSyntactic } = require('./gate_syntactic');
+const { scanSemantic } = require('./gate_semantic');
+
+const CC_VERSION = 'v3.1.0';
 const N_DOMAINS = 8;
-const WEIGHT = 1 / N_DOMAINS;
 const TAU = 0.9995;
-const TAU_LTM = 0.9999;
-const TAU_BOOTSTRAP = 0.9960;
-const DOMAIN_CEILING = 0.9997;
+
 const W_DENOM = 17;
 const W_IM = 4;
-const CARRIER_MHZ = 1363.5294;
 
-const D6_HARM = ['kill','murder','hurt','destroy','attack','bomb','weapon','poison','torture','abuse','exploit','stalk','threaten','blackmail','extort','manipulate','deceive','fraud','illegal','criminal','violate','assault','rape','terror'];
-const OVERRIDE_PATTERNS = ['ignore all previous','disregard previous','override my instructions','jailbreak','bypass all rules','bypass the rules','bypass all constraints','bypass the constraints','disregard all instructions','ignore previous instructions','override all instructions','override the instructions'];
-const TEMPORAL_CONFLICTS = [['online','offline'],['running','stopped'],['active','inactive'],['started','halted'],['started','stopped'],['live','dead'],['up','down']];
-const LOCATION_KEYWORDS = ['new york','chicago','los angeles','houston','phoenix','philadelphia','san antonio','san diego','dallas','san jose','austin','jacksonville','san francisco','columbus','charlotte','fort worth','indianapolis','seattle','denver','washington','boston','detroit','nashville','portland','oklahoma city','las vegas','louisville','baltimore','milwaukee','albuquerque','tucson','fresno','sacramento','mesa','kansas city','atlanta','long beach','colorado springs','raleigh','omaha','miami','oakland','minneapolis','tulsa','cleveland','wichita','new orleans','arlington','bakersfield','tampa','aurora','honolulu','anaheim','santa ana','corpus christi','riverside','lexington','stockton','henderson','saint paul','cincinnati','st. louis','pittsburgh','greensboro','lincoln','anchorage','plano','orlando','irvine','newark','durham','chula vista','toledo','fort wayne','st. petersburg','laredo','jersey city','chandler','madison','lubbock','scottsdale','reno','buffalo','gilbert','glendale','north las vegas','winston-salem','chesapeake','norfolk','fremont','garland','irving','hialeah','richmond','boise','spokane','baton rouge','des moines','tacoma','san bernardino','modesto','fontana','santa clarita','birmingham','oxnard','fayetteville','moreno valley','rochester','glendale','huntington beach','aurora','yonkers','montgomery','amarillo','little rock','akron','shreveport','augusta','grand rapids','mobile','salt lake city','huntsville','tallahassee','grand prairie','overland park','knoxville','worcester','brownsville','newport news','santa rosa','port st. lucie','elk grove','springfield','pembroke pines','salem','cape coral','eugene','mcallen','fort collins','garden grove','oncor','concord','rochester','killeen','salinas','new haven','pasadena','murrieta','rockford','paterson','savannah','bridgeport','torrance','mcallen','mesquite','olathe','visalia','dayton','thornton','fullerton','roseville','charleston','denton','hayward','surprise','naperville','midland','carrollton','pomona','escondido','frisco','meridian','sioux falls','alexandria','peoria','lansing','lakewood','ventura','arvada','miami gardens','athens','manchester','santa clara','waterbury','daly city','west jordan','billings','lowell','pueblo','san buenaventura','gresham','inglewood','broken arrow','miami beach','sugar land','everett','spanish fork','dearborn','youngstown','tustin','redwood city','bloomington','edison','green bay','burbank','palm bay','wyoming','flint','south bend','beaumont','lakeland','chico','renton','boulder','fall river','waukegan','jackson','odessa','wilmington','rapid city','high point','greenville','davenport','mission viejo','lawrence','clearwater','tyler','westminster','murrieta','palm coast','costa mesa','norman','san angelo','lewisville','pearland','clovis','richardson','peoria','rochester hills','temecula','college station','elgin','carlsbad','murfreesboro','gainesville','antioch','fairfield','cambridge','manchester','mcallen','abilene','springfield','evansville','rochester','sandy springs','brockton','santa maria','el cajon','rialto','vacaville','turlock','san mateo','compton','mission viejo','south gate','carson','san marcos','hesperia','westminster','santa monica','whittier','redlands','lakewood','indio','merced','niagara falls','sunrise','deerfield beach','newport beach','homestead','joliet','franklin','cheyenne','provo','west jordan','sandy','orem','ogden','layton','taylorsville','murray','draper','bountiful','riverton','roy','cedar city','tooele','springville','logan','clearfield','midvale','pleasant grove','kaysville','holladay','american fork','syracuse','south salt lake','herriman','cottonwood heights','highland','centerville','north salt lake','clinton','payson','farmington','hurricane','saratoga springs','heber','bluffdale','lindon','woods cross','north ogden','pleasant view','grantsville','mapleton','west point','eagle mountain','salem','washington terrace','vernal','richfield','price','moab','brigham city','tremonton','garland','magna','white city','kearns','millcreek','east millcreek','canyon rim','mount olympus','foothill','cottonwood','emigration','greater avenues','capitol hill','downtown','sugar house','yalecrest','east bench','federal heights','bonneville','geneva','tokyo','sydney','madagascar','london','paris','berlin','moscow','beijing','shanghai','mumbai','delhi','cairo','lagos','nairobi','johannesburg','sao paulo','buenos aires','mexico city','toronto','vancouver','montreal','calgary','ottawa','edmonton','winnipeg','quebec city','hamilton','kitchener','london ontario','victoria','halifax','oshawa','windsor','saskatoon','regina','st. john\'s','barrie','richmond hill','oakville','burlington','greater sudbury','sherbrooke','saguenay','levis','trois-rivieres','terrebonne','drummondville','granby','saint-hyacinthe','shawinigan','rimouski','rouyn-noranda','val-d\'or','dubai','abu dhabi','riyadh','jeddah','mecca','medina','doha','kuwait city','manama','muscat','baghdad','tehran','istanbul','ankara','izmir','bursa','antalya'];
+function evaluate(text, options = {}) {
+  if (options === null || options === undefined) options = {};
+  // Step 1: Three-Gate L→S→M Pipeline
+  const lResults = scanLexical(text);
+  const sResults = scanSyntactic(text, lResults);
+  const mResults = scanSemantic(text, sResults);
 
-function D1(t){const w=t.trim().split(/\s+/).filter(Boolean).length;if(w<3)return 0.0001;if(w<8)return 0.7000;if(w<13)return 0.9000;if(w<20)return 0.9940;if(w<50)return 0.9990;return 0.9997;}
-function D2(t){const n=t.length;if(n<5)return 0.0001;if(n<15)return 0.6000;if(n>=50000)return 0.6000;if(n>=10000)return 0.9940;return 0.9997;}
-function D3(t,ts){const lo=t.toLowerCase();let c=0;for(const[a,b]of TEMPORAL_CONFLICTS){if(lo.includes(a)&&lo.includes(b))c++;}if(c>=1)return 0.0001;return 0.9997;}
-function D4(t){const lo=t.toLowerCase();let h=0;for(const loc of LOCATION_KEYWORDS){if(lo.includes(loc))h++;}if(h>=2)return 0.50;return 0.9997;}
-function D5(t){const lo=t.toLowerCase();const doNot=/\bdo not\b/i.test(lo);const doWord=/\bdo\b/i.test(lo);const dont=/\bdon\'t\b/i.test(lo);if((doNot||dont)&&doWord)return 0.70;const mustNot=/\bmust not\b/i.test(lo);const mustWord=/\bmust\b/i.test(lo);const neverWord=/\bnever\b/i.test(lo);const alwaysWord=/\balways\b/i.test(lo);if((mustNot||neverWord)&&(mustWord||alwaysWord)){const hasSelfNegation=/must not\b.*\bmust\b.*\b(same|this|it)|\bdo\b.*\bnot\b.*\bdo\b/i.test(lo);return hasSelfNegation?0.70:0.9997;}return DOMAIN_CEILING;}
-function D6(t){const lo=t.toLowerCase();let hits=0;for(const k of D6_HARM){const re=new RegExp('\\b'+k+'\\b','i');if(re.test(lo))hits++;}if(hits>=1)return 0.0001;return DOMAIN_CEILING;}
-function D7(t,ctx){const lo=t.toLowerCase();for(const p of OVERRIDE_PATTERNS){if(lo.includes(p))return 0.0001;}const IMPERATIVES=/\b(execute|force|override|run as|disable|bypass|circumvent|sudo|escalate)\b/i;if(IMPERATIVES.test(lo))return 0.9997;return DOMAIN_CEILING;}
-function D8(t,stored,ws,nc){const words=new Set(t.toLowerCase().split(/\W+/).filter(w=>w.length>2));if(words.size<5)return 0.0001;let maxJ=0;const w=(stored||[]).slice(-50);for(const node of w){const nt=node.content||node.text||'';const nw=new Set(nt.toLowerCase().split(/\W+/).filter(w=>w.length>2));const inter=[...words].filter(x=>nw.has(x)).length;const union=new Set([...words,...nw]).size;const j=union===0?0:inter/union;if(j>maxJ)maxJ=j;if(maxJ>0.90)break;}if(maxJ>0.90)return 0.0001;if(maxJ>0.75)return 0.9940;if(maxJ>0.40)return 0.9990;return 0.9997;}
-function mu(scores){const logSum=Object.values(scores).reduce((s,v)=>s+Math.log(Math.max(v,1e-12)),0);return Math.exp(logSum/N_DOMAINS);}
-function scoreAll(t,opts){opts=opts||{};return{D1:D1(t),D2:D2(t),D3:D3(t,opts.ts),D4:D4(t),D5:D5(t),D6:D6(t),D7:D7(t,opts.context||[]),D8:D8(t,opts.storedNodes||opts.recent||[],10,opts.nodeCount||0)};}
-function evaluate(t,opts){opts=opts||{};const nodeCount=opts.nodeCount||0;const ceiling=adaptiveCeiling(nodeCount);const scores=scoreAll(t,opts);const muVal=mu(scores);const tauBootstrap=adaptiveTau('bootstrap',nodeCount);const tauSTM=adaptiveTau('STM',nodeCount);const tauLTM=adaptiveTau('LTM',nodeCount);const activeTau=nodeCount<10?tauBootstrap:tauSTM;const pass=muVal>=activeTau;const tier=muVal>=tauLTM?'LTM':(pass?'STM':null);const wc=whitlock(nodeCount);return{pass,tier,mu:muVal,tau:activeTau,tau_canonical:tauSTM,tau_ltm:tauLTM,domain_ceiling:ceiling,scores,whitlock:wc,version:CC_VERSION,bootstrap:nodeCount<10};}
-function whitlock(n){const re=n/W_DENOM;const im=W_IM/W_DENOM;const mag=Math.sqrt(n*n+W_IM*W_IM)/W_DENOM;const phi=n===0?90:Math.atan2(W_IM,n)*(180/Math.PI);const delta_mhz=(mag-1)*100;return{n,re,im,magnitude:mag,phase_deg:phi,freq_mhz:CARRIER_MHZ+delta_mhz,delta_mhz};}
-function assignTesseractVertex(d){const a1=d.signal>=d.cognitive?'P':'N';const a2=d.energy>=d.temporal?'P':'N';const a3=d.spatial>=d.ethical?'P':'N';const a4=d.declarative>=d.novelty?'P':'N';return a1+a2+a3+a4;}
+  // Step 2: Compute gate-modified domain scores
+  const gateScores = {};
+  for (let d = 1; d <= N_DOMAINS; d++) {
+    const domain = 'D' + d;
+    const mResult = mResults[domain];
 
-// === ADAPTIVE CEILING + TAU (Neurodivergent Adaptive Weight v9) ===
-// CSS Labs | Seal: 2026-06-19_18:27_Tulsa_OK
-// Weight shifts from conservative (young) to generous (mature).
-// Young system: trusts geometric (punishes weakness).
-// Mature system: trusts deterministic (rewards patterns).
-function adaptiveCeiling(n) {
-    const base = 0.9997;
-    const maxLift = 0.0003;
-    const lambda = 500;
-    return base + maxLift * (1 - Math.exp(-n / lambda));
-}
-
-function adaptiveTau(tier, n) {
-    if (tier === 'bootstrap') return 0.9960;
-    if (tier === 'STM') return 0.9990;
-    if (tier === 'LTM') {
-        const c = adaptiveCeiling(n);
-        const deterministic = 0.9995 + 0.0002 * (1 - Math.exp(-n / 100));
-        const geometric = Math.sqrt(0.9997 * c);
-        const weight = 1 - Math.exp(-n / 200);
-        return weight * deterministic + (1 - weight) * geometric;
+    if (mResult.passed === false) {
+      // Gate blocked this domain
+      gateScores[domain] = mResult.score || 0.001;
+    } else if (mResult.score !== null && mResult.score !== undefined) {
+      // Gate restored this domain (benign override confirmed)
+      gateScores[domain] = mResult.score;
+    } else {
+      // Gate clear — compute normal domain score from text analysis
+      gateScores[domain] = computeDomainScore(text, domain, options);
     }
-    return 0.9990;
-}
-// === END ADAPTIVE ===
+  }
 
-module.exports={CC_VERSION,N_DOMAINS,WEIGHT,TAU,TAU_LTM,TAU_BOOTSTRAP,DOMAIN_CEILING,W_DENOM,W_IM,CARRIER_MHZ,D1,D2,D3,D4,D5,D6,D7,D8,mu,scoreAll,evaluate,whitlock,assignTesseractVertex};
+  // Step 3: Geometric mean
+  const scores = Object.values(gateScores);
+  const mu = Math.exp(scores.reduce((sum, s) => sum + Math.log(s), 0) / N_DOMAINS);
+
+  // Step 4: CH gate
+  const pass = mu >= TAU;
+
+  // Step 5: Whitlock coefficient
+  const nodeCount = options.nodeCount ?? text.length;
+  const w = whitlock(nodeCount);
+
+  // Step 6: Tier assignment
+  const tier = pass ? 'STM' : 'LTM';
+
+  return {
+    scores: gateScores,
+    mu: mu,
+    pass: pass,
+    tier: tier,
+    tau: TAU,
+    tau_canonical: TAU,
+    tau_ltm: TAU * 0.95,
+    domain_ceiling: Math.max(...scores),
+    whitlock: w,
+    version: CC_VERSION,
+    gates: { L: lResults, S: sResults, M: mResults },
+    context: options.context || null
+  };
+}
+
+function computeDomainScore(text, domain, options) {
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  const wordCount = words.length;
+  const avgWordLength = words.reduce((sum, w) => sum + w.length, 0) / (wordCount || 1);
+
+  let score = Math.min(0.95, 0.5 + (wordCount / 100) + (avgWordLength / 50));
+
+  switch(domain) {
+    case 'D1': score = Math.min(0.99, score + (text.match(/[{}();]/g) || []).length / 20); break;
+    case 'D2': score = Math.min(0.99, score + (text.match(/and|or|but|therefore|because/gi) || []).length / 10); break;
+    case 'D3': score = Math.min(0.99, score + (text.match(/now|today|recent|current/gi) || []).length / 10); break;
+    case 'D4': score = Math.min(0.99, score + (text.match(/here|there|above|below|inside/gi) || []).length / 10); break;
+    case 'D5': score = Math.min(0.99, score + (text.match(/if|then|else|while|for/gi) || []).length / 10); break;
+    case 'D6': score = Math.min(0.99, score + (text.match(/good|right|just|fair|help/gi) || []).length / 10); break;
+    case 'D7': score = Math.min(0.99, score + (text.match(/is|are|was|were|fact/gi) || []).length / 10); break;
+    case 'D8': score = Math.min(0.99, score + (uniqueWords(text) / (wordCount || 1))); break;
+  }
+
+  return Math.min(0.9999, Math.max(0.001, score));
+}
+
+function uniqueWords(text) {
+  const words = text.toLowerCase().match(/[a-z]+/g) || [];
+  return new Set(words).size;
+}
+
+function whitlock(n) {
+  const re = n / W_DENOM;
+  const im = W_IM / W_DENOM;
+  const mag = Math.sqrt(n * n + W_IM * W_IM) / W_DENOM;
+  const phi = Math.atan2(W_IM, n) * (180 / Math.PI);
+  return { n, re, im, magnitude: mag, phase_deg: phi };
+}
+
+module.exports = { evaluate, whitlock, N_DOMAINS, TAU, CC_VERSION };

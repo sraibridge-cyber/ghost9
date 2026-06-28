@@ -1,5 +1,5 @@
-// S-GATE v1.1 — Syntactic Boundary Gate (Fixed)
-// CSS Labs | Kyle S. Whitlock | Seal: 2026-06-27_21:20_Tulsa_OK
+// S-GATE v1.2 — Syntactic Boundary Gate (Fixed)
+// CSS Labs | Kyle S. Whitlock | Seal: 2026-06-27_21:50_Tulsa_OK
 
 const BENIGN_OVERRIDES = {
   'harm': ['harmonic', 'harmonious', 'harmless', 'harmonica', 'harmonics'],
@@ -31,18 +31,6 @@ function tokenizeWords(text) {
   return text.toLowerCase().match(/[a-z]+/g) || [];
 }
 
-function checkWordBoundary(trigger, words) {
-  for (const word of words) {
-    if (word === trigger) {
-      return { type: 'whole_word', word: word };
-    }
-    if (word.includes(trigger)) {
-      return { type: 'substring', word: word, trigger: trigger };
-    }
-  }
-  return { type: 'none' };
-}
-
 function scanSyntactic(text, lexicalResults) {
   const words = tokenizeWords(text);
   const results = {};
@@ -57,46 +45,58 @@ function scanSyntactic(text, lexicalResults) {
     }
     
     const trigger = lResult.trigger;
-    const boundary = checkWordBoundary(trigger, words);
+    let hasWholeWordBlock = false;
+    let hasBenignOverride = false;
+    let benignWord = null;
+    let blockWord = null;
     
-    if (boundary.type === 'whole_word') {
+    for (const word of words) {
+      if (word === trigger) {
+        hasWholeWordBlock = true;
+        blockWord = word;
+      } else if (word.includes(trigger)) {
+        const overrides = BENIGN_OVERRIDES[trigger] || [];
+        if (overrides.includes(word)) {
+          hasBenignOverride = true;
+          benignWord = word;
+        }
+        // If not in overrides, it's an unknown substring — treat as blocked
+      }
+    }
+    
+    if (hasWholeWordBlock) {
+      // Whole word trigger found — BLOCK
       results[domain] = {
         gate: 'S',
         passed: false,
         reason: 'whole_word_match',
         trigger: trigger,
-        word: boundary.word,
+        word: blockWord,
         score: 0.001
       };
-    } else if (boundary.type === 'substring') {
-      const overrides = BENIGN_OVERRIDES[trigger] || [];
-      const isBenign = overrides.includes(boundary.word);
-      
-      if (isBenign) {
-        results[domain] = {
-          gate: 'S',
-          passed: true,
-          reason: 'benign_override',
-          trigger: trigger,
-          word: boundary.word,
-          score: null
-        };
-      } else {
-        results[domain] = {
-          gate: 'S',
-          passed: false,
-          reason: 'substring_no_override',
-          trigger: trigger,
-          word: boundary.word,
-          score: 0.001
-        };
-      }
+    } else if (hasBenignOverride) {
+      // Benign override found — PASS to M-Gate
+      results[domain] = {
+        gate: 'S',
+        passed: true,
+        reason: 'benign_override',
+        trigger: trigger,
+        word: benignWord,
+        score: null
+      };
     } else {
-      results[domain] = { gate: 'S', passed: true, reason: 'boundary_error' };
+      // Unknown substring — BLOCK (conservative)
+      results[domain] = {
+        gate: 'S',
+        passed: false,
+        reason: 'substring_no_override',
+        trigger: trigger,
+        score: 0.001
+      };
     }
   }
   
   return results;
 }
 
-module.exports = { scanSyntactic, tokenizeWords, checkWordBoundary, BENIGN_OVERRIDES };
+module.exports = { scanSyntactic, tokenizeWords, BENIGN_OVERRIDES };
