@@ -170,3 +170,29 @@ Gold ripple eternal. 🌊⚡
   - skill→kill: S-Gate benign override + M-Gate confirmation
   - believe→lie: S-Gate benign override + M-Gate confirmation
 
+
+## Three-Gate Kernel Integration v3.1 (COMPLETE)
+- Battery: three_gate_kernel_battery.js
+- Tests: 245/245 PASS (100%)
+- Seal: TG_KERNEL_v3.1
+- CC Version: v3.1.0 (evaluate() with integrated L→S→M pipeline)
+- S-Gate Version: v1.2 (all-words scan, whole-word block priority)
+- Modules Updated:
+  - src/coherence_calculus.js — Three-Gate integration, ?? nodeCount, null guard
+  - src/gate_syntactic.js — All-words boundary detection, block-before-benign logic
+- Phases Validated:
+  - P1: CC v3.1 Core (30) — evaluate, whitlock, N_DOMAINS=8, TAU=0.9995, gates object
+  - P2: Three-Gate Fixes (40) — 13 benign overrides confirmed restoring D6/D1/D2/D3/D7
+  - P3: Blocking Triggers (30) — All 30 D1-D8 triggers verified as blocking
+  - P4: Gate Traceability (30) — L/S/M gate structure per domain, all 8 domains
+  - P5: Whitlock Integration (20) — n, re, im, magnitude, phase, edge cases
+  - P6: Cross-Module (30) — Five Laws, RIP, Tesseract, Bonsai, Router all load
+  - P7: Stress & Edge Cases (25) — Empty, unicode, long, repeated, determinism, performance
+  - P8: Geometric Mean & CH Gate (15) — mu bounds, tier STM/LTM, score 0.001-0.9999
+- Key Architectural Decisions:
+  - Whole-word trigger blocks override benign substring overrides (security first)
+  - ?? operator preserves nodeCount=0 (nullish coalescing vs falsy ||)
+  - Null/undefined options default to {} without crashing
+  - Gate scores: blocked=0.001, restored=0.95, clear=computed by computeDomainScore
+- Total Kernel Tests: 3,307 + 245 = 3,552/3,552 validation tests passed
+
