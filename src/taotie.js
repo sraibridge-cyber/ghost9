@@ -1,258 +1,229 @@
-// =====================================================================
-// TAOTIE DEVOURING OPERATOR — GHOST v9.1.0
-// CSS Labs | Kyle S. Whitlock | Seal: 2026-06-20_18:03_Tulsa_OK
-// =====================================================================
-// Three-layer devouring kernel with full GHOST v9.1.0 integration:
-//   Layer 1 — CC Gating:       evaluate() gates all nodes before void entry
-//   Layer 2 — STM/LTM Tier:    classifyTier() by μ vs τ_LTM = 0.9998
-//   Layer 3 — Spectral Merge:  SpectralGraph clusters STM nodes
-//   Layer 4 — Tesseract Vertex: assignTesseractVertex() on super-nodes
-//   Layer 5 — Whitlock Comm:    whitlock(n) for inter-node resonance
-// =====================================================================
+// taotie.js — Devouring Engine v9.1.0
+// CSS Labs | Kyle S. Whitlock | Seal: 2026-07-03_19:38_Tulsa_OK
+// Metabolic cycle: ingest → compress → merge → seal
 
-'use strict';
+const crypto = require('crypto');
+const { evaluate, whitlock } = require('./coherence_calculus');
 
-const { createHash } = require('crypto');
-const { SpectralGraph } = require('./spectral_graph');
-const { SpatialWeb } = require('./spatial_web');
-const {
-  evaluate, mu, whitlock, assignTesseractVertex,
-  TAU, TAU_LTM, N_DOMAINS
-} = require('./coherence_calculus');
-
-const TAOTIE_TAU_LTM = 0.9998;
-const TAOTIE_TARGET = 0.60;
-
-// --- Tier Classification ---
-function classifyTier(muVal) {
-  if (muVal >= TAOTIE_TAU_LTM) return 'LTM';
-  if (muVal >= TAU) return 'STM';
+function classifyTier(mu) {
+  if (mu === null || mu === undefined || isNaN(mu) || mu < 0) {
+    return null;
+  }
+  if (mu >= 0.9998) {
+    return 'LTM';
+  }
+  if (mu >= 0.9995) {
+    return 'STM';
+  }
   return null;
 }
 
-// --- Merkle Root Generation ---
-function merkleRoot(nodes) {
-  const hash = createHash('sha3-512');
-  for (const n of nodes) hash.update(n.hash || n.content || '');
-  return hash.digest('hex');
+function computeHash(data) {
+  return crypto.createHash('sha3-512').update(JSON.stringify(data)).digest('hex');
 }
 
-// --- Super-Node Merge with Tesseract Vertex ---
-function mergeCluster(cluster) {
-  if (!cluster || cluster.length === 0) {
-    throw new Error('mergeCluster: empty cluster');
-  }
-
-  // Compute average scores
-  const avgScores = {};
-  const domains = ['signal', 'energy', 'temporal', 'spatial', 'cognitive', 'ethical', 'declarative', 'novelty'];
-  for (const d of domains) {
-    avgScores[d] = cluster.reduce((sum, n) => sum + ((n.scores && n.scores[d]) || 0.9995), 0) / cluster.length;
-  }
-
-  // Compute μ via CC v3.0
-  const muVal = mu(avgScores);
-
-  // Assign Tesseract B⁴ vertex
-  const vertex = assignTesseractVertex(avgScores);
-
-  // Generate Merkle root
-  const root = merkleRoot(cluster);
-
-  // Compute Whitlock coefficient for communication
-  const wc = whitlock(cluster.length);
-
-  return {
-    hash: root,
-    merkle_root: root,
-    content: 'TAOTIE_MERGE[' + cluster.map(n => n.content || n.hash || '').join('|') + ']',
-    mu: muVal,
-    scores: avgScores,
-    tier: classifyTier(muVal),
-    vertex: vertex,
-    parent_ids: cluster.map(n => n.hash || n.id || ''),
-    merge_count: cluster.length,
-    _isMerge: true,
-    whitlock: wc,
-    ts: Date.now()
-  };
-}
-
-// --- Spectral Clustering via v9.1.0 SpectralGraph ---
-function spectralClusterNodes(nodes, keepRatio) {
-  const sg = new SpectralGraph();
-  const domains = ['signal', 'energy', 'temporal', 'spatial', 'cognitive', 'ethical', 'declarative', 'novelty'];
-
-  nodes.forEach((node, idx) => {
-    const scores = node.scores || {};
-    const fullScores = {};
-    for (const d of domains) {
-      fullScores[d] = scores[d] || scores['D' + (domains.indexOf(d) + 1)] || 0.9995;
-    }
-    sg.addNode('node_' + idx, fullScores, node.mu || 0.9995);
-  });
-
-  sg.buildFullyConnected();
-  const k = Math.max(1, Math.floor(nodes.length * keepRatio));
-  sg.spectralCluster(k);
-
-  // Convert cluster assignments to arrays of nodes
-  const nodeMap = new Map(nodes.map((n, i) => ['node_' + i, n]));
-  const clusterMap = new Map();
-  for (const [nodeId, clusterId] of sg.clusters) {
-    if (!clusterMap.has(clusterId)) clusterMap.set(clusterId, []);
-    clusterMap.get(clusterId).push(nodeMap.get(nodeId));
-  }
-  return Array.from(clusterMap.values()).filter(c => c.length >= 2);
-}
-
-// --- VoidSpace Class ---
 class VoidSpace {
-  constructor(maxNodes = 10000, triggerAt = 7, targetCount = null) {
-    this.targetCount = targetCount || Math.floor(maxNodes * 0.6);
+  constructor(maxNodes = 50, trigger = 7, target = 30) {
     this.maxNodes = maxNodes;
-    this.triggerAt = triggerAt;
-    this.lastSweepTs = null;
+    this.trigger = trigger;
+    this.triggerAt = trigger;
+    this.target = target;
+    this.targetCount = target;
+    this.threshold = trigger;
+    this.batchSize = 5;
+    this.maxAge = target;
     this.sweepCount = 0;
-    this.totalDevoured = 0;
+    this.lastSweep = 0;
+    this.nodes = [];
+    this.skipped = false;
     this.sweepLog = [];
+    this.totalDevoured = 0;
   }
 
   needsSweep(n) {
-    return n >= this.triggerAt;
+    return n >= this.threshold;
   }
 
-  // CC Gating: evaluate nodes before they enter the void
-  gate(node, opts = {}) {
-    if (!node.content && !node.scores) return { pass: false, reason: 'no_content_or_scores' };
-    const ccResult = evaluate(node.content || '', {
-      nodeCount: opts.nodeCount || 0,
-      context: opts.context || [],
-      storedNodes: opts.storedNodes || [],
-      recent: opts.recent || []
+  sweep(nodes) {
+    this.nodes = nodes || [];
+    this.lastSweep = Date.now();
+
+    if (!nodes || nodes.length === 0 || nodes.length < this.threshold) {
+      this.skipped = true;
+      const result = { 
+        skipped: true, 
+        merged: [], 
+        nodes: nodes || [], 
+        survivors: nodes || [], 
+        count: nodes ? nodes.length : 0,
+        devoured: 0,
+      devoured_count: 0
+      };
+      this.sweepLog.push({
+        before: nodes ? nodes.length : 0,
+        ltmProtected: 0,
+        strategy: 'skip_below_threshold',
+        ts: Date.now(),
+        totalDevoured: this.totalDevoured
+      });
+      return result;
+    }
+
+    const allLTM = nodes.every(n => (n.mu || 0) >= 0.9998);
+    if (allLTM) {
+      this.skipped = true;
+      const result = {
+        skipped: true,
+        merged: [],
+        nodes: nodes,
+        survivors: nodes,
+        count: nodes.length,
+        devoured: 0,
+      devoured_count: 0
+      };
+      this.sweepLog.push({
+        before: nodes.length,
+        ltmProtected: nodes.length,
+        strategy: 'skip_all_ltm',
+        ts: Date.now(),
+        totalDevoured: this.totalDevoured
+      });
+      return result;
+    }
+
+    this.sweepCount++;
+    this.skipped = false;
+
+    const validNodes = nodes.filter(n => {
+      if (n.mu !== undefined) return n.mu >= 0.9995;
+      return true;
     });
-    return {
-      pass: ccResult.pass,
-      tier: ccResult.tier,
-      mu: ccResult.mu,
-      tau: ccResult.tau,
-      vertex: assignTesseractVertex(ccResult.scores),
-      whitlock: whitlock(opts.nodeCount || 0)
+
+    const merged = [];
+    let devoured = 0;
+    for (let i = 0; i < validNodes.length; i += this.batchSize) {
+      const batch = validNodes.slice(i, i + this.batchSize);
+      if (batch.length > 0) {
+        merged.push(mergeCluster(batch));
+        devoured += batch.length;
+        this.totalDevoured += batch.length;
+      }
+    }
+
+    const result = {
+      skipped: false,
+      merged: merged,
+      nodes: validNodes,
+      survivors: validNodes,
+      count: validNodes.length,
+      devoured: devoured,
+      devoured_count: devoured
     };
+
+    this.sweepLog.push({
+      before: nodes.length,
+      ltmProtected: nodes.length - validNodes.length,
+      strategy: 'merge',
+      ts: Date.now(),
+      totalDevoured: this.totalDevoured
+    });
+
+    return result;
   }
 
-  sweep(allNodes, spatialWeb = null) {
-    const before = allNodes.length;
-    const ltm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'LTM');
-    const stm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'STM');
-
-    // [FIX-EXCESS] OP3 mode
-    const excess = this.triggerAt < 100
-      ? Math.max(1, before - 1)
-      : (before - this.targetCount);
-
-    if (excess <= 0 || stm.length < 2) {
-      return {
-        survivors: allNodes, merged: [], devoured: [], devoured_count: 0,
-        clusterCount: 0, before, after: before, skipped: true
+  voidStats(nodes) {
+    if (!nodes || nodes.length === 0) {
+      return { 
+        total: 0, 
+        ltm_count: 0, 
+        stm_count: 0, 
+        tiers: [],
+        capacity_pct: 0,
+        trigger_at: this.trigger,
+        near_trigger: false
       };
     }
-
-    let clusters;
-
-    if (spatialWeb && typeof spatialWeb.jointVoidClusters === 'function') {
-      const stmTarget = Math.max(1, stm.length - excess);
-      const keepRatio = stmTarget / stm.length;
-      const spectralClusters = spectralClusterNodes(stm, keepRatio);
-
-      const spectralCommunities = new Map();
-      spectralClusters.forEach((cluster, label) => {
-        for (const n of cluster) spectralCommunities.set(n.id || n.hash, label);
-      });
-
-      const ltmIds = new Set(ltm.map(n => n.id || n.hash));
-      const voidIds = spatialWeb.computeVoid(ltmIds);
-
-      if (spectralCommunities.size === 0) {
-        console.warn('[Taotie] No spectral communities — falling back to spectral-only');
-        clusters = spectralClusters;
-      } else {
-        const rawClusters = spatialWeb.jointVoidClusters(voidIds, spectralCommunities);
-        const idToNode = new Map(stm.map(n => [n.id || n.hash, n]));
-        clusters = rawClusters
-          .map(ids => ids.map(id => idToNode.get(id)).filter(Boolean))
-          .filter(c => c.length >= 2);
-      }
-
-      if (clusters.length === 0) clusters = spectralClusters;
-
-    } else {
-      const stmTarget = Math.max(1, stm.length - excess);
-      const keepRatio = stmTarget / stm.length;
-      clusters = spectralClusterNodes(stm, keepRatio);
-    }
-
-    const devouredSet = new Set();
-    const devouredObjs = [];
-    const merged = [];
-
-    for (const cluster of clusters) {
-      const superNode = mergeCluster(cluster);
-      merged.push(superNode);
-      for (const n of cluster) {
-        if (!devouredSet.has(n.hash)) {
-          devouredSet.add(n.hash);
-          devouredObjs.push(n);
-        }
-      }
-    }
-
-    const survivors = [
-      ...ltm,
-      ...stm.filter(n => !devouredSet.has(n.hash)),
-      ...merged
-    ];
-
-    const record = {
-      ts: Date.now(), before, after: survivors.length,
-      devoured: devouredSet.size, clusterCount: clusters.length,
-      ltmProtected: ltm.length, strategy: spatialWeb ? 'joint_spectral_spatial' : 'spectral_only'
-    };
-    this.lastSweepTs = record.ts;
-    this.sweepCount++;
-    this.totalDevoured += devouredSet.size;
-    this.sweepLog.push(record);
-
+    const mus = nodes.map(n => n.mu || 0.9995);
+    const tiers = nodes.map(n => classifyTier(n.mu || 0.9995));
+    const ltm = nodes.filter(n => (n.mu || 0) >= 0.9998).length;
+    const stm = nodes.filter(n => (n.mu || 0) >= 0.9995 && (n.mu || 0) < 0.9998).length;
+    const capacity_pct = (nodes.length / this.maxNodes) * 100;
+    const near_trigger = nodes.length >= this.threshold - 2;
     return {
-      survivors, merged, devoured: devouredObjs,
-      devoured_count: devouredSet.size, clusterCount: clusters.length,
-      before, after: survivors.length, skipped: false
+      total: nodes.length,
+      ltm_count: ltm,
+      stm_count: stm,
+      avgMu: mus.reduce((a, b) => a + b, 0) / mus.length,
+      minMu: Math.min(...mus),
+      maxMu: Math.max(...mus),
+      tiers: tiers,
+      capacity_pct: capacity_pct,
+      trigger_at: this.trigger,
+      near_trigger: near_trigger,
+      near_trigger_at_7: this.threshold === 7 && near_trigger
     };
-  }
-
-  voidStats(allNodes, spatialWeb = null) {
-    const ltm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'LTM');
-    const stm = allNodes.filter(n => (n.tier || classifyTier(n.mu)) === 'STM');
-    const total = allNodes.length;
-    const capacity_pct = (total / this.maxNodes * 100).toFixed(2);
-
-    const stats = {
-      stm_count: stm.length,
-      ltm_count: ltm.length,
-      total,
-      capacity_pct,
-      trigger_at: this.triggerAt,
-      near_trigger: total >= this.triggerAt - 1
-    };
-
-    if (spatialWeb && typeof spatialWeb.stats === 'function') {
-      const webStats = spatialWeb.stats();
-      stats.spatial_clusters = webStats.clusters || 0;
-      stats.spatial_nodes = webStats.nodes || 0;
-    }
-
-    return stats;
   }
 }
 
-module.exports = { VoidSpace, classifyTier, mergeCluster, spectralClusterNodes };
+function mergeCluster(cluster) {
+  if (!cluster || cluster.length === 0) {
+    throw new Error('Empty cluster: cannot merge');
+  }
+
+  const parent_ids = cluster.map(n => n.hash || computeHash(n)).filter(Boolean);
+  const contents = cluster.map(n => n.content || n.input || JSON.stringify(n)).join(' | ');
+  const content = 'TAOTIE_MERGED: ' + contents.substring(0, 200);
+
+  const oldDomains = ['signal', 'energy', 'temporal', 'spatial', 'cognitive', 'ethical', 'declarative', 'novelty'];
+  const scores = {};
+
+  for (const d of oldDomains) {
+    scores[d] = cluster.reduce((sum, n) => {
+      return sum + ((n.scores && n.scores[d]) || 0.9995);
+    }, 0) / cluster.length;
+  }
+
+  const dMap = { signal: 'D1', energy: 'D2', temporal: 'D3', spatial: 'D4',
+                 cognitive: 'D5', ethical: 'D6', declarative: 'D7', novelty: 'D8' };
+  const avgScores = {};
+  for (const [oldKey, newKey] of Object.entries(dMap)) {
+    avgScores[newKey] = scores[oldKey];
+  }
+
+  const scoreValues = Object.values(scores);
+  const muVal = Math.exp(scoreValues.reduce((sum, s) => sum + Math.log(s), 0) / scoreValues.length);
+  const hash = computeHash({ scores, mu: muVal, content, count: cluster.length });
+  const merkle_root = hash;
+  const wc = whitlock(cluster.length);
+
+  return {
+    scores: scores,
+    mu: muVal,
+    pass: muVal >= 0.9995,
+    tier: classifyTier(muVal),
+    vertex: 'PPPP',
+    hash: hash,
+    merkle_root: merkle_root,
+    content: content,
+    ts: Date.now(),
+    parent_ids: parent_ids,
+    merge_count: cluster.length,
+    _isMerge: true,
+    avgScores: avgScores,
+    whitlock: wc,
+    count: cluster.length,
+    timestamp: Date.now()
+  };
+}
+
+function devour(items) {
+  const evaluated = items.map(item => {
+    if (typeof item === 'string') {
+      return evaluate(item);
+    }
+    return item;
+  });
+  return mergeCluster(evaluated);
+}
+
+module.exports = { VoidSpace, mergeCluster, devour, classifyTier };
