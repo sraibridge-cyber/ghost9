@@ -1,290 +1,178 @@
-// ================================================================
-// GHOST v9.0.1 — spatial_web.js
-// Spatial Web: Persistent Geometric Memory in Domain Space
-// ----------------------------------------------------------------
-// Nodes are points in R⁸ (one axis per domain D1–D8).
-// The web is a weighted proximity graph: edge weight = 1/distance.
-// As nodes accumulate the web grows denser → better void resolution.
-// As node scores update the web repositions → persistent learning.
-// Void = nodes with μ ≥ τ that have NOT settled into LTM attractors.
-// Used jointly with spectral_graph Fiedler vector: intersection of
-// spectral communities AND spatial clusters = Taotie merge targets.
-// ================================================================
-
-'use strict';
-
-const DOMAIN_KEYS = ['D1','D2','D3','D4','D5','D6','D7','D8'];
-const DIM = DOMAIN_KEYS.length;
-
-const EPSILON    = 0.12;
-const MIN_PTS    = 2;
-const MAX_EDGES  = 50_000;
+// ============================================================
+// SPATIAL WEB MODULE
+// CSS Labs | Kyle S. Whitlock | Seal: 2026-06-20_15:42_Tulsa_OK
+// ============================================================
 
 class SpatialWeb {
-  constructor () {
-    this._positions = new Map();
-    this._adj       = new Map();
-    this._void      = new Set();
-    this._edgeCount = 0;
-    this.learningCycles = 0;
-  }
-
-  static _pos (node) {
-    const s = node.scores || {};
-    const v = new Float64Array(DIM);
-    for (let i = 0; i < DIM; i++) {
-      v[i] = s[DOMAIN_KEYS[i]] ?? 0.5;
-    }
-    return v;
-  }
-
-  static _dist (a, b) {
-    let sum = 0;
-    for (let i = 0; i < DIM; i++) {
-      const d = a[i] - b[i];
-      sum += d * d;
-    }
-    return Math.sqrt(sum);
-  }
-
-  upsert (node) {
-    const id  = node.id;
-    const pos = SpatialWeb._pos(node);
-    const isNew = !this._positions.has(id);
-
-    if (!isNew) {
-      this._removeEdges(id);
-      this.learningCycles++;
+    constructor() {
+        this.clusters = new Map();
+        this.vertexIndex = new Map();
+        this.nodeToCluster = new Map();
+        this.dirty = true;
     }
 
-    this._positions.set(id, pos);
-    if (!this._adj.has(id)) this._adj.set(id, new Map());
-
-    let edgesAdded = 0;
-    for (const [otherId, otherPos] of this._positions) {
-      if (otherId === id) continue;
-      const dist = SpatialWeb._dist(pos, otherPos);
-      if (dist < EPSILON && dist > 0) {
-        const w = 1 / dist;
-        this._adj.get(id).set(otherId, w);
-        if (!this._adj.has(otherId)) this._adj.set(otherId, new Map());
-        this._adj.get(otherId).set(id, w);
-        edgesAdded++;
-        this._edgeCount++;
-      }
-    }
-
-    if (this._edgeCount > MAX_EDGES) this._pruneWeakest();
-
-    return { isNew, edgesAdded };
-  }
-
-  remove (id) {
-    if (!this._positions.has(id)) return;
-    this._removeEdges(id);
-    this._positions.delete(id);
-    this._adj.delete(id);
-    this._void.delete(id);
-  }
-
-  _removeEdges (id) {
-    const neighbors = this._adj.get(id);
-    if (!neighbors) return;
-    for (const [nbId] of neighbors) {
-      const nbAdj = this._adj.get(nbId);
-      if (nbAdj) {
-        nbAdj.delete(id);
-        this._edgeCount--;
-      }
-    }
-    neighbors.clear();
-  }
-
-  computeVoid (ltmIds) {
-    this._void.clear();
-    for (const id of this._positions.keys()) {
-      if (!ltmIds.has(id)) {
-        this._void.add(id);
-      }
-    }
-    return new Set(this._void);
-  }
-
-  get voidIds () { return new Set(this._void); }
-
-  spatialClusters (voidIds = this._void, eps = EPSILON, minPts = MIN_PTS) {
-    const ids    = [...voidIds];
-    const n      = ids.length;
-    if (n < 2) return [];
-
-    const labels = new Array(n).fill(-1);
-    const NOISE  = -2;
-    let clusterIdx = 0;
-
-    const posOf = id => this._positions.get(id);
-
-    const regionQuery = (idx) => {
-      const p = posOf(ids[idx]);
-      if (!p) return [];
-      const nbrs = [];
-      for (let j = 0; j < n; j++) {
-        if (j === idx) continue;
-        const q = posOf(ids[j]);
-        if (!q) continue;
-        if (SpatialWeb._dist(p, q) <= eps) nbrs.push(j);
-      }
-      return nbrs;
-    };
-
-    for (let i = 0; i < n; i++) {
-      if (labels[i] !== -1) continue;
-      const nbrs = regionQuery(i);
-      if (nbrs.length < minPts) { labels[i] = NOISE; continue; }
-
-      labels[i] = clusterIdx;
-      const seeds = [...nbrs];
-
-      for (let si = 0; si < seeds.length; si++) {
-        const j = seeds[si];
-        if (labels[j] === NOISE) labels[j] = clusterIdx;
-        if (labels[j] !== -1) continue;
-        labels[j] = clusterIdx;
-        const nbrs2 = regionQuery(j);
-        if (nbrs2.length >= minPts) {
-          for (const k of nbrs2) {
-            if (!seeds.includes(k)) seeds.push(k);
-          }
+    ingest(spectralGraph) {
+        if (!spectralGraph || !spectralGraph.clusters || !spectralGraph.nodes) {
+            return null;
         }
-      }
-      clusterIdx++;
+        this.clusters.clear();
+        this.vertexIndex.clear();
+        this.nodeToCluster.clear();
+
+        const stats = spectralGraph.getClusterStats();
+        if (!stats) return null;
+
+        for (const [clusterId, stat] of stats) {
+            const clusterNodes = Array.from(spectralGraph.clusters.entries()).filter(([id, cid]) => cid === clusterId).map(([id, cid]) => id);
+            const centroid = this.computeCentroid(spectralGraph, clusterNodes);
+            const vertex = this.computeVertex(centroid);
+            
+            this.clusters.set(clusterId, {
+                centroid,
+                nodes: new Set(clusterNodes),
+                vertex,
+                mu: stat.avgMu,
+                count: stat.count,
+                timestamp: Date.now()
+            });
+
+            if (!this.vertexIndex.has(vertex)) {
+                this.vertexIndex.set(vertex, new Set());
+            }
+            this.vertexIndex.get(vertex).add(clusterId);
+
+            for (const nodeId of clusterNodes) {
+                this.nodeToCluster.set(nodeId, clusterId);
+            }
+        }
+
+        this.dirty = false;
+        return this.clusters;
     }
 
-    const clusters = [];
-    for (let c = 0; c < clusterIdx; c++) {
-      const members = [];
-      for (let i = 0; i < n; i++) {
-        if (labels[i] === c) members.push(ids[i]);
-      }
-      if (members.length >= 2) clusters.push(members);
-    }
-    return clusters;
-  }
-
-  jointVoidClusters (voidIds, spectralCommunities) {
-    const spatClusters = this.spatialClusters(voidIds);
-
-    const result = [];
-    for (const cluster of spatClusters) {
-      const byCommunity = new Map();
-      for (const id of cluster) {
-        const comm = spectralCommunities.get(id) ?? -1;
-        if (!byCommunity.has(comm)) byCommunity.set(comm, []);
-        byCommunity.get(comm).push(id);
-      }
-      for (const [, members] of byCommunity) {
-        if (members.length >= 2) result.push(members);
-      }
-    }
-    return result;
-  }
-
-  serialize () {
-    const positions = {};
-    for (const [id, pos] of this._positions) {
-      positions[id] = Array.from(pos);
-    }
-    return {
-      schema:         'spatial_web_v1',
-      learningCycles: this.learningCycles,
-      nodeCount:      this._positions.size,
-      edgeCount:      this._edgeCount,
-      positions,
-      void:           [...this._void]
-    };
-  }
-
-  static deserialize (snapshot) {
-    if (snapshot?.schema !== 'spatial_web_v1') {
-      throw new Error('spatial_web: unknown snapshot schema');
-    }
-    const web = new SpatialWeb();
-    web.learningCycles = snapshot.learningCycles ?? 0;
-
-    for (const [id, arr] of Object.entries(snapshot.positions ?? {})) {
-      web._positions.set(id, new Float64Array(arr));
-      web._adj.set(id, new Map());
+    computeCentroid(spectralGraph, nodeIds) {
+        const sum = {
+            signal: 0, energy: 0, temporal: 0, spatial: 0,
+            cognitive: 0, ethical: 0, declarative: 0, novelty: 0
+        };
+        for (const nodeId of nodeIds) {
+            const node = spectralGraph.nodes.get(nodeId);
+            if (!node) continue;
+            const s = node.scores;
+            sum.signal += s.signal;
+            sum.energy += s.energy;
+            sum.temporal += s.temporal;
+            sum.spatial += s.spatial;
+            sum.cognitive += s.cognitive;
+            sum.ethical += s.ethical;
+            sum.declarative += s.declarative;
+            sum.novelty += s.novelty;
+        }
+        const n = nodeIds.length;
+        return {
+            signal: sum.signal / n,
+            energy: sum.energy / n,
+            temporal: sum.temporal / n,
+            spatial: sum.spatial / n,
+            cognitive: sum.cognitive / n,
+            ethical: sum.ethical / n,
+            declarative: sum.declarative / n,
+            novelty: sum.novelty / n
+        };
     }
 
-    const ids = [...web._positions.keys()];
-    for (let i = 0; i < ids.length; i++) {
-      for (let j = i + 1; j < ids.length; j++) {
-        const dist = SpatialWeb._dist(
-          web._positions.get(ids[i]),
-          web._positions.get(ids[j])
+    computeVertex(scores) {
+        const b1 = scores.signal >= scores.cognitive ? 'P' : 'N';
+        const b2 = scores.energy >= scores.temporal ? 'P' : 'N';
+        const b3 = scores.spatial >= scores.ethical ? 'P' : 'N';
+        const b4 = scores.declarative >= scores.novelty ? 'P' : 'N';
+        return b1 + b2 + b3 + b4;
+    }
+
+    queryNearest(scores, k) {
+        const candidates = this.getCandidates(this.computeVertex(scores));
+        const distances = candidates.map(cid => ({
+            clusterId: cid,
+            distance: this.euclideanDistance(scores, this.clusters.get(cid).centroid),
+            mu: this.clusters.get(cid).mu
+        }));
+        distances.sort((a, b) => a.distance - b.distance);
+        return distances.slice(0, k);
+    }
+
+    queryRadius(scores, radius) {
+        const candidates = this.getCandidates(this.computeVertex(scores));
+        return candidates.map(cid => ({
+            clusterId: cid,
+            distance: this.euclideanDistance(scores, this.clusters.get(cid).centroid),
+            mu: this.clusters.get(cid).mu
+        })).filter(d => d.distance <= radius);
+    }
+
+    getCandidates(vertex) {
+        const candidates = new Set();
+        if (this.vertexIndex.has(vertex)) {
+            for (const cid of this.vertexIndex.get(vertex)) candidates.add(cid);
+        }
+        for (let i = 0; i < 4; i++) {
+            const neighbor = vertex.substring(0, i) + (vertex[i] === 'P' ? 'N' : 'P') + vertex.substring(i + 1);
+            if (this.vertexIndex.has(neighbor)) {
+                for (const cid of this.vertexIndex.get(neighbor)) candidates.add(cid);
+            }
+        }
+        return Array.from(candidates);
+    }
+
+    euclideanDistance(a, b) {
+        return Math.sqrt(
+            (a.signal - b.signal) ** 2 +
+            (a.energy - b.energy) ** 2 +
+            (a.temporal - b.temporal) ** 2 +
+            (a.spatial - b.spatial) ** 2 +
+            (a.cognitive - b.cognitive) ** 2 +
+            (a.ethical - b.ethical) ** 2 +
+            (a.declarative - b.declarative) ** 2 +
+            (a.novelty - b.novelty) ** 2
         );
-        if (dist < EPSILON && dist > 0) {
-          const w = 1 / dist;
-          web._adj.get(ids[i]).set(ids[j], w);
-          web._adj.get(ids[j]).set(ids[i], w);
-          web._edgeCount++;
+    }
+
+    addNodeToCluster(nodeId, scores, clusterId) {
+        if (!scores || !nodeId) return false;
+        const cluster = this.clusters.get(clusterId);
+        if (!cluster) return false;
+        const n = cluster.count;
+        const c = cluster.centroid;
+        c.signal = (c.signal * n + scores.signal) / (n + 1);
+        c.energy = (c.energy * n + scores.energy) / (n + 1);
+        c.temporal = (c.temporal * n + scores.temporal) / (n + 1);
+        c.spatial = (c.spatial * n + scores.spatial) / (n + 1);
+        c.cognitive = (c.cognitive * n + scores.cognitive) / (n + 1);
+        c.ethical = (c.ethical * n + scores.ethical) / (n + 1);
+        c.declarative = (c.declarative * n + scores.declarative) / (n + 1);
+        c.novelty = (c.novelty * n + scores.novelty) / (n + 1);
+        cluster.count++;
+        cluster.nodes.add(nodeId);
+        this.nodeToCluster.set(nodeId, clusterId);
+        this.dirty = true;
+        const newVertex = this.computeVertex(c);
+        if (newVertex !== cluster.vertex) {
+            this.vertexIndex.get(cluster.vertex).delete(clusterId);
+            cluster.vertex = newVertex;
+            if (!this.vertexIndex.has(newVertex)) this.vertexIndex.set(newVertex, new Set());
+            this.vertexIndex.get(newVertex).add(clusterId);
         }
-      }
+        return true;
     }
 
-    for (const id of (snapshot.void ?? [])) web._void.add(id);
-
-    return web;
-  }
-
-  _pruneWeakest () {
-    const all = [];
-    for (const [a, nbrs] of this._adj) {
-      for (const [b, w] of nbrs) {
-        if (a < b) all.push({ w, a, b });
-      }
-    }
-    all.sort((x, y) => x.w - y.w);
-    const toRemove = all.length - MAX_EDGES;
-    for (let i = 0; i < toRemove; i++) {
-      const { a, b } = all[i];
-      this._adj.get(a)?.delete(b);
-      this._adj.get(b)?.delete(a);
-      this._edgeCount--;
-    }
-  }
-
-  stats () {
-    const degrees = [];
-    for (const [, nbrs] of this._adj) degrees.push(nbrs.size);
-    const avgDeg = degrees.length
-      ? degrees.reduce((a,b) => a+b, 0) / degrees.length
-      : 0;
-    return {
-      nodes:          this._positions.size,
-      edges:          this._edgeCount,
-      voidNodes:      this._void.size,
-      avgDegree:      +avgDeg.toFixed(3),
-      learningCycles: this.learningCycles,
-      epsilon:        EPSILON,
-      dim:            DIM
-    };
-  }
-
-  voidProximityMap (topN = 5) {
-    const map = {};
-    for (const id of this._void) {
-      const pos  = this._positions.get(id);
-      if (!pos) continue;
-      const nbrs = this._adj.get(id);
-      if (!nbrs) { map[id] = []; continue; }
-      const sorted = [...nbrs.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, topN)
-        .map(([nid, w]) => ({ id: nid, weight: +w.toFixed(4) }));
-      map[id] = sorted;
-    }
-    return map;
-  }
+    getCluster(clusterId) { return this.clusters.get(clusterId) || null; }
+    getClusterForNode(nodeId) { const v = this.nodeToCluster.get(nodeId); return v !== undefined ? v : null; }
+    getClusterCount() { return this.clusters.size; }
+    getNodeCount() { return this.nodeToCluster.size; }
+    getClustersByVertex(vertex) { return this.vertexIndex.get(vertex) || new Set(); }
+    getVertices() { return Array.from(this.vertexIndex.keys()); }
+    isDirty() { return this.dirty; }
 }
 
-module.exports = { SpatialWeb, EPSILON, DIM, DOMAIN_KEYS };
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { SpatialWeb };
+}

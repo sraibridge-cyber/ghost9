@@ -1,0 +1,12 @@
+/data/data/com.termux/files/home/ghost-kernel-v90/src/ghost_face.js:452
+  const ws = web.stats();
+                 ^
+
+TypeError: web.stats is not a function
+    at Server.<anonymous> (/data/data/com.termux/files/home/ghost-kernel-v90/src/ghost_face.js:452:18)
+    at Object.onceWrapper (node:events:630:28)
+    at Server.emit (node:events:521:24)
+    at emitListeningNT (node:net:2052:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:89:21)
+
+Node.js v26.3.1

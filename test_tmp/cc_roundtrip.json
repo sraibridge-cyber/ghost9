@@ -1,0 +1,166 @@
+{
+  "cc": {
+    "scores": {
+      "D1": 0.65,
+      "D2": 0.65,
+      "D3": 0.65,
+      "D4": 0.65,
+      "D5": 0.65,
+      "D6": 0.65,
+      "D7": 0.65,
+      "D8": 0.99
+    },
+    "mu": 0.6850993987638334,
+    "pass": false,
+    "tier": "LTM",
+    "tau": 0.9995,
+    "tau_canonical": 0.9995,
+    "tau_ltm": 0.9495250000000001,
+    "domain_ceiling": 0.99,
+    "whitlock": {
+      "n": 3,
+      "re": 0.17647058823529413,
+      "im": 0.23529411764705882,
+      "magnitude": 0.29411764705882354,
+      "phase_deg": 53.13010235415598
+    },
+    "version": "v3.1.0",
+    "gates": {
+      "L": {
+        "D1": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D2": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D3": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D4": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D5": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D6": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D7": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        },
+        "D8": {
+          "gate": "L",
+          "matched": false,
+          "trigger": null,
+          "score": null
+        }
+      },
+      "S": {
+        "D1": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D2": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D3": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D4": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D5": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D6": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D7": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        },
+        "D8": {
+          "gate": "S",
+          "passed": true,
+          "reason": "L-gate clear"
+        }
+      },
+      "M": {
+        "D1": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D2": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D3": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D4": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D5": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D6": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D7": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        },
+        "D8": {
+          "gate": "M",
+          "passed": true,
+          "reason": "s-gate_clear"
+        }
+      }
+    },
+    "context": null
+  }
+}
