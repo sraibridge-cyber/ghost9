@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>THE OBSERVATORY — GHOST v9.0.9</title>
+  <title>THE OBSERVATORY — GHOST v9.1.0</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -12,6 +12,7 @@
       --parchment:#e8e4d9;--parchment-dim:#6a6860;
       --aqua:#5fffd4;--crimson:#c0392b;--crimson-b:#f44336;
       --cobalt:#4a90d9;--solar:#ffd700;--border:#181826;
+      --online:#2ecc71;--offline:#e74c3c;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
     body{background:var(--void);color:var(--parchment);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
@@ -23,580 +24,256 @@
     .h-sub{font-size:9px;letter-spacing:.3em;color:var(--parchment-dim);}
     .h-logo{font-family:'Cinzel',serif;font-size:24px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-shadow:0 0 24px rgba(200,168,75,.4);}
     .h-right{text-align:right;display:flex;flex-direction:column;gap:3px;}
+    .status-row{display:flex;align-items:center;gap:6px;font-size:9px;justify-content:flex-end;}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:var(--offline);box-shadow:0 0 6px var(--offline);transition:all .3s;}
+    .status-dot.online{background:var(--online);box-shadow:0 0 6px var(--online);}
+
+    /* Nav */
+    .nav{display:flex;gap:16px;padding:16px 36px;border-bottom:1px solid var(--border);}
+    .nav a{color:var(--gold-dim);text-decoration:none;font-size:10px;letter-spacing:.1em;transition:color .2s;}
+    .nav a:hover{color:var(--gold);}
+
+    /* Main */
+    .main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
 
     /* Status strip */
-    .strip{display:flex;gap:0;border-bottom:1px solid var(--border);}
-    .strip-block{flex:1;padding:14px 20px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+    .strip{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:24px;}
+    .strip-block{flex:1;padding:14px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
     .strip-block:last-child{border-right:none;}
-    .strip-key{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.4em;color:var(--parchment-dim);}
-    .strip-val{font-size:20px;font-weight:700;font-family:'Space Mono',monospace;}
+    .strip-label{font-size:9px;letter-spacing:.15em;color:var(--parchment-dim);text-transform:uppercase;}
+    .strip-val{font-size:16px;font-weight:700;color:var(--gold);font-family:'Cinzel',serif;}
     .strip-sub{font-size:9px;color:var(--parchment-dim);}
-    .n-arc-wrap{position:relative;width:60px;height:60px;}
 
-    /* n progress arc canvas */
-    #n-arc{display:block;}
-
-    /* Phase badge */
-    .phase-badge{display:inline-block;padding:3px 10px;border-radius:2px;font-size:9px;font-weight:700;letter-spacing:.2em;font-family:'Cinzel',serif;}
-    .phase-badge.bootstrap{background:rgba(95,255,212,.08);color:var(--aqua);border:1px solid rgba(95,255,212,.3);}
-    .phase-badge.production{background:rgba(200,168,75,.08);color:var(--gold);border:1px solid rgba(200,168,75,.3);}
-
-    /* Main two-panel */
-    .main-grid{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 180px);}
-
-    /* Left panel */
-    .left-panel{border-right:1px solid var(--border);padding:24px 24px 80px;display:flex;flex-direction:column;gap:24px;overflow-y:auto;}
-    .card{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:18px;}
-    .card-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.45em;color:var(--gold-dim);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
-    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #0e0e18;font-size:11px;}
-    .stat-row:last-child{border-bottom:none;}
-    .stat-key{color:var(--parchment-dim);}
-    .stat-val{font-weight:700;color:var(--parchment);}
-    .stat-val.gold{color:var(--gold);}
-    .stat-val.aqua{color:var(--aqua);}
-    .stat-val.cobalt{color:var(--cobalt);}
-    .stat-val.solar{color:var(--solar);}
-    .stat-val.crimson{color:var(--crimson-b);}
-    .mono{font-family:'Space Mono',monospace;font-size:10px;}
-
-    /* n sweep bar */
-    .sweep-bar-wrap{height:6px;background:#111118;border-radius:3px;overflow:hidden;margin-top:6px;}
-    .sweep-bar{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px;transition:width .5s ease;}
-    .sweep-label{display:flex;justify-content:space-between;font-size:9px;color:var(--parchment-dim);margin-top:4px;}
-
-    /* Taotie control */
-    .btn-sweep{width:100%;padding:12px;background:transparent;border:1px solid var(--gold-dim);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;font-weight:600;letter-spacing:.3em;cursor:pointer;transition:all .2s;margin-top:12px;}
-    .btn-sweep:hover{background:rgba(200,168,75,.08);border-color:var(--gold);}
-    .btn-sweep:active{transform:scale(.98);}
-    .btn-sweep.sweeping{animation:sweepPulse 1s ease infinite;pointer-events:none;}
-    @keyframes sweepPulse{0%,100%{border-color:var(--gold-dim)}50%{border-color:var(--gold-bright)}}
-
-    /* Verify btn */
-    .btn-verify{width:100%;padding:10px;background:transparent;border:1px solid var(--border);color:var(--parchment-dim);font-family:'Cinzel',serif;font-size:10px;letter-spacing:.25em;cursor:pointer;transition:all .2s;margin-top:8px;}
-    .btn-verify:hover{border-color:var(--aqua);color:var(--aqua);}
-
-    /* Live feed */
-    .feed-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;}
-    .feed-item{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:2px;border-left:2px solid;font-size:10px;animation:slideIn .25s ease;}
-    .feed-item.devour{background:rgba(200,168,75,.03);border-color:var(--gold-dim);}
-    .feed-item.sweep{background:rgba(95,255,212,.03);border-color:var(--aqua);}
-    .feed-item.reject{background:rgba(192,57,43,.03);border-color:var(--crimson);opacity:.7;}
-    .feed-ts{color:var(--parchment-dim);flex-shrink:0;font-size:9px;}
-    .feed-type{font-weight:700;flex-shrink:0;width:58px;}
-    .feed-item.devour .feed-type{color:var(--gold);}
-    .feed-item.sweep .feed-type{color:var(--aqua);}
-    .feed-item.reject .feed-type{color:var(--crimson-b);}
-    .feed-detail{color:var(--parchment-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-    /* Right panel */
-    .right-panel{display:grid;grid-template-rows:1fr 1fr;overflow:hidden;}
-    .viz-block{position:relative;border-bottom:1px solid var(--border);overflow:hidden;}
-    .viz-block:last-child{border-bottom:none;}
-    .viz-label{position:absolute;top:14px;left:18px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.4em;color:var(--gold-dim);z-index:2;}
-    .viz-sub{position:absolute;top:30px;left:18px;font-size:9px;color:var(--parchment-dim);z-index:2;}
-    canvas.full{width:100%;height:100%;display:block;}
-
-    /* Merkle hash display */
-    .hash-chain{font-size:9px;color:var(--parchment-dim);word-break:break-all;line-height:1.8;font-family:'Space Mono',monospace;}
-    .hash-chain .hval{color:var(--gold);font-size:10px;}
-
-    /* API panel */
-    .api-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;}
-    .api-btn{padding:7px 10px;background:transparent;border:1px solid var(--border);color:var(--parchment-dim);font-size:9px;font-family:'Space Mono',monospace;cursor:pointer;transition:all .15s;text-align:left;letter-spacing:.05em;}
+    /* API Grid */
+    .api-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px;}
+    .api-btn{padding:10px;background:transparent;border:1px solid var(--border);color:var(--parchment-dim);font-size:9px;font-family:'Space Mono',monospace;cursor:pointer;transition:all .2s;text-align:left;}
     .api-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
-    .api-result{margin-top:10px;padding:10px;background:#060609;border-radius:2px;border:1px solid var(--border);font-size:9px;color:var(--aqua);font-family:'Space Mono',monospace;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;display:none;}
+    .api-btn:active{background:var(--panel2);}
 
-    /* Bottom status */
-    .sbar{position:fixed;bottom:0;left:0;right:0;background:rgba(13,13,20,.95);border-top:1px solid var(--border);padding:7px 36px;display:flex;gap:28px;font-size:10px;color:var(--parchment-dim);backdrop-filter:blur(4px);}
-    .sdot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--aqua);margin-right:5px;animation:blink 2.5s infinite;}
-    .sv{color:var(--aqua);}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-    @keyframes slideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    /* Result panel */
+    .api-result{margin-top:16px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--aqua);max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;display:none;}
+    .api-result.show{display:block;}
 
-    ::-webkit-scrollbar{width:3px;}
-    ::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:2px;}
+    /* Node list */
+    .node-list{margin-top:24px;}
+    .node-title{font-size:10px;letter-spacing:.2em;color:var(--parchment-dim);margin-bottom:12px;}
+    .node-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;}
+    .node-card{padding:12px 14px;background:var(--panel);border:1px solid var(--border);border-radius:4px;font-size:10px;}
+    .node-hash{color:var(--gold);margin-bottom:4px;font-size:9px;}
+    .node-content{color:var(--parchment);margin-bottom:6px;max-height:60px;overflow:hidden;}
+    .node-meta{display:flex;gap:12px;font-size:9px;color:var(--parchment-dim);}
+    .node-meta span{display:flex;gap:3px;}
+    .node-mu{color:var(--aqua);}
+    .node-tier{color:var(--gold);}
+
+    /* Tesseract viz */
+    .tesseract-wrap{margin-top:24px;padding:20px;background:var(--panel);border:1px solid var(--border);border-radius:4px;}
+    .tesseract-title{font-size:10px;letter-spacing:.2em;color:var(--parchment-dim);margin-bottom:12px;}
+    .tesseract-canvas{width:100%;height:200px;}
+
+    /* Ghostlet advice */
+    .ghostlet-box{margin-top:24px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:4px;}
+    .ghostlet-advice{font-size:11px;color:var(--parchment);line-height:1.6;font-style:italic;}
+    .ghostlet-wc{font-size:10px;color:var(--gold);margin-top:8px;}
+
+    /* Offline banner */
+    .offline-banner{display:none;align-items:center;gap:10px;padding:10px 16px;background:rgba(231,76,60,.1);border:1px solid var(--crimson);border-radius:4px;font-size:10px;color:var(--crimson-b);margin-bottom:20px;}
+    .offline-banner.show{display:flex;}
+
+    /* Section titles */
+    .section-title{font-size:10px;letter-spacing:.2em;color:var(--gold);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+    /* Query input */
+    .query-row{display:flex;gap:8px;margin-bottom:16px;}
+    .query-input{flex:1;padding:8px 12px;background:var(--panel);border:1px solid var(--border);border-radius:4px;color:var(--parchment);font-family:'Space Mono',monospace;font-size:10px;}
+    .query-input:focus{outline:none;border-color:var(--gold-dim);}
+    .query-btn{padding:8px 16px;background:transparent;border:1px solid var(--gold-dim);color:var(--gold);font-size:9px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s;}
+    .query-btn:hover{background:var(--gold);color:var(--void);}
   </style>
 </head>
 <body>
+  <div class="header">
+    <div class="h-left">
+      <div class="h-title">CSS LABS</div>
+      <div class="h-sub">THE OBSERVATORY — CSS Labs</div>
+    </div>
+    <div class="h-logo">GHOST</div>
+    <div class="h-right">
+      <div class="status-row"><span class="status-dot" id="face-dot"></span><span>FACE :7766</span></div>
+      <div class="status-row"><span class="status-dot" id="kern-dot"></span><span>KERNEL :7767</span></div>
+    </div>
+  </div>
 
-<header class="header">
-  <div class="h-left">
-    <div class="h-title">The Observatory</div>
-    <div class="h-sub">Spatial Web &amp; Kernel State</div>
+  <div class="nav">
+    <a href="index.html">← NEXUS</a>
+    <a href="devour.html">DEVOURING GATE →</a>
   </div>
-  <div class="h-logo">GHOST</div>
-  <div class="h-right">
-    <div class="h-title">Harmony Labs</div>
-    <div class="h-sub">KERNEL :7767</div>
-  </div>
-</header>
 
-<!-- Status strip -->
-<div class="strip">
-  <div class="strip-block">
-    <div class="strip-key">NODE COUNT</div>
-    <div class="strip-val" id="strip-n" style="color:var(--aqua)">—</div>
-    <div class="strip-sub">n toward Taotie</div>
-  </div>
-  <div class="strip-block">
-    <div class="strip-key">WHITLOCK |W_v3|</div>
-    <div class="strip-val" id="strip-w" style="color:var(--gold)">—</div>
-    <div class="strip-sub" id="strip-w-sub">n* = 16.52</div>
-  </div>
-  <div class="strip-block">
-    <div class="strip-key">PHASE</div>
-    <div class="strip-val" style="font-size:13px;padding-top:4px"><span class="phase-badge bootstrap" id="phase-badge">BOOTSTRAP</span></div>
-    <div class="strip-sub" id="strip-tau">τ = —</div>
-  </div>
-  <div class="strip-block">
-    <div class="strip-key">SWEEPS</div>
-    <div class="strip-val" id="strip-sweeps" style="color:var(--parchment-dim)">—</div>
-    <div class="strip-sub" id="strip-last-sweep">last: —</div>
-  </div>
-  <div class="strip-block">
-    <div class="strip-key">ARCHIVED NODES</div>
-    <div class="strip-val" id="strip-archive" style="color:var(--parchment-dim)">—</div>
-    <div class="strip-sub">preserved in archive</div>
-  </div>
-</div>
-
-<div class="main-grid">
-
-  <!-- Left panel -->
-  <div class="left-panel">
-
-    <!-- System Harmonics -->
-    <div class="card">
-      <div class="card-title">System Harmonics</div>
-      <div class="stat-row"><span class="stat-key">n (active nodes)</span><span class="stat-val aqua" id="lp-n">—</span></div>
-      <div class="stat-row"><span class="stat-key">STM (Ephemeral)</span><span class="stat-val cobalt" id="lp-stm">—</span></div>
-      <div class="stat-row"><span class="stat-key">LTM (Eternal)</span><span class="stat-val solar" id="lp-ltm">—</span></div>
-      <div class="stat-row"><span class="stat-key">|W_v3|</span><span class="stat-val gold mono" id="lp-w">—</span></div>
-      <div class="stat-row"><span class="stat-key">Unity progress</span><span class="stat-val mono" id="lp-unity">—%</span></div>
-      <div class="stat-row"><span class="stat-key">τ threshold</span><span class="stat-val mono" id="lp-tau">—</span></div>
-      <div class="stat-row"><span class="stat-key">Chain anchor</span><span class="stat-val mono gold" id="lp-root" style="font-size:9px">—</span></div>
+  <div class="main">
+    <div class="offline-banner" id="offline-banner">
+      <span>⚡ OFFLINE MODE</span>
+      <span>Local simulation active. Reconnect to FACE/KERNEL for live data.</span>
     </div>
 
-    <!-- Taotie Controls -->
-    <div class="card">
-      <div class="card-title">Taotie · The Great Compression</div>
-      <div class="stat-row"><span class="stat-key">Trigger threshold</span><span class="stat-val gold">n ≥ 7</span></div>
-      <div class="stat-row"><span class="stat-key">Strategy</span><span class="stat-val" style="font-size:10px">OP3-Informed</span></div>
-      <div class="stat-row"><span class="stat-key">Sweep mode</span><span class="stat-val" style="font-size:10px">Spectral Cluster</span></div>
-      <div style="margin-top:12px">
-        <div style="font-size:9px;color:var(--parchment-dim);margin-bottom:6px">n progression toward compression</div>
-        <div class="sweep-bar-wrap"><div class="sweep-bar" id="sweep-bar"></div></div>
-        <div class="sweep-label"><span>0</span><span>n=7 TRIGGER</span></div>
+    <div class="strip" id="stats-strip">
+      <div class="strip-block">
+        <div class="strip-label">Nodes</div>
+        <div class="strip-val" id="stat-n">—</div>
+        <div class="strip-sub" id="stat-cap">capacity —%</div>
       </div>
-      <button class="btn-sweep" id="btn-sweep" onclick="invokeSweep()">⚡ INVOKE THE GREAT COMPRESSION</button>
+      <div class="strip-block">
+        <div class="strip-label">Whitlock</div>
+        <div class="strip-val" id="stat-w">—</div>
+        <div class="strip-sub" id="stat-phi">phase —°</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">STM / LTM</div>
+        <div class="strip-val" id="stat-tier">— / —</div>
+        <div class="strip-sub">active tiers</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Merkle</div>
+        <div class="strip-val" id="stat-merkle">—</div>
+        <div class="strip-sub">root hash</div>
+      </div>
     </div>
 
-    <!-- Archive -->
-    <div class="card">
-      <div class="card-title">Archive · The Unanchored</div>
-      <div class="stat-row"><span class="stat-key">Archived super-nodes</span><span class="stat-val gold" id="arch-count">—</span></div>
-      <div class="stat-row"><span class="stat-key">Merkle chain depth</span><span class="stat-val" id="chain-depth">—</span></div>
-      <div style="margin-top:10px">
-        <div class="hash-chain">
-          Chain anchor:<br><span class="hval" id="full-root">—</span>
+    <div class="section-title">KERNEL QUERIES</div>
+    <div class="api-grid">
+      <button class="api-btn" onclick="callApi('GET', '/bench')">GET /bench</button>
+      <button class="api-btn" onclick="callApi('GET', '/recall?q=')">GET /recall</button>
+      <button class="api-btn" onclick="callApi('GET', '/verify')">GET /verify</button>
+      <button class="api-btn" onclick="callApi('GET', '/ghostlet')">GET /ghostlet</button>
+      <button class="api-btn" onclick="callApi('GET', '/nav?vertex=P')">GET /nav</button>
+      <button class="api-btn" onclick="callApi('POST', '/cmd', {cmd:'status'})">POST /cmd status</button>
+    </div>
+    <div class="query-row">
+      <input class="query-input" id="recall-q" placeholder="recall query...">
+      <button class="query-btn" onclick="callApi('GET', '/recall?q='+encodeURIComponent(document.getElementById('recall-q').value))">RECALL</button>
+    </div>
+
+    <div class="section-title">FACE QUERIES</div>
+    <div class="api-grid">
+      <button class="api-btn" onclick="callApi('GET', '/state', null, true)">GET /state</button>
+      <button class="api-btn" onclick="callApi('GET', '/nodes', null, true)">GET /nodes</button>
+      <button class="api-btn" onclick="callApi('GET', '/taotie', null, true)">GET /taotie</button>
+      <button class="api-btn" onclick="callApi('GET', '/void', null, true)">GET /void</button>
+      <button class="api-btn" onclick="callApi('GET', '/logs', null, true)">GET /logs</button>
+      <button class="api-btn" onclick="callApi('GET', '/archive', null, true)">GET /archive</button>
+      <button class="api-btn" onclick="callApi('GET', '/benchmark', null, true)">GET /benchmark</button>
+      <button class="api-btn" onclick="callApi('POST', '/taotie/sweep', null, true)">POST /taotie/sweep</button>
+    </div>
+
+    <div class="api-result" id="api-result"></div>
+
+    <div class="section-title">RECENT NODES</div>
+    <div class="node-list" id="node-list">
+      <div style="font-size:10px;color:var(--parchment-dim);text-align:center;padding:24px">No nodes ingested yet.</div>
+    </div>
+
+    <div class="section-title">TESSERACT DISTRIBUTION</div>
+    <div class="tesseract-wrap">
+      <canvas class="tesseract-canvas" id="tess-canvas"></canvas>
+    </div>
+
+    <div class="section-title">GHOSTLET ADVICE</div>
+    <div class="ghostlet-box" id="ghostlet-box">
+      <div class="ghostlet-advice" id="ghostlet-advice">Query the ghostlet for kernel guidance...</div>
+      <div class="ghostlet-wc" id="ghostlet-wc"></div>
+    </div>
+  </div>
+
+  <script src="ghost_api.js"></script>
+  <script>
+    async function callApi(method, path, body, isFace){
+      const el = document.getElementById('api-result');
+      el.classList.add('show');
+      el.textContent = 'Loading...';
+      const base = isFace ? GHOST.FACE : GHOST.KERN;
+      const opts = {method, timeout: 5000};
+      if(body) opts.body = JSON.stringify(body);
+      if(method === 'POST' && !body) opts.headers = {'Content-Type':'application/json'};
+      const r = await ghostFetch(base, path, opts);
+      el.textContent = JSON.stringify(r.data, null, 2);
+      if(path === '/ghostlet' && r.data.advice) document.getElementById('ghostlet-advice').textContent = r.data.advice;
+      if(path === '/ghostlet' && r.data.whitlock) document.getElementById('ghostlet-wc').textContent = '|W|=' + r.data.whitlock.magnitude.toFixed(5) + ' φ=' + r.data.whitlock.phase_deg.toFixed(2) + '°';
+      if(path === '/recall' && r.data.results) renderNodes(r.data.results);
+      if(path === '/nodes' && r.data.nodes) renderNodes(r.data.nodes);
+      if(path === '/state') updateStrip(r.data);
+    }
+
+    function renderNodes(nodes){
+      const el = document.getElementById('node-list');
+      if(!nodes || !nodes.length){
+        el.innerHTML = '<div style="font-size:10px;color:var(--parchment-dim);text-align:center;padding:24px">No nodes found.</div>';
+        return;
+      }
+      el.innerHTML = '<div class="node-grid">' + nodes.map(n=>`
+        <div class="node-card">
+          <div class="node-hash">${n.hash || '—'}</div>
+          <div class="node-content">${n.content || '—'}</div>
+          <div class="node-meta">
+            <span>μ <span class="node-mu">${(n.mu||0).toFixed(4)}</span></span>
+            <span class="node-tier">${n.tier||'STM'}</span>
+            <span>${n.vertex||'PPPP'}</span>
+          </div>
         </div>
-      </div>
-      <button class="btn-verify" onclick="verifyChain()">✦ VERIFY MERKLE CHAIN</button>
-      <div id="verify-result" style="font-size:10px;margin-top:8px;display:none;padding:8px;border-radius:2px;"></div>
-    </div>
-
-    <!-- Live Feed -->
-    <div class="card">
-      <div class="card-title">Live Feed</div>
-      <div class="feed-list" id="feed-list">
-        <div style="font-size:10px;color:#2e2e3e;text-align:center;padding:12px">Polling KERNEL…</div>
-      </div>
-    </div>
-
-    <!-- Raw API -->
-    <div class="card">
-      <div class="card-title">Raw API</div>
-      <div class="api-grid">
-        <button class="api-btn" onclick="callApi('GET','/bench')">GET /bench</button>
-        <button class="api-btn" onclick="callApi('GET','/recall?q=')">GET /recall</button>
-        <button class="api-btn" onclick="callApi('GET','/verify')">GET /verify</button>
-        <button class="api-btn" onclick="callApi('GET','/ghostlet')">GET /ghostlet</button>
-        <button class="api-btn" onclick="callApi('GET','/nav?vertex=0')">GET /nav</button>
-        <button class="api-btn" onclick="callApi('POST','/cmd','{"cmd":"status"}')">POST /cmd status</button>
-      </div>
-      <div class="api-result" id="api-result"></div>
-    </div>
-
-  </div>
-
-  <!-- Right panel: two visualizations -->
-  <div class="right-panel">
-
-    <!-- Spatial Web (force-directed) -->
-    <div class="viz-block" id="sw-block">
-      <div class="viz-label">Spatial Web</div>
-      <div class="viz-sub" id="sw-sub">Loading…</div>
-      <canvas id="sw-canvas" class="full"></canvas>
-    </div>
-
-    <!-- Tesseract B⁴ -->
-    <div class="viz-block" id="ts-block">
-      <div class="viz-label">Tesseract B⁴</div>
-      <div class="viz-sub" id="ts-sub">16 vertices · 32 edges</div>
-      <canvas id="ts-canvas" class="full"></canvas>
-    </div>
-
-  </div>
-
-</div>
-
-<div class="sbar">
-  <span><span class="sdot"></span>KERNEL <span class="sv">:7767</span></span>
-  <span>n = <span class="sv" id="sb-n">—</span></span>
-  <span>|W_v3| = <span class="sv" id="sb-w">—</span></span>
-  <span>phase = <span class="sv" id="sb-phase">—</span></span>
-  <span>anchor = <span class="sv" id="sb-root">—</span></span>
-</div>
-
-<script>
-const KERN='http://localhost:7767', FACE='http://localhost:7766';
-let gs={n:0,stm:0,ltm:0,w:0,tau:.9960,phase:'Bootstrap',root:null,sweeps:0,archived:0,nodes:[]};
-let feed=[];
-
-function wv3(n){return Math.sqrt(n*n+16)/17;}
-
-// ── State polling ──────────────────────────────────────────────────────────
-async function pollState(){
-  for(const [url,isFace] of [[KERN+'/bench',false],[FACE+'/state',true]]){
-    try{
-      const r=await fetch(url,{signal:AbortSignal.timeout(2500)});
-      if(r.ok){applyGS(await r.json()); return;}
-    }catch(e){}
-  }
-}
-function applyGS(d){
-  const n=d.n??d.nodeCount??gs.n;
-  gs.n=n; gs.stm=d.stm??d.stmCount??0; gs.ltm=d.ltm??d.ltmCount??0;
-  gs.w=wv3(n); gs.tau=d.tau??(n<10?.9960:.9995);
-  gs.phase=n<10?'Bootstrap':'Production';
-  gs.root=d.merkleRoot??d.chainRoot??null;
-  gs.sweeps=d.sweepCount??d.sweeps??gs.sweeps;
-  gs.archived=d.archived??d.archiveCount??gs.archived;
-  gs.nodes=d.nodes??gs.nodes;
-  updateUI();
-  updateSpatialWeb();
-}
-function updateUI(){
-  const n=gs.n, w=gs.w;
-  // Strip
-  document.getElementById('strip-n').textContent=n;
-  document.getElementById('strip-w').textContent=w.toFixed(4);
-  document.getElementById('strip-w-sub').textContent='progress to n*=16.52: '+(w/1).toFixed(1)+'%';
-  const pb=document.getElementById('phase-badge');
-  pb.textContent=gs.phase.toUpperCase(); pb.className='phase-badge '+gs.phase.toLowerCase();
-  document.getElementById('strip-tau').textContent='τ = '+gs.tau.toFixed(4);
-  document.getElementById('strip-sweeps').textContent=gs.sweeps;
-  document.getElementById('strip-last-sweep').textContent='last: —';
-  document.getElementById('strip-archive').textContent=gs.archived;
-  // Left panel
-  document.getElementById('lp-n').textContent=n;
-  document.getElementById('lp-stm').textContent=gs.stm;
-  document.getElementById('lp-ltm').textContent=gs.ltm;
-  document.getElementById('lp-w').textContent=w.toFixed(6);
-  document.getElementById('lp-unity').textContent=(Math.min(w,1)*100).toFixed(1)+'%';
-  document.getElementById('lp-tau').textContent=gs.tau.toFixed(4);
-  document.getElementById('lp-root').textContent=gs.root?gs.root.slice(0,20)+'…':'—';
-  document.getElementById('full-root').textContent=gs.root??'—';
-  document.getElementById('arch-count').textContent=gs.archived;
-  document.getElementById('chain-depth').textContent=gs.sweeps;
-  // Sweep bar
-  const pct=Math.min(100,(n/7)*100);
-  document.getElementById('sweep-bar').style.width=pct+'%';
-  if(n>=7) document.getElementById('sweep-bar').style.background='linear-gradient(90deg,var(--crimson),var(--crimson-b))';
-  else document.getElementById('sweep-bar').style.background='linear-gradient(90deg,var(--gold-dim),var(--gold))';
-  // Status bar
-  document.getElementById('sb-n').textContent=n;
-  document.getElementById('sb-w').textContent=w.toFixed(4);
-  document.getElementById('sb-phase').textContent=gs.phase;
-  document.getElementById('sb-root').textContent=gs.root?gs.root.slice(0,10)+'…':'—';
-  // Sub label tesseract
-  document.getElementById('ts-sub').textContent=`16 vertices · 32 edges · ${n} node${n!==1?'s':''} active`;
-}
-pollState(); setInterval(pollState,3000);
-
-// ── Feed push ──────────────────────────────────────────────────────────────
-function pushFeed(type,detail){
-  feed.unshift({type,detail,ts:new Date().toLocaleTimeString('en-US',{hour12:false})});
-  if(feed.length>20) feed.pop();
-  const el=document.getElementById('feed-list');
-  el.innerHTML=feed.length?feed.map(f=>`
-    <div class="feed-item ${f.type}">
-      <span class="feed-ts">${f.ts}</span>
-      <span class="feed-type">${f.type.toUpperCase()}</span>
-      <span class="feed-detail">${f.detail}</span>
-    </div>`).join(''):
-    '<div style="font-size:10px;color:#2e2e3e;text-align:center;padding:12px">Polling KERNEL…</div>';
-}
-
-// ── Sweep ──────────────────────────────────────────────────────────────────
-async function invokeSweep(){
-  const btn=document.getElementById('btn-sweep');
-  btn.classList.add('sweeping'); btn.textContent='⟳ COMPRESSING…';
-  try{
-    const r=await fetch(FACE+'/taotie/sweep',{method:'POST',signal:AbortSignal.timeout(6000)});
-    const d=await r.json();
-    pushFeed('sweep','Super-node merged · '+(d.compressed??'?')+' nodes → 1');
-    gs.sweeps++;
-    pollState();
-  }catch(e){
-    pushFeed('reject','Sweep failed — '+e.message);
-  }finally{
-    btn.classList.remove('sweeping'); btn.textContent='⚡ INVOKE THE GREAT COMPRESSION';
-  }
-}
-
-// ── Verify ─────────────────────────────────────────────────────────────────
-async function verifyChain(){
-  const el=document.getElementById('verify-result');
-  el.style.display='block'; el.textContent='Verifying chain…';
-  try{
-    const r=await fetch(KERN+'/verify',{signal:AbortSignal.timeout(5000)});
-    const d=await r.json();
-    const ok=d.valid??d.verified??d.ok??true;
-    el.textContent=ok?'✓ Chain integrity verified — all hashes valid':'✗ Chain integrity FAILED — corruption detected';
-    el.style.color=ok?'var(--aqua)':'var(--crimson-b)';
-    el.style.background=ok?'rgba(95,255,212,.04)':'rgba(192,57,43,.06)';
-    pushFeed(ok?'devour':'reject','Merkle chain '+(ok?'VERIFIED':'FAILED'));
-  }catch(e){
-    el.textContent='Verify endpoint unreachable — '+e.message;
-    el.style.color='var(--crimson-b)';
-  }
-}
-
-// ── API explorer ───────────────────────────────────────────────────────────
-async function callApi(method,path,body){
-  const el=document.getElementById('api-result');
-  el.style.display='block'; el.textContent='→ '+method+' '+path+'\n\nFetching…';
-  const base=path.startsWith('/bench')||path.startsWith('/recall')||path.startsWith('/verify')||path.startsWith('/ghostlet')||path.startsWith('/nav')||path.startsWith('/cmd')?KERN:FACE;
-  try{
-    const opts={method,signal:AbortSignal.timeout(4000)};
-    if(body){opts.headers={'Content-Type':'application/json'};opts.body=body;}
-    const r=await fetch(base+path,opts);
-    const txt=await r.text();
-    try{ el.textContent=JSON.stringify(JSON.parse(txt),null,2); }
-    catch(e){ el.textContent=txt; }
-  }catch(e){
-    el.textContent='Error: '+e.message;
-  }
-}
-
-// ── Spatial Web (force-directed) ───────────────────────────────────────────
-let swNodes=[], swEdges=[], swAnimId;
-function updateSpatialWeb(){
-  // Build node list from state
-  const raw=gs.nodes;
-  if(raw&&raw.length){
-    const cv=document.getElementById('sw-canvas');
-    const W=cv.offsetWidth||600, H=cv.offsetHeight||300;
-    swNodes=raw.map((nd,i)=>({
-      id:nd.id??i, tier:nd.tier??'STM', mu:nd.mu??0.9990,
-      vertex:nd.vertex??0,
-      x:W/2+(Math.random()-.5)*W*.6,
-      y:H/2+(Math.random()-.5)*H*.6,
-      vx:0, vy:0
-    }));
-    // Edges: connect nodes with same tesseract vertex
-    swEdges=[];
-    for(let i=0;i<swNodes.length;i++){
-      for(let j=i+1;j<swNodes.length;j++){
-        if(swNodes[i].vertex===swNodes[j].vertex)
-          swEdges.push([i,j]);
-      }
+      `).join('') + '</div>';
     }
-    document.getElementById('sw-sub').textContent=`${swNodes.length} nodes · ${swEdges.length} edges · live`;
-  } else {
-    // Generate demo nodes from n count
-    const cv=document.getElementById('sw-canvas');
-    const W=cv.offsetWidth||600, H=cv.offsetHeight||300;
-    const n=Math.max(gs.n,0);
-    if(swNodes.length!==n){
-      swNodes=Array.from({length:n},(_,i)=>({
-        id:i, tier:Math.random()>.15?'STM':'LTM', mu:.9990+Math.random()*.001,
-        vertex:Math.floor(Math.random()*16),
-        x:W/2+(Math.random()-.5)*W*.5, y:H/2+(Math.random()-.5)*H*.4, vx:0, vy:0
-      }));
-      swEdges=[];
-      for(let i=0;i<swNodes.length;i++){
-        for(let j=i+1;j<swNodes.length;j++){
-          if(swNodes[i].vertex===swNodes[j].vertex) swEdges.push([i,j]);
-        }
-      }
-    }
-    document.getElementById('sw-sub').textContent=`${n} nodes · ${swEdges.length} edges · simulated layout`;
-  }
-}
 
-(function startSW(){
-  const cv=document.getElementById('sw-canvas');
-  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;}
-  resize(); new ResizeObserver(resize).observe(cv);
-  const ctx=cv.getContext('2d');
-  let angle=0;
-  function tick(){
-    const W=cv.width, H=cv.height;
-    // Physics step
-    const k=0.04, rep=800, damp=0.85, cx=W/2, cy=H/2;
-    swNodes.forEach(a=>{
-      // Center gravity
-      a.vx+=(cx-a.x)*0.005; a.vy+=(cy-a.y)*0.005;
-      // Repulsion
-      swNodes.forEach(b=>{
-        if(a===b) return;
-        const dx=a.x-b.x, dy=a.y-b.y;
-        const d2=Math.max(dx*dx+dy*dy,100);
-        const f=rep/d2;
-        a.vx+=f*(dx/Math.sqrt(d2)); a.vy+=f*(dy/Math.sqrt(d2));
+    function updateStrip(d){
+      const n = d.n || 0;
+      const wc = d.whitlock || {magnitude:0, phase_deg:0};
+      const stm = d.stm_count || 0;
+      const ltm = d.ltm_count || 0;
+      const cap = d.capacity_pct || '0.0';
+      document.getElementById('stat-n').textContent = n;
+      document.getElementById('stat-cap').textContent = 'capacity ' + cap + '%';
+      document.getElementById('stat-w').textContent = wc.magnitude ? wc.magnitude.toFixed(3) : '—';
+      document.getElementById('stat-phi').textContent = 'φ ' + (wc.phase_deg ? wc.phase_deg.toFixed(1) : '—') + '°';
+      document.getElementById('stat-tier').textContent = stm + ' / ' + ltm;
+      document.getElementById('stat-merkle').textContent = d.merkle_root ? d.merkle_root.slice(0,16)+'…' : '—';
+    }
+
+    // Tesseract canvas
+    function drawTesseract(){
+      const c = document.getElementById('tess-canvas');
+      const ctx = c.getContext('2d');
+      c.width = c.offsetWidth; c.height = 200;
+      const W = c.width, H = c.height, cx = W/2, cy = H/2;
+      ctx.clearRect(0,0,W,H);
+      const verts = ['P','T','S','C','E','D','N'];
+      const colors = {'P':'#c8a84b','T':'#5fffd4','S':'#4a90d9','C':'#ffd700','E':'#c0392b','D':'#9b59b6','N':'#e67e22'};
+      const dist = _offline.nodes.length ? {P:_offline.nodes.length,T:0,S:0,C:0,E:0,D:0,N:0} : {P:1,T:0,S:0,C:0,E:0,D:0,N:0};
+      const total = Object.values(dist).reduce((a,b)=>a+b,1);
+      let ang = -Math.PI/2;
+      verts.forEach((v,i)=>{
+        const pct = (dist[v]||0)/total;
+        const r = 60 + pct * 40;
+        const x = cx + Math.cos(ang)*r;
+        const y = cy + Math.sin(ang)*r;
+        ctx.beginPath(); ctx.arc(x,y,4+pct*12,0,Math.PI*2);
+        ctx.fillStyle = colors[v] || '#666';
+        ctx.fill();
+        ctx.fillStyle = colors[v]; ctx.font = '10px "Space Mono"';
+        ctx.fillText(v, x+8, y+4);
+        ang += Math.PI*2/7;
       });
-    });
-    // Spring attraction
-    swEdges.forEach(([i,j])=>{
-      const a=swNodes[i], b=swNodes[j];
-      if(!a||!b) return;
-      const dx=b.x-a.x, dy=b.y-a.y;
-      const d=Math.sqrt(dx*dx+dy*dy)||1;
-      const f=(d-60)*k;
-      const fx=f*(dx/d), fy=f*(dy/d);
-      a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
-    });
-    // Integrate + damp + clamp
-    swNodes.forEach(n=>{
-      n.vx*=damp; n.vy*=damp;
-      n.x=Math.max(16,Math.min(W-16,n.x+n.vx));
-      n.y=Math.max(16,Math.min(H-16,n.y+n.vy));
-    });
-    // Draw
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#05050a'; ctx.fillRect(0,0,W,H);
-    // Grid
-    ctx.strokeStyle='#0c0c14'; ctx.lineWidth=.5;
-    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-    // Edges
-    swEdges.forEach(([i,j])=>{
-      const a=swNodes[i], b=swNodes[j];
-      if(!a||!b) return;
-      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
-      ctx.strokeStyle='rgba(74,144,217,.15)'; ctx.lineWidth=1; ctx.stroke();
-    });
-    // Nodes
-    swNodes.forEach(n=>{
-      const isLTM=n.tier==='LTM';
-      const r=isLTM?7:5;
-      const col=isLTM?'#ffd700':'#4a90d9';
-      ctx.beginPath(); ctx.arc(n.x,n.y,r,0,Math.PI*2);
-      ctx.fillStyle=col; ctx.shadowBlur=isLTM?12:6; ctx.shadowColor=col;
-      ctx.fill(); ctx.shadowBlur=0;
-    });
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-
-// ── Tesseract B⁴ ──────────────────────────────────────────────────────────
-(function startTesseract(){
-  const cv=document.getElementById('ts-canvas');
-  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;}
-  resize(); new ResizeObserver(resize).observe(cv);
-  const ctx=cv.getContext('2d');
-
-  // 16 vertices of B⁴: all (±1)^4
-  const verts4=[];
-  for(let i=0;i<16;i++) verts4.push([(i>>3)&1?1:-1,(i>>2)&1?1:-1,(i>>1)&1?1:-1,i&1?1:-1]);
-
-  // Edges: vertices differing in exactly 1 coord
-  const edges=[];
-  for(let i=0;i<16;i++) for(let j=i+1;j<16;j++){
-    let diff=0;
-    for(let k=0;k<4;k++) if(verts4[i][k]!==verts4[j][k]) diff++;
-    if(diff===1) edges.push([i,j]);
-  }
-
-  let ang=0;
-  function rot4(v,t){
-    // Rotate in XW plane
-    const cosT=Math.cos(t), sinT=Math.sin(t);
-    const [x,y,z,w]=v;
-    return [x*cosT-w*sinT, y, z, x*sinT+w*cosT];
-  }
-  function rot4yz(v,t){
-    const cosT=Math.cos(t*.7), sinT=Math.sin(t*.7);
-    const [x,y,z,w]=v;
-    return [x, y*cosT-z*sinT, y*sinT+z*cosT, w];
-  }
-  function proj(v,W,H){
-    // 4D→3D (perspective from w)
-    const dist=3;
-    const [x,y,z,w]=v;
-    const s4=dist/(dist-w*.4);
-    const x3=x*s4, y3=y*s4, z3=z*s4;
-    // 3D→2D
-    const dist3=4;
-    const s3=dist3/(dist3-z3*.35);
-    const scale=Math.min(W,H)*0.22;
-    return [W/2+x3*s3*scale, H/2+y3*s3*scale];
-  }
-
-  function tick(){
-    ang+=0.006;
-    const W=cv.width, H=cv.height;
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#05050a'; ctx.fillRect(0,0,W,H);
-    // Star field
-    ctx.fillStyle='rgba(200,168,75,.06)';
-    for(let i=0;i<60;i++){
-      const sx=(Math.sin(i*37.1)*W/2+W/2), sy=(Math.cos(i*91.7)*H/2+H/2);
-      ctx.fillRect(sx,sy,1,1);
     }
-    // Project all verts
-    const projected=verts4.map(v=>{
-      let rv=rot4(v,ang);
-      rv=rot4yz(rv,ang);
-      return proj(rv,W,H);
-    });
-    // Get active vertices from gs
-    const activeVerts=new Set(gs.nodes.map(n=>n.vertex??-1));
-    const stmVerts=new Set(gs.nodes.filter(n=>n.tier!=='LTM').map(n=>n.vertex??-1));
-    const ltmVerts=new Set(gs.nodes.filter(n=>n.tier==='LTM').map(n=>n.vertex??-1));
 
-    // Edges
-    edges.forEach(([i,j])=>{
-      const [x1,y1]=projected[i], [x2,y2]=projected[j];
-      const active=activeVerts.has(i)&&activeVerts.has(j);
-      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
-      ctx.strokeStyle=active?'rgba(200,168,75,.4)':'rgba(255,255,255,.06)';
-      ctx.lineWidth=active?1:.5; ctx.stroke();
-    });
-    // Vertices
-    verts4.forEach((_,i)=>{
-      const [x,y]=projected[i];
-      const isLTM=ltmVerts.has(i), isSTM=stmVerts.has(i);
-      const r=isLTM?5:isSTM?4:2.5;
-      const col=isLTM?'#ffd700':isSTM?'#4a90d9':'rgba(200,168,75,.25)';
-      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fillStyle=col;
-      if(isLTM||isSTM){ctx.shadowBlur=10;ctx.shadowColor=col;}
-      ctx.fill(); ctx.shadowBlur=0;
-      // Vertex label
-      if(isSTM||isLTM){
-        ctx.fillStyle=col; ctx.font='7px Space Mono';
-        ctx.fillText('V'+i, x+6, y-4);
-      }
-    });
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-</script>
+    async function updateStatus(){
+      const s = await checkStatus();
+      document.getElementById('face-dot').classList.toggle('online', s.face.online);
+      document.getElementById('kern-dot').classList.toggle('online', s.kernel.online);
+      if(!s.anyOnline) document.getElementById('offline-banner').classList.add('show');
+      else document.getElementById('offline-banner').classList.remove('show');
+      updateStrip(s.face);
+      drawTesseract();
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 5000);
+    drawTesseract();
+  </script>
 </body>
 </html>

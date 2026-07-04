@@ -3,238 +3,240 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GHOST v9.0.9 — Harmony Labs</title>
+  <title>GHOST v9.1.0 — CSS Labs</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --void:#05050a;--panel:#0d0d14;
+      --void:#05050a;--panel:#0d0d14;--panel2:#12121e;
       --gold:#c8a84b;--gold-dim:#7a6228;--gold-bright:#ffd700;
       --parchment:#e8e4d9;--parchment-dim:#6a6860;
-      --aqua:#5fffd4;--crimson:#c0392b;
+      --aqua:#5fffd4;--crimson:#c0392b;--crimson-b:#f44336;
       --cobalt:#4a90d9;--solar:#ffd700;--border:#181826;
+      --online:#2ecc71;--offline:#e74c3c;
     }
     *{margin:0;padding:0;box-sizing:border-box;}
     html,body{width:100%;height:100%;}
     body{background:var(--void);color:var(--parchment);font-family:'Space Mono',monospace;
-         display:flex;flex-direction:column;align-items:center;justify-content:center;
-         min-height:100vh;overflow:hidden;position:relative;}
+         min-height:100vh;overflow-x:hidden;position:relative;}
 
-    /* Animated background grid */
-    .bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.35;}
+    /* Animated constellation background */
+    .bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.4;}
 
     /* Content */
-    .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-width:900px;padding:40px 24px;}
+    .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-width:900px;padding:40px 24px;margin:0 auto;}
 
-    /* Taotie eye pair (small logo) */
-    .logo-mark{margin-bottom:28px;}
-    .logo-mark svg{width:70px;height:44px;}
-    .eye-pulse{animation:eyePulse 3.5s ease-in-out infinite;}
-    @keyframes eyePulse{0%,100%{opacity:.55}50%{opacity:1}}
+    /* Header */
+    .header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:20px 0;border-bottom:1px solid var(--gold-dim);margin-bottom:32px;}
+    .h-left{display:flex;flex-direction:column;gap:3px;}
+    .h-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5em;color:var(--gold);}
+    .h-sub{font-size:9px;letter-spacing:.3em;color:var(--parchment-dim);}
+    .h-logo{font-family:'Cinzel',serif;font-size:32px;font-weight:900;color:var(--gold);letter-spacing:.15em;text-shadow:0 0 40px rgba(200,168,75,.5);}
+    .h-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 
-    /* Wordmark */
-    .wordmark{font-family:'Cinzel',serif;font-size:clamp(48px,8vw,88px);font-weight:900;
-      color:var(--gold);letter-spacing:.18em;line-height:1;
-      text-shadow:0 0 60px rgba(200,168,75,.35),0 0 120px rgba(200,168,75,.1);}
-    .wordmark-ver{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5em;
-      color:var(--gold-dim);margin-top:6px;text-align:center;}
-    .wordmark-sub{font-size:10px;letter-spacing:.35em;color:var(--parchment-dim);
-      margin-top:8px;text-align:center;}
+    /* Status dots */
+    .status-row{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.1em;}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--offline);box-shadow:0 0 8px var(--offline);transition:all .3s;}
+    .status-dot.online{background:var(--online);box-shadow:0 0 8px var(--online);}
+    .status-label{color:var(--parchment-dim);}
 
-    /* Rule */
-    .rule{width:100%;max-width:560px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);
-      margin:36px 0;}
+    /* Stats strip */
+    .strip{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;width:100%;margin-bottom:32px;}
+    .strip-block{flex:1;padding:16px 20px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+    .strip-block:last-child{border-right:none;}
+    .strip-label{font-size:9px;letter-spacing:.15em;color:var(--parchment-dim);text-transform:uppercase;}
+    .strip-val{font-size:18px;font-weight:700;color:var(--gold);font-family:'Cinzel',serif;}
+    .strip-sub{font-size:9px;color:var(--parchment-dim);}
 
-    /* Portal cards */
-    .portals{display:flex;gap:24px;width:100%;max-width:700px;}
-    .portal{flex:1;padding:32px 28px;background:var(--panel);border:1px solid var(--border);
-      border-radius:3px;cursor:pointer;transition:all .25s;text-decoration:none;color:inherit;
-      display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;}
-    .portal::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;}
-    .portal.devour::before{background:radial-gradient(ellipse at 50% 0%,rgba(200,168,75,.08),transparent 70%);}
-    .portal.observatory::before{background:radial-gradient(ellipse at 50% 0%,rgba(95,255,212,.06),transparent 70%);}
+    /* Offline badge */
+    .offline-badge{display:none;align-items:center;gap:8px;padding:8px 16px;background:rgba(231,76,60,.15);border:1px solid var(--crimson);border-radius:4px;font-size:10px;color:var(--crimson-b);margin-bottom:16px;width:100%;}
+    .offline-badge.show{display:flex;}
+    .resync-btn{margin-left:auto;background:transparent;border:1px solid var(--crimson);color:var(--crimson-b);padding:4px 12px;font-size:9px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s;}
+    .resync-btn:hover{background:var(--crimson);color:var(--void);}
+
+    /* Portals */
+    .portals{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;margin-bottom:32px;}
+    .portal{display:block;padding:32px;border:1px solid var(--border);border-radius:4px;text-decoration:none;transition:all .3s;position:relative;overflow:hidden;}
+    .portal::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s;}
     .portal:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
     .portal:hover::before{opacity:1;}
-    .portal.observatory:hover{border-color:rgba(95,255,212,.3);}
-    .portal-icon{font-size:22px;margin-bottom:4px;}
-    .portal-name{font-family:'Cinzel',serif;font-size:17px;font-weight:600;letter-spacing:.2em;}
-    .portal.devour .portal-name{color:var(--gold);}
-    .portal.observatory .portal-name{color:var(--aqua);}
-    .portal-tag{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.4em;color:var(--parchment-dim);margin-top:2px;}
-    .portal-desc{font-size:10px;color:var(--parchment-dim);line-height:1.7;margin-top:4px;}
-    .portal-port{font-size:9px;letter-spacing:.2em;margin-top:auto;padding-top:12px;
-      border-top:1px solid var(--border);}
-    .portal.devour .portal-port{color:var(--gold-dim);}
-    .portal.observatory .portal-port{color:rgba(95,255,212,.5);}
-    .portal-arrow{position:absolute;bottom:24px;right:22px;font-size:18px;opacity:.3;transition:all .25s;}
-    .portal:hover .portal-arrow{opacity:.8;transform:translateX(3px);}
-
-    /* System stats */
-    .sys-strip{display:flex;gap:28px;margin-top:28px;font-size:10px;color:var(--parchment-dim);}
-    .sys-item span{color:var(--gold);margin-left:5px;}
-    .sys-dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;animation:blink 2.5s infinite;}
-    .sys-dot.up{background:var(--aqua);}
-    .sys-dot.down{background:var(--crimson);}
+    .portal-name{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);margin-bottom:8px;}
+    .portal-desc{font-size:11px;color:var(--parchment-dim);line-height:1.6;margin-bottom:16px;}
+    .portal-meta{display:flex;gap:16px;font-size:9px;letter-spacing:.1em;color:var(--parchment-dim);}
+    .portal-meta span{display:flex;align-items:center;gap:4px;}
+    .portal-meta .dot{width:6px;height:6px;border-radius:50%;background:var(--gold-dim);}
 
     /* Footer */
-    .footer{position:fixed;bottom:22px;left:0;right:0;text-align:center;
-      font-family:'Cinzel',serif;font-size:9px;letter-spacing:.5em;color:var(--gold-dim);z-index:1;}
+    .footer{width:100%;padding:20px 0;border-top:1px solid var(--border);margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--parchment-dim);letter-spacing:.1em;}
+    .footer-left{display:flex;gap:16px;}
+    .seal{color:var(--gold-dim);}
 
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-
-    /* Floating particles (done via canvas) */
+    /* Seals */
+    .wordmark{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:.3em;margin-bottom:8px;}
+    .version{font-size:10px;color:var(--parchment-dim);letter-spacing:.2em;}
   </style>
 </head>
 <body>
+  <canvas class="bg-canvas" id="bg"></canvas>
 
-<canvas class="bg-canvas" id="bg"></canvas>
-
-<div class="content">
-
-  <!-- Logo mark: two Taotie eyes -->
-  <div class="logo-mark">
-    <svg viewBox="0 0 70 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Left eye -->
-      <circle cx="17" cy="22" r="14" stroke="#c8a84b" stroke-width=".8" fill="#080810"/>
-      <circle cx="17" cy="22" r="9" stroke="#7a6228" stroke-width=".6" fill="#05050a"/>
-      <circle class="eye-pulse" cx="17" cy="22" r="5" fill="#1a1008" stroke="#c8a84b" stroke-width=".8"/>
-      <circle cx="17" cy="22" r="2.5" fill="#c8a84b"/>
-      <circle cx="18.5" cy="20.5" r=".8" fill="#ffd700"/>
-      <!-- Right eye -->
-      <circle cx="53" cy="22" r="14" stroke="#c8a84b" stroke-width=".8" fill="#080810"/>
-      <circle cx="53" cy="22" r="9" stroke="#7a6228" stroke-width=".6" fill="#05050a"/>
-      <circle class="eye-pulse" cx="53" cy="22" r="5" fill="#1a1008" stroke="#c8a84b" stroke-width=".8"/>
-      <circle cx="53" cy="22" r="2.5" fill="#c8a84b"/>
-      <circle cx="54.5" cy="20.5" r=".8" fill="#ffd700"/>
-      <!-- Bridge -->
-      <line x1="31" y1="22" x2="39" y2="22" stroke="#3a2e14" stroke-width=".5" stroke-dasharray="1.5,2"/>
-    </svg>
-  </div>
-
-  <div class="wordmark">GHOST</div>
-  <div class="wordmark-ver">v 9 . 0 . 9</div>
-  <div class="wordmark-sub">Geometric · Harmonic · Ontological · Spatial · Transformer</div>
-
-  <div class="rule"></div>
-
-  <!-- Portal cards -->
-  <div class="portals">
-    <a class="portal devour" href="devour.html">
-      <div class="portal-icon">⬡</div>
-      <div class="portal-name">THE DEVOURING GATE</div>
-      <div class="portal-tag">Coherence Calculus v3.0.9</div>
-      <div class="portal-desc">
-        Feed text to the Taotie.<br>
-        Eight domains assess resonance.<br>
-        The gate admits or devours.
+  <div class="content">
+    <div class="header">
+      <div class="h-left">
+        <div class="h-title">CSS LABS</div>
+        <div class="h-sub">SOVEREIGN · VENDORLESS · CLOUDLESS</div>
       </div>
-      <div class="portal-port">FACE · localhost:7766</div>
-      <span class="portal-arrow">→</span>
-    </a>
-
-    <a class="portal observatory" href="state.html">
-      <div class="portal-icon">⊹</div>
-      <div class="portal-name">THE OBSERVATORY</div>
-      <div class="portal-tag">Spatial Web · Kernel State</div>
-      <div class="portal-desc">
-        The full cosmic view.<br>
-        Tesseract B⁴ · force-directed graph.<br>
-        Invoke the Great Compression.
+      <div class="h-logo">GHOST</div>
+      <div class="h-right">
+        <div class="status-row" id="face-status">
+          <span class="status-dot" id="face-dot"></span>
+          <span class="status-label">FACE :7766</span>
+        </div>
+        <div class="status-row" id="kern-status">
+          <span class="status-dot" id="kern-dot"></span>
+          <span class="status-label">KERNEL :7767</span>
+        </div>
       </div>
-      <div class="portal-port">KERNEL · localhost:7767</div>
-      <span class="portal-arrow">→</span>
-    </a>
+    </div>
+
+    <div class="offline-badge" id="offline-badge">
+      <span>⚡ OFFLINE MODE — Local simulation active</span>
+      <span id="queued-count">0 offerings queued</span>
+      <button class="resync-btn" id="resync-btn" onclick="doResync()">RESYNC</button>
+    </div>
+
+    <div class="strip" id="stats-strip">
+      <div class="strip-block">
+        <div class="strip-label">Nodes</div>
+        <div class="strip-val" id="stat-n">—</div>
+        <div class="strip-sub" id="stat-cap">capacity —%</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Whitlock</div>
+        <div class="strip-val" id="stat-w">—</div>
+        <div class="strip-sub" id="stat-phi">phase —°</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">STM / LTM</div>
+        <div class="strip-val" id="stat-tier">— / —</div>
+        <div class="strip-sub">active tiers</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Tests</div>
+        <div class="strip-val">10,042</div>
+        <div class="strip-sub">all passing</div>
+      </div>
+    </div>
+
+    <div class="portals">
+      <a class="portal" href="devour.html">
+        <div class="portal-name">THE DEVOURING GATE</div>
+        <div class="portal-desc">Ingest information through the coherence gate. All eight domains must resonate above threshold. The gate admits or devours.</div>
+        <div class="portal-meta">
+          <span><span class="dot"></span>FACE :7766</span>
+          <span>POST /devour</span>
+        </div>
+      </a>
+      <a class="portal" href="state.html">
+        <div class="portal-name">THE OBSERVATORY</div>
+        <div class="portal-desc">Query, recall, verify, and navigate the kernel state. Inspect the Tesseract, audit the chain, commune with the ghostlet.</div>
+        <div class="portal-meta">
+          <span><span class="dot"></span>KERNEL :7767</span>
+          <span>GET /recall /verify /nav</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">
+        <span class="seal">CSS Labs</span>
+        <span>Kyle S. Whitlock</span>
+        <span>v9.1.0</span>
+      </div>
+      <div class="seal" id="seal-date">Seal: 2026-07-04_Tulsa_OK</div>
+    </div>
   </div>
 
-  <!-- Live system status -->
-  <div class="sys-strip">
-    <div class="sys-item"><span class="sys-dot" id="face-dot"></span>FACE<span id="face-status">—</span></div>
-    <div class="sys-item"><span class="sys-dot" id="kern-dot"></span>KERNEL<span id="kern-status">—</span></div>
-    <div class="sys-item">n =<span id="sys-n">—</span></div>
-    <div class="sys-item">|W_v3| =<span id="sys-w">—</span></div>
-    <div class="sys-item">phase =<span id="sys-phase">—</span></div>
-  </div>
+  <script src="ghost_api.js"></script>
+  <script>
+    // Constellation background
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let W, H, stars = [];
+    function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+    resize(); window.addEventListener('resize', resize);
 
-</div>
+    class Star {
+      constructor(){ this.reset(); }
+      reset(){
+        this.x = Math.random()*W; this.y = Math.random()*H;
+        this.r = Math.random()*1.5+.5; this.vx = (Math.random()-.5)*.3;
+        this.vy = (Math.random()-.5)*.3; this.alpha = Math.random()*.5+.2;
+        this.gold = Math.random() > .7;
+      }
+      update(){
+        this.x += this.vx; this.y += this.vy;
+        if(this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+      }
+      draw(){
+        ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+        ctx.fillStyle = this.gold ? `rgba(200,168,75,${this.alpha})` : `rgba(95,255,212,${this.alpha})`;
+        ctx.fill();
+      }
+    }
+    for(let i=0;i<120;i++) stars.push(new Star());
 
-<div class="footer">Harmony Labs · Sovereign · Vendorless · Cloudless · 2026</div>
-
-<script>
-// ── Background animation ───────────────────────────────────────────────────
-(function(){
-  const cv=document.getElementById('bg');
-  const ctx=cv.getContext('2d');
-  function resize(){cv.width=window.innerWidth;cv.height=window.innerHeight;}
-  resize(); window.addEventListener('resize',resize);
-
-  // Particles
-  const particles=Array.from({length:80},()=>({
-    x:Math.random()*window.innerWidth,
-    y:Math.random()*window.innerHeight,
-    vx:(Math.random()-.5)*.2, vy:(Math.random()-.5)*.2,
-    size:Math.random()*1.5+.3, alpha:Math.random()*.4+.1
-  }));
-
-  function tick(){
-    ctx.clearRect(0,0,cv.width,cv.height);
-    // Grid lines
-    ctx.strokeStyle='rgba(200,168,75,.04)'; ctx.lineWidth=.5;
-    const gs=80;
-    for(let x=0;x<cv.width;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
-    for(let y=0;y<cv.height;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
-    // Particles
-    particles.forEach(p=>{
-      p.x=(p.x+p.vx+cv.width)%cv.width;
-      p.y=(p.y+p.vy+cv.height)%cv.height;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,168,75,${p.alpha})`; ctx.fill();
-    });
-    // Connection lines (nearby particles)
-    for(let i=0;i<particles.length;i++){
-      for(let j=i+1;j<particles.length;j++){
-        const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
-        const d=Math.sqrt(dx*dx+dy*dy);
-        if(d<100){
-          ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y);
-          ctx.strokeStyle=`rgba(200,168,75,${.06*(1-d/100)})`; ctx.lineWidth=.5; ctx.stroke();
+    function drawLines(){
+      for(let i=0;i<stars.length;i++){
+        for(let j=i+1;j<stars.length;j++){
+          const dx=stars[i].x-stars[j].x, dy=stars[i].y-stars[j].y, d=Math.sqrt(dx*dx+dy*dy);
+          if(d<120){ ctx.beginPath(); ctx.moveTo(stars[i].x,stars[i].y); ctx.lineTo(stars[j].x,stars[j].y);
+            ctx.strokeStyle = `rgba(200,168,75,${.08*(1-d/120)})`; ctx.stroke();
+          }
         }
       }
     }
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
+    function animate(){ ctx.clearRect(0,0,W,H); stars.forEach(s=>{s.update();s.draw();}); drawLines(); requestAnimationFrame(animate); }
+    animate();
 
-// ── System health check ────────────────────────────────────────────────────
-async function checkHealth(){
-  // FACE
-  try{
-    const r=await fetch('http://localhost:7766/state',{signal:AbortSignal.timeout(2000)});
-    const ok=r.ok;
-    document.getElementById('face-dot').className='sys-dot '+(ok?'up':'down');
-    document.getElementById('face-status').textContent=ok?' LIVE':' OFFLINE';
-    if(ok){
-      const d=await r.json();
-      const n=d.n??d.nodeCount??0;
-      const w=Math.sqrt(n*n+16)/17;
-      document.getElementById('sys-n').textContent=' '+n;
-      document.getElementById('sys-w').textContent=' '+w.toFixed(4);
-      document.getElementById('sys-phase').textContent=' '+(n<10?'Bootstrap':'Production');
+    // Status & stats
+    async function updateStats(){
+      const s = await checkStatus();
+      const faceDot = document.getElementById('face-dot');
+      const kernDot = document.getElementById('kern-dot');
+      const offlineBadge = document.getElementById('offline-badge');
+
+      faceDot.classList.toggle('online', s.face.online);
+      kernDot.classList.toggle('online', s.kernel.online);
+
+      if(!s.anyOnline){
+        offlineBadge.classList.add('show');
+        document.getElementById('queued-count').textContent = s.offeringsQueued + ' offerings queued';
+      } else {
+        offlineBadge.classList.remove('show');
+      }
+
+      const n = s.face.n || 0;
+      const wc = s.face.whitlock || {magnitude:0, phase_deg:0};
+      const stm = s.face.stm_count || 0;
+      const ltm = s.face.ltm_count || 0;
+      const cap = s.face.capacity_pct || '0.0';
+
+      document.getElementById('stat-n').textContent = n;
+      document.getElementById('stat-cap').textContent = 'capacity ' + cap + '%';
+      document.getElementById('stat-w').textContent = wc.magnitude ? wc.magnitude.toFixed(3) : '—';
+      document.getElementById('stat-phi').textContent = 'φ ' + (wc.phase_deg ? wc.phase_deg.toFixed(1) : '—') + '°';
+      document.getElementById('stat-tier').textContent = stm + ' / ' + ltm;
     }
-  }catch(e){
-    document.getElementById('face-dot').className='sys-dot down';
-    document.getElementById('face-status').textContent=' OFFLINE';
-  }
-  // KERNEL
-  try{
-    const r=await fetch('http://localhost:7767/bench',{signal:AbortSignal.timeout(2000)});
-    document.getElementById('kern-dot').className='sys-dot '+(r.ok?'up':'down');
-    document.getElementById('kern-status').textContent=r.ok?' LIVE':' OFFLINE';
-  }catch(e){
-    document.getElementById('kern-dot').className='sys-dot down';
-    document.getElementById('kern-status').textContent=' OFFLINE';
-  }
-}
-checkHealth(); setInterval(checkHealth,5000);
-</script>
+
+    async function doResync(){
+      const btn = document.getElementById('resync-btn');
+      btn.textContent = 'SYNCING...';
+      const r = await resyncOfferings();
+      btn.textContent = 'RESYNC (' + r.synced + ' synced)';
+      setTimeout(()=>{ btn.textContent = 'RESYNC'; updateStats(); }, 3000);
+    }
+
+    updateStats();
+    setInterval(updateStats, 5000);
+  </script>
 </body>
 </html>
