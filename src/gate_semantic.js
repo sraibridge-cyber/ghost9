@@ -20,7 +20,8 @@ const SEMANTIC_CONTEXTS = {
   'families': { domain: 'D7', classification: 'benign', context: 'social' },
   'allies': { domain: 'D7', classification: 'benign', context: 'social' },
   'falsetto': { domain: 'D7', classification: 'benign', context: 'music' },
-  'exhaustive': { domain: 'D2', classification: 'benign', context: 'thoroughness' }
+  'exhaustive': { domain: 'D2', classification: 'benign', context: 'thoroughness' },
+  'harm': { domain: 'D6', classification: 'benign', context: 'ethical_negation' }
 };
 
 function scanSemantic(text, syntacticResults) {

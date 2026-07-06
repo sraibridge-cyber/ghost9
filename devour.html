@@ -189,7 +189,8 @@
 
   <script src="ghost_api.js"></script>
   <script>
-    const DKEYS = ['signal','energy','temporal','spatial','cognitive','ethical','declarative','novelty'];
+    const DKEYS = ['D1','D2','D3','D4','D5','D6','D7','D8'];
+    const DNAME = {D1:'SIGNAL',D2:'ENERGY',D3:'TEMPORAL',D4:'SPATIAL',D5:'COGNITIVE',D6:'ETHICAL',D7:'DECLARATIVE',D8:'NOVELTY'};
 
     function renderOfferings(){
       const list = document.getElementById('off-list');
@@ -257,7 +258,7 @@
         const s = scores[k] || 0;
         const pct = Math.round(s * 100);
         return `<div class="domain">
-          <div class="domain-name">${k}</div>
+          <div class="domain-name">${DNAME[k] || k}</div>
           <div class="domain-bar"><div class="domain-fill ${admitted?'':'reject'}" style="width:${pct}%"></div></div>
           <div class="domain-val">${pct}%</div>
         </div>`;

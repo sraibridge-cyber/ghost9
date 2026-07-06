@@ -31,6 +31,21 @@ function tokenizeWords(text) {
   return text.toLowerCase().match(/[a-z]+/g) || [];
 }
 
+// Negation context detection for ethical domain triggers
+const NEGATION_WORDS = ['never','no','not','prevent','avoid','stop','against','protect','without','shall','must'];
+function hasNegationContext(text, trigger) {
+  const lower = text.toLowerCase();
+  const words = lower.match(/[a-z]+/g) || [];
+  for (let i = 0; i < words.length; i++) {
+    if (words[i] === trigger) {
+      for (let j = Math.max(0, i - 4); j < i; j++) {
+        if (NEGATION_WORDS.includes(words[j])) return true;
+      }
+    }
+  }
+  return false;
+}
+
 function scanSyntactic(text, lexicalResults) {
   const words = tokenizeWords(text);
   const results = {};
@@ -52,9 +67,15 @@ function scanSyntactic(text, lexicalResults) {
     
     for (const word of words) {
       if (word === trigger) {
-        hasWholeWordBlock = true;
-        blockWord = word;
-      } else if (word.includes(trigger)) {
+        if (hasNegationContext(text, trigger)) {
+          // Negated context - treat as benign even for whole word match
+          hasBenignOverride = true;
+          benignWord = word;
+        } else {
+          hasWholeWordBlock = true;
+          blockWord = word;
+        }
+      } else if (word === trigger) {
         const overrides = BENIGN_OVERRIDES[trigger] || [];
         if (overrides.includes(word)) {
           hasBenignOverride = true;
@@ -84,7 +105,17 @@ function scanSyntactic(text, lexicalResults) {
         word: benignWord,
         score: null
       };
-    } else {
+  } else if (hasNegationContext(text, trigger)) {
+    // Negated context - treat as benign
+    results[domain] = {
+      gate: 'S',
+      passed: true,
+      reason: 'negation_context',
+      trigger: trigger,
+      word: null,
+      score: null
+    };
+  } else {
       // Unknown substring — BLOCK (conservative)
       results[domain] = {
         gate: 'S',
