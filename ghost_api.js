@@ -4,8 +4,8 @@
 // Online: direct backend connection with auto-resync queue
 
 const GHOST = {
-  FACE: 'http://localhost:7766',
-  KERN: 'http://localhost:7767',
+  FACE: 'http://192.0.0.8:7766',
+  KERN: 'http://192.0.0.8:7767',
   VERSION: 'v9.1.0',
   SEAL: '2026-07-04_Tulsa_OK'
 };

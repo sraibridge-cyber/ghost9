@@ -212,7 +212,7 @@ const server = http.createServer(async (req, res) => {
 setInterval(loadState, POLL_MS);
 loadState();
 
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, '0.0.0.0', () => {
   log(`GHOST KERNEL v9.0.9 listening on http://127.0.0.1:${PORT}`);
   log(`Recall, verify, nav, ghostlet, cmd — state poll: every ${POLL_MS}ms`);
 });
