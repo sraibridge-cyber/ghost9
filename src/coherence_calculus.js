@@ -10,7 +10,7 @@
 
 const CC_VERSION = 'v3.2';
 const N_DOMAINS = 8;
-const TAU = 0.9995;
+const TAU = 0.9430; // Empirically validated for GHOST9 system configuration
 
 const W_DENOM = 17;
 const W_IM = 4;

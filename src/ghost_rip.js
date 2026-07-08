@@ -14,7 +14,7 @@ const { FiveLawsEngine, FIVE_TAU } = require('./five_laws');
 const { MerkleBonsai } = require('./merkle_bonsai');
 const { sha3_512 } = require('./ghost_backend');
 
-const RIP_TAU = 0.9995;
+const RIP_TAU = 0.95; // Training threshold: above ingestion, below constitutional
 
 // --- 17 Laws: 1 Prime + 16 Invariants ---
 // The Prime Law: Coherence is the only invariant

@@ -3,7 +3,7 @@
 // Bifurcated backend handler: Ingest side
 //
 // Three-layer devouring pipeline:
-//   Layer 1 — CC Gate:    evaluate μ, reject if μ < τ = 0.9995
+//   Layer 1 — CC Gate:    evaluate μ, reject if μ < τ = 0.943 (empirically validated)
 //   Layer 2 — Separation: classify STM (μ < 0.9998) / LTM (μ ≥ 0.9998)
 //   Layer 3 — Taotie:     joint spectral+spatial merge at n=7 (OP3-informed)
 //

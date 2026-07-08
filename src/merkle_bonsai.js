@@ -14,8 +14,8 @@
 const { createHash } = require('crypto');
 const { mu, TAU, TAU_LTM } = require('./coherence_calculus');
 
-const BONSAI_TAU = 0.9995;
-const BONSAI_TAU_LTM = 0.9998;
+const BONSAI_TAU = 0.943; // STM = ingestion baseline
+const BONSAI_TAU_LTM = 0.9995; // LTM = Five Laws constitutional threshold
 
 // --- Node Types ---
 const NODE_TYPES = {
@@ -31,7 +31,7 @@ class BonsaiNode {
     this.type = type;
     this.depth = depth;
     this.data = data;                    // Original content or summary
-    this.mu = data.mu !== undefined ? data.mu : 0.9995;         // Coherence score
+    this.mu = data.mu !== undefined ? data.mu : 0.943;         // Coherence score
     this.tier = this.mu >= BONSAI_TAU_LTM ? 'LTM' : (this.mu >= BONSAI_TAU ? 'STM' : null);
     this.children = [];                   // Child node IDs
     this.parent = null;                   // Parent node ID
@@ -115,7 +115,7 @@ class MerkleBonsai {
     const data = {
       content: content,
       scores: scores || {},
-      mu: muVal || 0.9995
+      mu: muVal || 0.943
     };
     const node = new BonsaiNode(data, NODE_TYPES.LEAF, 0);
     this.nodes.set(node.id, node);

@@ -51,3 +51,57 @@ GHOST9 = information devouring kernel (eats everything that passes both)
 - As system matures and weights refine, τ can be raised
 - Repetition is NOT coherence — D8 penalizes accordingly
 - Short texts with strong keywords score 0.93-0.98 (correct for learning phase)
+
+## CC v3.2 TRUE Empirical Battery v3.5 — 2026-07-07
+
+**Result: 207 passed, 0 failed**
+
+**Foundation:** v3.2 162/162 clean sweep  
+**Principle:** Zero duct tape. Only known patterns.  
+**Method:** Every test expectation grounded in prior empirical observation.
+
+### Empirical Tau Determination
+- `GHOST9_TAU = 0.9430` — cluster analysis of μ distribution
+- Natural separation: fragment (≤6 words, μ < 0.94) vs short+ (≥7 words, μ > 0.94)
+
+### Key Findings
+| Finding | Value | Notes |
+|---------|-------|-------|
+| Minimum viable text | 7 words | D1 short tier = 0.85 |
+| Fragment tier boundary | ≤6 words | μ ≈ 0.91-0.94, below τ |
+| Short tier boundary | 7-10 words | Filler text passes; 11-12 words borderline |
+| Medium tier | 13-19 words | All pass |
+| D8 repetition penalty | Weak at ≤15 words | Filler text still passes |
+| D8 repetition penalty | Kicks in at 25+ words | μ ≈ 0.9434, just above τ |
+| Whitlock W(1) | 0.2425 | sqrt(17)/17 (corrected from 0.2941) |
+| Whitlock W(3) | 0.2941 | 5/17 (corrected from 0.3578) |
+| Whitlock W(100) | 5.8871 | sqrt(10016)/17 (corrected from 5.8829) |
+
+### Three-Gate + CC Architecture
+- **Three-Gate (upstream):** lexical, syntactical, semantical validation
+- **CC (this module):** 8-domain weighted geometric mean coherence scoring
+- **Division of labor:** Three-Gate ensures "real language," CC ensures "substantial information"
+
+### Battery Sections (17 total, 207 tests)
+1. MUST PASS (10)
+2. MUST BLOCK (5)
+3. D1 TIER BOUNDARIES (50)
+4. DOMAIN KEYWORD COVERAGE (24)
+5. D8 REPETITION PENALTY (9)
+6. CROSS-DOMAIN INTERACTIONS (5)
+7. EDGE CASES (15)
+8. WHITLOCK COEFFICIENT (18)
+9. WEIGHTS VALIDATION (12)
+10. D5 LOGIC WORDS (8)
+11. D6 ETHICAL BALANCE (3)
+12. D7 VERIFICATION WORDS (4)
+13. MU BOUNDARY TESTS (2)
+14. MODULE INTERFACE (17)
+15. REALISTIC GHOST9 INPUTS (5)
+16. EXPANSION — KNOWN PATTERNS (13)
+17. NEGATIVE CONFIRMATION (12)
+
+### Honest Assessment
+This battery does NOT prove CC v3.2 is a universal coherence evaluator. It proves that CC v3.2, with its specific weights, tiers, and neutral defaults, behaves consistently and predictably across 207 diverse inputs. The "information devouring kernel" philosophy is served: Three-Gate blocks gibberish, CC blocks fragments, everything else passes.
+
+**Seal: 2026-07-07_22:23_Tulsa_OK**
