@@ -1,45 +1,52 @@
-// L-GATE v1.0 — Lexical Pre-Semantic Gate
-// CSS Labs | Kyle S. Whitlock | Seal: 2026-06-27_21:02_Tulsa_OK
-// Fast substring pattern matching on raw character sequences
+// gate_lexical.js v2.2 — Pure Lexical Gate
+// CSS Labs | Kyle S. Whitlock
+// Scope: "Is every word a valid English word?"
+// Seal: 2026-07-11_12:15_Tulsa_OK
 
-const LEXICAL_TRIGGERS = {
-  D1: ['corrupt', 'taint', 'poison'],      // Signal/Structural
-  D2: ['drain', 'deplete', 'exhaust'],     // Energy
-  D3: ['stale', 'expired', 'rotten'],      // Temporal
-  D4: ['collapsed', 'crushed', 'destroyed'], // Spatial
-  D5: ['insane', 'broken', 'deluded'],      // Cognitive
-  D6: ['harm', 'kill', 'die', 'ass'],       // Ethical — the known limitation
-  D7: ['lie', 'false', 'fake'],             // Declarative
-  D8: ['stolen', 'plagiarized', 'copied']   // Novelty
-};
+const fs = require('fs');
+const path = require('path');
 
-function scanLexical(text) {
-  const lower = text.toLowerCase();
-  const results = {};
-  
-  for (let d = 1; d <= 8; d++) {
-    const domain = 'D' + d;
-    const triggers = LEXICAL_TRIGGERS[domain] || [];
-    let matched = false;
-    let matchedTrigger = null;
-    
-    for (const trigger of triggers) {
-      if (lower.includes(trigger)) {
-        matched = true;
-        matchedTrigger = trigger;
-        break;
-      }
-    }
-    
-    results[domain] = {
-      gate: 'L',
-      matched: matched,
-      trigger: matchedTrigger,
-      score: matched ? 0.001 : null // null means "pass to next gate"
-    };
+const CORE = [
+  'the','be','to','of','and','a','in','that','have','i',
+  'it','for','not','on','with','he','as','you','do','at',
+  'this','but','his','by','from','they','we','say','her','she',
+  'or','an','will','my','one','all','would','there','their','what',
+  'so','up','out','if','about','who','get','which','go','me',
+  'when','make','can','like','time','no','just','him','know','take',
+  'people','into','year','your','good','some','could','them','see','other',
+  'than','then','now','look','only','come','its','over','think','also',
+  'back','after','use','two','how','our','work','first','well','way',
+  'even','new','want','because','any','these','give','day','most','us'
+];
+
+const wordSet = new Set(CORE);
+
+// Load extended wordlist from JSON if available
+const extPath = path.join(__dirname, 'gate_lexical_words.json');
+try {
+  if (fs.existsSync(extPath)) {
+    const extra = JSON.parse(fs.readFileSync(extPath, 'utf8'));
+    extra.forEach(w => wordSet.add(w));
   }
-  
-  return results;
+} catch (e) { /* core only */ }
+
+function tokenize(text) {
+  return (text.toLowerCase().match(/[a-z]+/g) || []);
 }
 
-module.exports = { scanLexical, LEXICAL_TRIGGERS };
+function scanLexical(text) {
+  const words = tokenize(text);
+  if (words.length === 0) {
+    return { pass: false, gate: 'lexical', reason: 'no_words_found', checked: 0, unknown: [] };
+  }
+  const unknown = words.filter(w => !wordSet.has(w));
+  return {
+    pass: unknown.length === 0,
+    gate: 'lexical',
+    reason: unknown.length === 0 ? 'all_words_valid' : 'unknown_words_found',
+    checked: words.length,
+    unknown: unknown
+  };
+}
+
+module.exports = { scanLexical, tokenize, wordCount: wordSet.size };
