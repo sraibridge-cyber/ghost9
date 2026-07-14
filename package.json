@@ -1,7 +1,7 @@
 {
   "name": "ghost-kernel",
-  "version": "9.0.9",
-  "description": "GHOST v9.0.9 — Generative Holistic Oracle State Topology with Taotie Devouring Architecture",
+  "version": "9.1.0",
+  "description": "GHOST v9.1.0 — Generative Holistic Oracle State Topology with Taotie Devouring Architecture",
   "main": "src/ghost_face.js",
   "engines": { "node": ">=18.0.0" },
   "scripts": {

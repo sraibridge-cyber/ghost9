@@ -21,3 +21,10 @@ package-lock.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Runtime logs (regenerated on every run — historical logs live in archive/logs/)
+*.log
+data/*.log
+
+# Test scratch output (fixtures used for a single run — historical ones live in tests/fixtures/)
+test_tmp/
