@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE OBSERVATORY — GHOST v9.1.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --void:#05050a;--panel:#0d0d14;--panel2:#0f0f18;
+      --gold:#c8a84b;--gold-dim:#7a6228;--gold-bright:#ffd700;
+      --parchment:#e8e4d9;--parchment-dim:#6a6860;
+      --aqua:#5fffd4;--crimson:#c0392b;--crimson-b:#f44336;
+      --cobalt:#4a90d9;--solar:#ffd700;--border:#181826;
+      --online:#2ecc71;--offline:#e74c3c;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--void);color:var(--parchment);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
+
+    /* Header */
+    .header{display:flex;justify-content:space-between;align-items:center;padding:16px 36px;border-bottom:1px solid var(--gold-dim);}
+    .h-left{display:flex;flex-direction:column;gap:3px;}
+    .h-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.45em;color:var(--gold);}
+    .h-sub{font-size:9px;letter-spacing:.3em;color:var(--parchment-dim);}
+    .h-logo{font-family:'Cinzel',serif;font-size:24px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-shadow:0 0 24px rgba(200,168,75,.4);}
+    .h-right{text-align:right;display:flex;flex-direction:column;gap:3px;}
+    .status-row{display:flex;align-items:center;gap:6px;font-size:9px;justify-content:flex-end;}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:var(--offline);box-shadow:0 0 6px var(--offline);transition:all .3s;}
+    .status-dot.online{background:var(--online);box-shadow:0 0 6px var(--online);}
+
+    /* Nav */
+    .nav{display:flex;gap:16px;padding:16px 36px;border-bottom:1px solid var(--border);}
+    .nav a{color:var(--gold-dim);text-decoration:none;font-size:10px;letter-spacing:.1em;transition:color .2s;}
+    .nav a:hover{color:var(--gold);}
+
+    /* Main */
+    .main{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+
+    /* Status strip */
+    .strip{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:24px;}
+    .strip-block{flex:1;padding:14px 18px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+    .strip-block:last-child{border-right:none;}
+    .strip-label{font-size:9px;letter-spacing:.15em;color:var(--parchment-dim);text-transform:uppercase;}
+    .strip-val{font-size:16px;font-weight:700;color:var(--gold);font-family:'Cinzel',serif;}
+    .strip-sub{font-size:9px;color:var(--parchment-dim);}
+
+    /* API Grid */
+    .api-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px;}
+    .api-btn{padding:10px;background:transparent;border:1px solid var(--border);color:var(--parchment-dim);font-size:9px;font-family:'Space Mono',monospace;cursor:pointer;transition:all .2s;text-align:left;}
+    .api-btn:hover{border-color:var(--gold-dim);color:var(--gold);}
+    .api-btn:active{background:var(--panel2);}
+
+    /* Result panel */
+    .api-result{margin-top:16px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--aqua);max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;display:none;}
+    .api-result.show{display:block;}
+
+    /* Node list */
+    .node-list{margin-top:24px;}
+    .node-title{font-size:10px;letter-spacing:.2em;color:var(--parchment-dim);margin-bottom:12px;}
+    .node-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;}
+    .node-card{padding:12px 14px;background:var(--panel);border:1px solid var(--border);border-radius:4px;font-size:10px;}
+    .node-hash{color:var(--gold);margin-bottom:4px;font-size:9px;}
+    .node-content{color:var(--parchment);margin-bottom:6px;max-height:60px;overflow:hidden;}
+    .node-meta{display:flex;gap:12px;font-size:9px;color:var(--parchment-dim);}
+    .node-meta span{display:flex;gap:3px;}
+    .node-mu{color:var(--aqua);}
+    .node-tier{color:var(--gold);}
+
+    /* Tesseract viz */
+    .tesseract-wrap{margin-top:24px;padding:20px;background:var(--panel);border:1px solid var(--border);border-radius:4px;}
+    .tesseract-title{font-size:10px;letter-spacing:.2em;color:var(--parchment-dim);margin-bottom:12px;}
+    .tesseract-canvas{width:100%;height:200px;}
+
+    /* Ghostlet advice */
+    .ghostlet-box{margin-top:24px;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:4px;}
+    .ghostlet-advice{font-size:11px;color:var(--parchment);line-height:1.6;font-style:italic;}
+    .ghostlet-wc{font-size:10px;color:var(--gold);margin-top:8px;}
+
+    /* Offline banner */
+    .offline-banner{display:none;align-items:center;gap:10px;padding:10px 16px;background:rgba(231,76,60,.1);border:1px solid var(--crimson);border-radius:4px;font-size:10px;color:var(--crimson-b);margin-bottom:20px;}
+    .offline-banner.show{display:flex;}
+
+    /* Section titles */
+    .section-title{font-size:10px;letter-spacing:.2em;color:var(--gold);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+    /* Query input */
+    .query-row{display:flex;gap:8px;margin-bottom:16px;}
+    .query-input{flex:1;padding:8px 12px;background:var(--panel);border:1px solid var(--border);border-radius:4px;color:var(--parchment);font-family:'Space Mono',monospace;font-size:10px;}
+    .query-input:focus{outline:none;border-color:var(--gold-dim);}
+    .query-btn{padding:8px 16px;background:transparent;border:1px solid var(--gold-dim);color:var(--gold);font-size:9px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s;}
+    .query-btn:hover{background:var(--gold);color:var(--void);}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="h-left">
+      <div class="h-title">CSS LABS</div>
+      <div class="h-sub">THE OBSERVATORY — CSS Labs</div>
+    </div>
+    <div class="h-logo">GHOST</div>
+    <div class="h-right">
+      <div class="status-row"><span class="status-dot" id="face-dot"></span><span>FACE :7766</span></div>
+      <div class="status-row"><span class="status-dot" id="kern-dot"></span><span>KERNEL :7767</span></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a href="index.html">← NEXUS</a>
+    <a href="devour.html">DEVOURING GATE →</a>
+  </div>
+
+  <div class="main">
+    <div class="offline-banner" id="offline-banner">
+      <span>⚡ OFFLINE MODE</span>
+      <span>Local simulation active. Reconnect to FACE/KERNEL for live data.</span>
+    </div>
+
+    <div class="strip" id="stats-strip">
+      <div class="strip-block">
+        <div class="strip-label">Nodes</div>
+        <div class="strip-val" id="stat-n">—</div>
+        <div class="strip-sub" id="stat-cap">capacity —%</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Whitlock</div>
+        <div class="strip-val" id="stat-w">—</div>
+        <div class="strip-sub" id="stat-phi">phase —°</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">STM / LTM</div>
+        <div class="strip-val" id="stat-tier">— / —</div>
+        <div class="strip-sub">active tiers</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Merkle</div>
+        <div class="strip-val" id="stat-merkle">—</div>
+        <div class="strip-sub">root hash</div>
+      </div>
+    </div>
+
+    <div class="section-title">KERNEL QUERIES</div>
+    <div class="api-grid">
+      <button class="api-btn" onclick="callApi('GET', '/bench')">GET /bench</button>
+      <button class="api-btn" onclick="callApi('GET', '/recall?q=')">GET /recall</button>
+      <button class="api-btn" onclick="callApi('GET', '/verify')">GET /verify</button>
+      <button class="api-btn" onclick="callApi('GET', '/ghostlet')">GET /ghostlet</button>
+      <button class="api-btn" onclick="callApi('GET', '/nav?vertex=P')">GET /nav</button>
+      <button class="api-btn" onclick="callApi('POST', '/cmd', {cmd:'status'})">POST /cmd status</button>
+    </div>
+    <div class="query-row">
+      <input class="query-input" id="recall-q" placeholder="recall query...">
+      <button class="query-btn" onclick="callApi('GET', '/recall?q='+encodeURIComponent(document.getElementById('recall-q').value))">RECALL</button>
+    </div>
+
+    <div class="section-title">FACE QUERIES</div>
+    <div class="api-grid">
+      <button class="api-btn" onclick="callApi('GET', '/state', null, true)">GET /state</button>
+      <button class="api-btn" onclick="callApi('GET', '/nodes', null, true)">GET /nodes</button>
+      <button class="api-btn" onclick="callApi('GET', '/taotie', null, true)">GET /taotie</button>
+      <button class="api-btn" onclick="callApi('GET', '/void', null, true)">GET /void</button>
+      <button class="api-btn" onclick="callApi('GET', '/logs', null, true)">GET /logs</button>
+      <button class="api-btn" onclick="callApi('GET', '/archive', null, true)">GET /archive</button>
+      <button class="api-btn" onclick="callApi('GET', '/benchmark', null, true)">GET /benchmark</button>
+      <button class="api-btn" onclick="callApi('POST', '/taotie/sweep', null, true)">POST /taotie/sweep</button>
+    </div>
+
+    <div class="api-result" id="api-result"></div>
+
+    <div class="section-title">RECENT NODES</div>
+    <div class="node-list" id="node-list">
+      <div style="font-size:10px;color:var(--parchment-dim);text-align:center;padding:24px">No nodes ingested yet.</div>
+    </div>
+
+    <div class="section-title">TESSERACT DISTRIBUTION</div>
+    <div class="tesseract-wrap">
+      <canvas class="tesseract-canvas" id="tess-canvas"></canvas>
+    </div>
+
+    <div class="section-title">GHOSTLET ADVICE</div>
+    <div class="ghostlet-box" id="ghostlet-box">
+      <div class="ghostlet-advice" id="ghostlet-advice">Query the ghostlet for kernel guidance...</div>
+      <div class="ghostlet-wc" id="ghostlet-wc"></div>
+    </div>
+  </div>
+
+  <script src="ghost_api.js"></script>
+  <script>
+    async function callApi(method, path, body, isFace){
+      const el = document.getElementById('api-result');
+      el.classList.add('show');
+      el.textContent = 'Loading...';
+      const base = isFace ? GHOST.FACE : GHOST.KERN;
+      const opts = {method, timeout: 5000};
+      if(body) opts.body = JSON.stringify(body);
+      if(method === 'POST' && !body) opts.headers = {'Content-Type':'application/json'};
+      const r = await ghostFetch(base, path, opts);
+      el.textContent = JSON.stringify(r.data, null, 2);
+      if(path === '/ghostlet' && r.data.advice) document.getElementById('ghostlet-advice').textContent = r.data.advice;
+      if(path === '/ghostlet' && r.data.whitlock) document.getElementById('ghostlet-wc').textContent = '|W|=' + r.data.whitlock.magnitude.toFixed(5) + ' φ=' + r.data.whitlock.phase_deg.toFixed(2) + '°';
+      if(path === '/recall' && r.data.results) renderNodes(r.data.results);
+      if(path === '/nodes' && r.data.nodes) renderNodes(r.data.nodes);
+      if(path === '/state') updateStrip(r.data);
+    }
+
+    function renderNodes(nodes){
+      const el = document.getElementById('node-list');
+      if(!nodes || !nodes.length){
+        el.innerHTML = '<div style="font-size:10px;color:var(--parchment-dim);text-align:center;padding:24px">No nodes found.</div>';
+        return;
+      }
+      el.innerHTML = '<div class="node-grid">' + nodes.map(n=>`
+        <div class="node-card">
+          <div class="node-hash">${n.hash || '—'}</div>
+          <div class="node-content">${n.content || '—'}</div>
+          <div class="node-meta">
+            <span>μ <span class="node-mu">${(n.mu||0).toFixed(4)}</span></span>
+            <span class="node-tier">${n.tier||'STM'}</span>
+            <span>${n.vertex||'PPPP'}</span>
+          </div>
+        </div>
+      `).join('') + '</div>';
+    }
+
+    function updateStrip(d){
+      const n = d.n || 0;
+      const wc = d.whitlock || {magnitude:0, phase_deg:0};
+      const stm = d.stm_count || 0;
+      const ltm = d.ltm_count || 0;
+      const cap = d.capacity_pct || '0.0';
+      document.getElementById('stat-n').textContent = n;
+      document.getElementById('stat-cap').textContent = 'capacity ' + cap + '%';
+      document.getElementById('stat-w').textContent = wc.magnitude ? wc.magnitude.toFixed(3) : '—';
+      document.getElementById('stat-phi').textContent = 'φ ' + (wc.phase_deg ? wc.phase_deg.toFixed(1) : '—') + '°';
+      document.getElementById('stat-tier').textContent = stm + ' / ' + ltm;
+      document.getElementById('stat-merkle').textContent = d.merkle_root ? d.merkle_root.slice(0,16)+'…' : '—';
+    }
+
+    // Tesseract canvas
+    function drawTesseract(){
+      const c = document.getElementById('tess-canvas');
+      const ctx = c.getContext('2d');
+      c.width = c.offsetWidth; c.height = 200;
+      const W = c.width, H = c.height, cx = W/2, cy = H/2;
+      ctx.clearRect(0,0,W,H);
+      const verts = ['P','T','S','C','E','D','N'];
+      const colors = {'P':'#c8a84b','T':'#5fffd4','S':'#4a90d9','C':'#ffd700','E':'#c0392b','D':'#9b59b6','N':'#e67e22'};
+      const dist = _offline.nodes.length ? {P:_offline.nodes.length,T:0,S:0,C:0,E:0,D:0,N:0} : {P:1,T:0,S:0,C:0,E:0,D:0,N:0};
+      const total = Object.values(dist).reduce((a,b)=>a+b,1);
+      let ang = -Math.PI/2;
+      verts.forEach((v,i)=>{
+        const pct = (dist[v]||0)/total;
+        const r = 60 + pct * 40;
+        const x = cx + Math.cos(ang)*r;
+        const y = cy + Math.sin(ang)*r;
+        ctx.beginPath(); ctx.arc(x,y,4+pct*12,0,Math.PI*2);
+        ctx.fillStyle = colors[v] || '#666';
+        ctx.fill();
+        ctx.fillStyle = colors[v]; ctx.font = '10px "Space Mono"';
+        ctx.fillText(v, x+8, y+4);
+        ang += Math.PI*2/7;
+      });
+    }
+
+    async function updateStatus(){
+      const s = await checkStatus();
+      document.getElementById('face-dot').classList.toggle('online', s.face.online);
+      document.getElementById('kern-dot').classList.toggle('online', s.kernel.online);
+      if(!s.anyOnline) document.getElementById('offline-banner').classList.add('show');
+      else document.getElementById('offline-banner').classList.remove('show');
+      updateStrip(s.face);
+      drawTesseract();
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 5000);
+    drawTesseract();
+  </script>
+</body>
+</html>

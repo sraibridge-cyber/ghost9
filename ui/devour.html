@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE DEVOURING GATE — GHOST v9.1.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --void:#05050a;--panel:#0d0d14;--panel2:#12121e;
+      --gold:#c8a84b;--gold-dim:#7a6228;--gold-bright:#ffd700;
+      --parchment:#e8e4d9;--parchment-dim:#7a7770;
+      --aqua:#5fffd4;--crimson:#c0392b;--crimson-b:#f44336;
+      --cobalt:#4a90d9;--solar:#ffd700;--border:#1a1a26;
+      --online:#2ecc71;--offline:#e74c3c;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--void);color:var(--parchment);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
+
+    /* Header */
+    .header{display:flex;justify-content:space-between;align-items:center;padding:18px 40px;border-bottom:1px solid var(--gold-dim);}
+    .h-left,.h-right{display:flex;flex-direction:column;gap:3px;}
+    .h-right{align-items:flex-end;}
+    .h-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.45em;color:var(--gold);}
+    .h-sub{font-size:9px;letter-spacing:.3em;color:var(--parchment-dim);}
+    .h-logo{font-family:'Cinzel',serif;font-size:28px;font-weight:900;color:var(--gold);letter-spacing:.2em;text-shadow:0 0 30px rgba(200,168,75,.4);}
+    .status-row{display:flex;align-items:center;gap:6px;font-size:9px;}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:var(--offline);box-shadow:0 0 6px var(--offline);transition:all .3s;}
+    .status-dot.online{background:var(--online);box-shadow:0 0 6px var(--online);}
+
+    /* Main */
+    .main{max-width:820px;margin:0 auto;padding:40px 24px 80px;}
+
+    /* Taotie SVG */
+    .taotie-wrap{display:flex;justify-content:center;margin-bottom:32px;}
+    .taotie-svg{width:120px;height:80px;transition:all .5s;}
+    .taotie-idle{filter:drop-shadow(0 0 10px rgba(200,168,75,.3));}
+    .taotie-admit{filter:drop-shadow(0 0 30px rgba(95,255,212,.8));transform:scale(1.05);}
+    .taotie-reject{filter:drop-shadow(0 0 30px rgba(192,57,43,.8));transform:scale(.95);}
+
+    /* Input area */
+    .input-wrap{margin-bottom:24px;}
+    .input-label{font-size:9px;letter-spacing:.2em;color:var(--parchment-dim);margin-bottom:8px;display:block;}
+    .input-area{width:100%;min-height:140px;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:16px;color:var(--parchment);font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;resize:vertical;transition:border-color .3s;}
+    .input-area:focus{outline:none;border-color:var(--gold-dim);}
+    .input-area::placeholder{color:var(--parchment-dim);opacity:.5;}
+
+    /* Devour button */
+    .btn-devour{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:transparent;border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:13px;letter-spacing:.2em;cursor:pointer;transition:all .25s;position:relative;}
+    .btn-devour:hover{background:var(--gold);color:var(--void);}
+    .btn-devour.loading{opacity:.5;pointer-events:none;}
+    .btn-devour::before{content:'⚡';}
+
+    /* Result panel */
+    .result-panel{display:none;margin-top:24px;padding:20px;background:var(--panel);border:1px solid var(--border);border-radius:4px;}
+    .result-panel.show{display:block;}
+    .mu-row{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+    .mu-val{font-family:'Cinzel',serif;font-size:28px;color:var(--gold);}
+    .mu-val.reject{color:var(--crimson-b);}
+    .verdict-val{font-size:11px;letter-spacing:.15em;padding:4px 12px;border-radius:3px;}
+    .verdict-val.admit{background:rgba(95,255,212,.1);color:var(--aqua);border:1px solid var(--aqua);}
+    .verdict-val.reject{background:rgba(192,57,43,.1);color:var(--crimson-b);border:1px solid var(--crimson-b);}
+
+    /* Domain bars */
+    .domains{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+    .domain{display:flex;align-items:center;gap:8px;font-size:10px;}
+    .domain-name{width:80px;color:var(--parchment-dim);text-transform:uppercase;letter-spacing:.05em;}
+    .domain-bar{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden;}
+    .domain-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px;transition:width .5s;}
+    .domain-fill.reject{background:linear-gradient(90deg,var(--crimson),var(--crimson-b));}
+    .domain-val{width:40px;text-align:right;color:var(--gold);}
+
+    /* Meta row */
+    .meta-row{display:flex;gap:24px;font-size:10px;color:var(--parchment-dim);margin-bottom:8px;flex-wrap:wrap;}
+    .meta-row span{display:flex;gap:4px;}
+    .meta-label{color:var(--parchment-dim);}
+    .meta-val{color:var(--parchment);}
+
+    /* Error */
+    .error-note{display:none;padding:12px 16px;background:rgba(192,57,43,.1);border:1px solid var(--crimson);border-radius:4px;font-size:11px;color:var(--crimson-b);margin-top:16px;}
+    .error-note.show{display:block;}
+
+    /* Offerings list */
+    .offerings{margin-top:32px;}
+    .off-title{font-size:10px;letter-spacing:.2em;color:var(--parchment-dim);margin-bottom:12px;}
+    .off-list{display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;}
+    .off-item{padding:12px 16px;background:var(--panel);border:1px solid var(--border);border-radius:4px;font-size:10px;}
+    .off-item .off-text{color:var(--parchment);margin-bottom:4px;}
+    .off-item .off-meta{display:flex;gap:16px;color:var(--parchment-dim);font-size:9px;}
+
+    /* Offline badge */
+    .offline-banner{display:none;align-items:center;gap:10px;padding:10px 16px;background:rgba(231,76,60,.1);border:1px solid var(--crimson);border-radius:4px;font-size:10px;color:var(--crimson-b);margin-bottom:20px;}
+    .offline-banner.show{display:flex;}
+
+    /* Nav */
+    .nav{display:flex;gap:16px;margin-bottom:24px;}
+    .nav a{color:var(--gold-dim);text-decoration:none;font-size:10px;letter-spacing:.1em;transition:color .2s;}
+    .nav a:hover{color:var(--gold);}
+
+    /* Reset */
+    .reset-row{margin-top:24px;display:flex;gap:12px;}
+    .btn-reset{padding:8px 16px;background:transparent;border:1px solid var(--border);color:var(--parchment-dim);font-size:9px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s;}
+    .btn-reset:hover{border-color:var(--crimson);color:var(--crimson-b);}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="h-left">
+      <div class="h-title">CSS LABS</div>
+      <div class="h-sub">THE DEVOURING GATE — CSS Labs</div>
+    </div>
+    <div class="h-logo">GHOST</div>
+    <div class="h-right">
+      <div class="status-row"><span class="status-dot" id="face-dot"></span><span>FACE :7766</span></div>
+      <div class="status-row"><span class="status-dot" id="kern-dot"></span><span>KERNEL :7767</span></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="nav">
+      <a href="index.html">← NEXUS</a>
+      <a href="state.html">OBSERVATORY →</a>
+    </div>
+
+    <div class="offline-banner" id="offline-banner">
+      <span>⚡ OFFLINE</span>
+      <span>Offerings stored locally. Will resync when FACE reconnects.</span>
+      <span id="off-queue">0 queued</span>
+    </div>
+
+    <div class="taotie-wrap">
+      <svg class="taotie-svg taotie-idle" id="taotie" viewBox="0 0 120 80">
+        <defs>
+          <linearGradient id="eyeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#c8a84b;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <!-- Left eye -->
+        <ellipse cx="35" cy="40" rx="18" ry="22" fill="none" stroke="url(#eyeGrad)" stroke-width="2"/>
+        <ellipse cx="35" cy="40" rx="8" ry="12" fill="url(#eyeGrad)" opacity="0.6"/>
+        <circle cx="35" cy="40" r="3" fill="#ffd700"/>
+        <!-- Right eye -->
+        <ellipse cx="85" cy="40" rx="18" ry="22" fill="none" stroke="url(#eyeGrad)" stroke-width="2"/>
+        <ellipse cx="85" cy="40" rx="8" ry="12" fill="url(#eyeGrad)" opacity="0.6"/>
+        <circle cx="85" cy="40" r="3" fill="#ffd700"/>
+        <!-- Bridge -->
+        <path d="M 53 40 Q 60 32 67 40" fill="none" stroke="#c8a84b" stroke-width="1.5" opacity="0.5"/>
+        <!-- Brow ridge -->
+        <path d="M 20 22 Q 35 15 50 22" fill="none" stroke="#c8a84b" stroke-width="1" opacity="0.4"/>
+        <path d="M 70 22 Q 85 15 100 22" fill="none" stroke="#c8a84b" stroke-width="1" opacity="0.4"/>
+      </svg>
+    </div>
+
+    <div class="input-wrap">
+      <label class="input-label">OFFERING — Enter text to be devoured by the coherence gate</label>
+      <textarea class="input-area" id="dinput" placeholder="All eight domains must resonate above threshold.&#10;syntactic mass · structural complexity · temporal integrity · spatial grounding · directive safety · harmonic avoidance · contextual coherence · spectral near-duplicate detection"></textarea>
+    </div>
+
+    <button class="btn-devour" id="bdv" onclick="devour()">DEVOUR</button>
+
+    <div class="error-note" id="err"></div>
+
+    <div class="result-panel" id="result">
+      <div class="mu-row">
+        <div class="mu-val" id="mval">—</div>
+        <div class="verdict-val" id="vval">—</div>
+      </div>
+      <div class="domains" id="domains"></div>
+      <div class="meta-row">
+        <span><span class="meta-label">τ</span><span class="meta-val" id="tauv">—</span></span>
+        <span><span class="meta-label">TIER</span><span class="meta-val" id="tierv">—</span></span>
+        <span><span class="meta-label">VERTEX</span><span class="meta-val" id="vertv">—</span></span>
+        <span><span class="meta-label">N</span><span class="meta-val" id="nv">—</span></span>
+        <span><span class="meta-label">ELAPSED</span><span class="meta-val" id="elv">—</span></span>
+      </div>
+    </div>
+
+    <div class="offerings" id="offerings-wrap">
+      <div class="off-title">RECENT OFFERINGS</div>
+      <div class="off-list" id="off-list"></div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn-reset" onclick="resetGate()">RESET GATE</button>
+      <button class="btn-reset" onclick="clearOfferings()">CLEAR OFFERINGS</button>
+    </div>
+  </div>
+
+  <script src="ghost_api.js"></script>
+  <script>
+    const DKEYS = ['D1','D2','D3','D4','D5','D6','D7','D8'];
+    const DNAME = {D1:'SIGNAL',D2:'ENERGY',D3:'TEMPORAL',D4:'SPATIAL',D5:'COGNITIVE',D6:'ETHICAL',D7:'DECLARATIVE',D8:'NOVELTY'};
+
+    function renderOfferings(){
+      const list = document.getElementById('off-list');
+      const offs = JSON.parse(localStorage.getItem('gh_offerings')||'[]');
+      if(!offs.length){
+        list.innerHTML = '<div style="font-size:10px;color:var(--parchment-dim);text-align:center;padding:24px">No offerings yet — feed the gate.</div>';
+        return;
+      }
+      list.innerHTML = offs.map(o=>`
+        <div class="off-item">
+          <div class="off-text">${o.preview}</div>
+          <div class="off-meta">
+            <span>μ ${o.mu}</span>
+            <span>${o.tier}</span>
+            <span>${o.ts}</span>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('off-queue').textContent = offs.length + ' queued';
+    }
+
+    async function devour(){
+      const txt = document.getElementById('dinput').value.trim();
+      if(!txt) return;
+      const btn = document.getElementById('bdv');
+      const taotie = document.getElementById('taotie');
+      const err = document.getElementById('err');
+      btn.classList.add('loading'); btn.textContent = 'CONSUMING...';
+      err.classList.remove('show'); err.textContent = '';
+
+      const result = await ghostFetch(GHOST.FACE, '/devour', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({text: txt, ts: Date.now()}),
+        timeout: 8000
+      });
+
+      btn.classList.remove('loading'); btn.textContent = '⚡ DEVOUR';
+
+      const d = result.data;
+      const admitted = d.admitted || false;
+      const mu = d.mu || 0;
+      const tau = d.tau || 0.9995;
+      const scores = d.scores || {};
+      const tier = d.tier || null;
+      const vertex = d.vertex || 'PPPP';
+      const n = d.n || _offline.n;
+
+      // Taotie animation
+      taotie.className = 'taotie-svg ' + (admitted ? 'taotie-admit' : 'taotie-reject');
+      setTimeout(()=>{ taotie.className = 'taotie-svg taotie-idle'; }, 1200);
+
+      // Result panel
+      document.getElementById('result').classList.add('show');
+      const mval = document.getElementById('mval');
+      mval.textContent = mu.toFixed(6);
+      mval.className = 'mu-val ' + (admitted ? '' : 'reject');
+      const vval = document.getElementById('vval');
+      vval.textContent = admitted ? 'RESONANCE ACHIEVED' : 'RESONANCE INSUFFICIENT';
+      vval.className = 'verdict-val ' + (admitted ? 'admit' : 'reject');
+
+      // Domain bars
+      const domContainer = document.getElementById('domains');
+      domContainer.innerHTML = DKEYS.map(k=>{
+        const s = scores[k] || 0;
+        const pct = Math.round(s * 100);
+        return `<div class="domain">
+          <div class="domain-name">${DNAME[k] || k}</div>
+          <div class="domain-bar"><div class="domain-fill ${admitted?'':'reject'}" style="width:${pct}%"></div></div>
+          <div class="domain-val">${pct}%</div>
+        </div>`;
+      }).join('');
+
+      // Meta
+      document.getElementById('tauv').textContent = tau.toFixed(4);
+      document.getElementById('tierv').textContent = tier || '—';
+      document.getElementById('vertv').textContent = vertex;
+      document.getElementById('nv').textContent = n;
+      document.getElementById('elv').textContent = (d.elapsed_ms || 0) + 'ms';
+
+      // Queue offering
+      if(result.offline){
+        document.getElementById('offline-banner').classList.add('show');
+        queueOffering({text: txt, mu: mu.toFixed(4), tier: tier||'REJECT', preview: txt.slice(0,60), ts: new Date().toLocaleTimeString()});
+      }
+
+      // Update local state if admitted
+      if(admitted && result.offline){
+        const node = {hash: d.hash || 'h_'+Math.random().toString(36).slice(2,10), content: txt.slice(0,200), mu, tier, vertex, ts: Date.now(), merge_count: 1};
+        _offline.nodes.push(node);
+        _offline.n = _offline.nodes.length;
+      }
+
+      renderOfferings();
+      updateStatus();
+    }
+
+    async function resetGate(){
+      try{
+        await ghostFetch(GHOST.FACE, '/reset', {method: 'DELETE', timeout: 3000});
+        _offline.nodes = []; _offline.n = 0; _offline.merkle_root = null;
+        document.getElementById('dinput').value = '';
+        document.getElementById('result').classList.remove('show');
+        renderOfferings();
+        updateStatus();
+      }catch(e){
+        document.getElementById('err').textContent = 'Reset failed: ' + e.message;
+        document.getElementById('err').classList.add('show');
+      }
+    }
+
+    function clearOfferings(){
+      localStorage.setItem('gh_offerings', '[]');
+      renderOfferings();
+      updateStatus();
+    }
+
+    async function updateStatus(){
+      const s = await checkStatus();
+      document.getElementById('face-dot').classList.toggle('online', s.face.online);
+      document.getElementById('kern-dot').classList.toggle('online', s.kernel.online);
+      if(!s.anyOnline) document.getElementById('offline-banner').classList.add('show');
+      else document.getElementById('offline-banner').classList.remove('show');
+      document.getElementById('off-queue').textContent = s.offeringsQueued + ' queued';
+    }
+
+    renderOfferings();
+    updateStatus();
+    setInterval(updateStatus, 5000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GHOST v9.1.0 — CSS Labs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --void:#05050a;--panel:#0d0d14;--panel2:#12121e;
+      --gold:#c8a84b;--gold-dim:#7a6228;--gold-bright:#ffd700;
+      --parchment:#e8e4d9;--parchment-dim:#6a6860;
+      --aqua:#5fffd4;--crimson:#c0392b;--crimson-b:#f44336;
+      --cobalt:#4a90d9;--solar:#ffd700;--border:#181826;
+      --online:#2ecc71;--offline:#e74c3c;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{width:100%;height:100%;}
+    body{background:var(--void);color:var(--parchment);font-family:'Space Mono',monospace;
+         min-height:100vh;overflow-x:hidden;position:relative;}
+
+    /* Animated constellation background */
+    .bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.4;}
+
+    /* Content */
+    .content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-width:900px;padding:40px 24px;margin:0 auto;}
+
+    /* Header */
+    .header{display:flex;justify-content:space-between;align-items:center;width:100%;padding:20px 0;border-bottom:1px solid var(--gold-dim);margin-bottom:32px;}
+    .h-left{display:flex;flex-direction:column;gap:3px;}
+    .h-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5em;color:var(--gold);}
+    .h-sub{font-size:9px;letter-spacing:.3em;color:var(--parchment-dim);}
+    .h-logo{font-family:'Cinzel',serif;font-size:32px;font-weight:900;color:var(--gold);letter-spacing:.15em;text-shadow:0 0 40px rgba(200,168,75,.5);}
+    .h-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+
+    /* Status dots */
+    .status-row{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.1em;}
+    .status-dot{width:8px;height:8px;border-radius:50%;background:var(--offline);box-shadow:0 0 8px var(--offline);transition:all .3s;}
+    .status-dot.online{background:var(--online);box-shadow:0 0 8px var(--online);}
+    .status-label{color:var(--parchment-dim);}
+
+    /* Stats strip */
+    .strip{display:flex;gap:0;border:1px solid var(--border);border-radius:4px;overflow:hidden;width:100%;margin-bottom:32px;}
+    .strip-block{flex:1;padding:16px 20px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+    .strip-block:last-child{border-right:none;}
+    .strip-label{font-size:9px;letter-spacing:.15em;color:var(--parchment-dim);text-transform:uppercase;}
+    .strip-val{font-size:18px;font-weight:700;color:var(--gold);font-family:'Cinzel',serif;}
+    .strip-sub{font-size:9px;color:var(--parchment-dim);}
+
+    /* Offline badge */
+    .offline-badge{display:none;align-items:center;gap:8px;padding:8px 16px;background:rgba(231,76,60,.15);border:1px solid var(--crimson);border-radius:4px;font-size:10px;color:var(--crimson-b);margin-bottom:16px;width:100%;}
+    .offline-badge.show{display:flex;}
+    .resync-btn{margin-left:auto;background:transparent;border:1px solid var(--crimson);color:var(--crimson-b);padding:4px 12px;font-size:9px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s;}
+    .resync-btn:hover{background:var(--crimson);color:var(--void);}
+
+    /* Portals */
+    .portals{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;margin-bottom:32px;}
+    .portal{display:block;padding:32px;border:1px solid var(--border);border-radius:4px;text-decoration:none;transition:all .3s;position:relative;overflow:hidden;}
+    .portal::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .3s;}
+    .portal:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
+    .portal:hover::before{opacity:1;}
+    .portal-name{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);margin-bottom:8px;}
+    .portal-desc{font-size:11px;color:var(--parchment-dim);line-height:1.6;margin-bottom:16px;}
+    .portal-meta{display:flex;gap:16px;font-size:9px;letter-spacing:.1em;color:var(--parchment-dim);}
+    .portal-meta span{display:flex;align-items:center;gap:4px;}
+    .portal-meta .dot{width:6px;height:6px;border-radius:50%;background:var(--gold-dim);}
+
+    /* Footer */
+    .footer{width:100%;padding:20px 0;border-top:1px solid var(--border);margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--parchment-dim);letter-spacing:.1em;}
+    .footer-left{display:flex;gap:16px;}
+    .seal{color:var(--gold-dim);}
+
+    /* Seals */
+    .wordmark{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:.3em;margin-bottom:8px;}
+    .version{font-size:10px;color:var(--parchment-dim);letter-spacing:.2em;}
+  </style>
+</head>
+<body>
+  <canvas class="bg-canvas" id="bg"></canvas>
+
+  <div class="content">
+    <div class="header">
+      <div class="h-left">
+        <div class="h-title">CSS LABS</div>
+        <div class="h-sub">SOVEREIGN · VENDORLESS · CLOUDLESS</div>
+      </div>
+      <div class="h-logo">GHOST</div>
+      <div class="h-right">
+        <div class="status-row" id="face-status">
+          <span class="status-dot" id="face-dot"></span>
+          <span class="status-label">FACE :7766</span>
+        </div>
+        <div class="status-row" id="kern-status">
+          <span class="status-dot" id="kern-dot"></span>
+          <span class="status-label">KERNEL :7767</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="offline-badge" id="offline-badge">
+      <span>⚡ OFFLINE MODE — Local simulation active</span>
+      <span id="queued-count">0 offerings queued</span>
+      <button class="resync-btn" id="resync-btn" onclick="doResync()">RESYNC</button>
+    </div>
+
+    <div class="strip" id="stats-strip">
+      <div class="strip-block">
+        <div class="strip-label">Nodes</div>
+        <div class="strip-val" id="stat-n">—</div>
+        <div class="strip-sub" id="stat-cap">capacity —%</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Whitlock</div>
+        <div class="strip-val" id="stat-w">—</div>
+        <div class="strip-sub" id="stat-phi">phase —°</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">STM / LTM</div>
+        <div class="strip-val" id="stat-tier">— / —</div>
+        <div class="strip-sub">active tiers</div>
+      </div>
+      <div class="strip-block">
+        <div class="strip-label">Tests</div>
+        <div class="strip-val">10,042</div>
+        <div class="strip-sub">all passing</div>
+      </div>
+    </div>
+
+    <div class="portals">
+      <a class="portal" href="devour.html">
+        <div class="portal-name">THE DEVOURING GATE</div>
+        <div class="portal-desc">Ingest information through the coherence gate. All eight domains must resonate above threshold. The gate admits or devours.</div>
+        <div class="portal-meta">
+          <span><span class="dot"></span>FACE :7766</span>
+          <span>POST /devour</span>
+        </div>
+      </a>
+      <a class="portal" href="state.html">
+        <div class="portal-name">THE OBSERVATORY</div>
+        <div class="portal-desc">Query, recall, verify, and navigate the kernel state. Inspect the Tesseract, audit the chain, commune with the ghostlet.</div>
+        <div class="portal-meta">
+          <span><span class="dot"></span>KERNEL :7767</span>
+          <span>GET /recall /verify /nav</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <div class="footer-left">
+        <span class="seal">CSS Labs</span>
+        <span>Kyle S. Whitlock</span>
+        <span>v9.1.0</span>
+      </div>
+      <div class="seal" id="seal-date">Seal: 2026-07-04_Tulsa_OK</div>
+    </div>
+  </div>
+
+  <script src="ghost_api.js"></script>
+  <script>
+    // Constellation background
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let W, H, stars = [];
+    function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    class Star {
+      constructor(){ this.reset(); }
+      reset(){
+        this.x = Math.random()*W; this.y = Math.random()*H;
+        this.r = Math.random()*1.5+.5; this.vx = (Math.random()-.5)*.3;
+        this.vy = (Math.random()-.5)*.3; this.alpha = Math.random()*.5+.2;
+        this.gold = Math.random() > .7;
+      }
+      update(){
+        this.x += this.vx; this.y += this.vy;
+        if(this.x<0||this.x>W||this.y<0||this.y>H) this.reset();
+      }
+      draw(){
+        ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+        ctx.fillStyle = this.gold ? `rgba(200,168,75,${this.alpha})` : `rgba(95,255,212,${this.alpha})`;
+        ctx.fill();
+      }
+    }
+    for(let i=0;i<120;i++) stars.push(new Star());
+
+    function drawLines(){
+      for(let i=0;i<stars.length;i++){
+        for(let j=i+1;j<stars.length;j++){
+          const dx=stars[i].x-stars[j].x, dy=stars[i].y-stars[j].y, d=Math.sqrt(dx*dx+dy*dy);
+          if(d<120){ ctx.beginPath(); ctx.moveTo(stars[i].x,stars[i].y); ctx.lineTo(stars[j].x,stars[j].y);
+            ctx.strokeStyle = `rgba(200,168,75,${.08*(1-d/120)})`; ctx.stroke();
+          }
+        }
+      }
+    }
+    function animate(){ ctx.clearRect(0,0,W,H); stars.forEach(s=>{s.update();s.draw();}); drawLines(); requestAnimationFrame(animate); }
+    animate();
+
+    // Status & stats
+    async function updateStats(){
+      const s = await checkStatus();
+      const faceDot = document.getElementById('face-dot');
+      const kernDot = document.getElementById('kern-dot');
+      const offlineBadge = document.getElementById('offline-badge');
+
+      faceDot.classList.toggle('online', s.face.online);
+      kernDot.classList.toggle('online', s.kernel.online);
+
+      if(!s.anyOnline){
+        offlineBadge.classList.add('show');
+        document.getElementById('queued-count').textContent = s.offeringsQueued + ' offerings queued';
+      } else {
+        offlineBadge.classList.remove('show');
+      }
+
+      const n = s.face.n || 0;
+      const wc = s.face.whitlock || {magnitude:0, phase_deg:0};
+      const stm = s.face.stm_count || 0;
+      const ltm = s.face.ltm_count || 0;
+      const cap = s.face.capacity_pct || '0.0';
+
+      document.getElementById('stat-n').textContent = n;
+      document.getElementById('stat-cap').textContent = 'capacity ' + cap + '%';
+      document.getElementById('stat-w').textContent = wc.magnitude ? wc.magnitude.toFixed(3) : '—';
+      document.getElementById('stat-phi').textContent = 'φ ' + (wc.phase_deg ? wc.phase_deg.toFixed(1) : '—') + '°';
+      document.getElementById('stat-tier').textContent = stm + ' / ' + ltm;
+    }
+
+    async function doResync(){
+      const btn = document.getElementById('resync-btn');
+      btn.textContent = 'SYNCING...';
+      const r = await resyncOfferings();
+      btn.textContent = 'RESYNC (' + r.synced + ' synced)';
+      setTimeout(()=>{ btn.textContent = 'RESYNC'; updateStats(); }, 3000);
+    }
+
+    updateStats();
+    setInterval(updateStats, 5000);
+  </script>
+</body>
+</html>
