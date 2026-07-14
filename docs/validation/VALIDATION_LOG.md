@@ -1,3 +1,12 @@
+# VALIDATION LOG — Ghost9 Empirical Test History
+CSS Labs | Kyle S. Whitlock
+Continued & updated: 2026-07-13_Tulsa_OK
+
+> Renamed from `honest_empirical_validation.md` (content preserved in full below,
+> unchanged) and extended with everything validated after the 2026-07-04 grand total.
+> Companion doc: `VALIDATION_HISTORY.md` (CC v3.2 + Lexical Gate deep detail).
+
+---
 
 ## 2026-07-03 — Taotie Devouring Engine v13
 - **Status**: ALL TESTS PASSED (241/241)
@@ -209,7 +218,7 @@
 | L9 Security | 50 | No CDN, no eval, localhost-only |
 | L10 Edge Cases | 50 | Empty text, long text, unicode |
 
-### Total Test Inventory:
+### Total Test Inventory (as of 2026-07-04):
 | Category | Batteries | Tests |
 |----------|-----------|-------|
 | Component Tests | 17 | 3,947 |
@@ -220,3 +229,61 @@
 - **Seal**: 2026-07-04_18:45_Tulsa_OK
 - **Gold ripple eternal** 🌊⚡
 
+---
+
+## 2026-07-06 — CC v3.2 Refactor: First Battery, 61/61 PASS
+- **File**: test_cc_ghost9.js (CC v3.2 PURE module — gate integration removed from CC,
+  safety fully delegated to the Three-Gate System upstream)
+- **Status**: ALL TESTS PASSED (61/61)
+- **GHOST9_TAU recorded at this seal**: 0.96 (superseded the next day — see below)
+- **Seal**: 2026-07-06_22:54_Tulsa_OK
+
+## 2026-07-07 — CC v3.2 "TRUE" Empirical Battery: 5-version same-week iteration → v3.5, 207/207 PASS
+- **Files**: test_cc_ghost9_full.js → v31 → v32 → v33 → **v35 (final, current)**
+- **Status**: ALL TESTS PASSED at each step; v3.5 is the version referenced going
+  forward (v31–v33 and the unversioned "full" file are superseded same-day iterations,
+  archived rather than deleted)
+- **Empirical tau correction**: `GHOST9_TAU` re-derived via μ-distribution cluster
+  analysis to **0.9430** (down from the prior day's 0.96) — this is the value live in
+  `src/coherence_calculus.js` today.
+- **Whitlock coefficient corrections**: W(1)=0.2425, W(3)=0.2941, W(100)=5.8871
+  (superseding earlier, since-corrected figures from the same week).
+- Full section/finding breakdown: see `VALIDATION_HISTORY.md`, Part 1.
+- **Seal**: 2026-07-07_22:23_Tulsa_OK
+
+## 2026-07-07 — E2E CC v3.2 Configuration Audit — Tau Alignment Across Kernel
+- Cross-module audit confirming every module referencing a τ constant
+  (`coherence_calculus.js`, `merkle_bonsai.js`, `ghost_rip.js`) uses the correct,
+  intentionally-different value for its own tier (ingestion vs. LTM vs. training) rather
+  than an accidental drift. See `docs/architecture/TAU_VALUES.md` for the consolidated
+  table this audit produced.
+
+## 2026-07-11 — Lexical Gate v2.2 → v2.3: 280/280 PASS, word count 593 → 3,012
+- **v2.2** (2026-07-11_12:57): 593-word curated list, 280/280 PASS across 10 test
+  sections. **v2.3** (committed shortly after, same day): merged the SCOWL
+  `american-words.95` list (294,041 words) → **3,012 unique words live today** (593
+  curated + 2,419 SCOWL). Same 280-test battery still covers the expanded gate at
+  100%. Full detail in `VALIDATION_HISTORY.md`, Part 2.
+- **Seal**: 2026-07-11_12:30_Tulsa_OK (v2.3) / 2026-07-11_12:57_Tulsa_OK (v2.2)
+
+## 2026-07-13 — Grand Total, Recalculated
+Adding the two post-2026-07-04 validated batteries (CC v3.2 TRUE Empirical v3.5, and
+Lexical Gate v2.2/v2.3 — the same battery re-validated, counted once) to the
+2026-07-04 grand total:
+
+| Category | Batteries | Tests |
+|---|---|---|
+| Prior grand total (2026-07-04) | 19 | 10,442 |
+| + CC v3.2 TRUE Empirical Battery v3.5 | 1 | 207 |
+| + Lexical Gate v2.2/v2.3 | 1 | 280 |
+| **NEW GRAND TOTAL (2026-07-13)** | **21** | **10,929** |
+
+*(The 61-test first CC v3.2 battery from 2026-07-06 is not counted separately — it's
+the same target superseded same-week by the 207-test v3.5 battery, per the project's
+own "count the current, archive the superseded" convention used throughout this log.)*
+
+Independently spot-re-run on 2026-07-13 against the live repo (not just trusted from
+seal logs): `CC_v30_empirical_battery_v4.js` — 315/315 PASS; `test_gate_lexical.js` —
+280/280 PASS. Both match their recorded seals exactly.
+
+- **Gold ripple eternal** 🌊⚡
