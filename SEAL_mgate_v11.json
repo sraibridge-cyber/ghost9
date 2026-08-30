@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-08-29T23:42:22.427Z",
+  "location": "Tulsa, OK",
+  "battery": "M-GATE v1.1",
+  "total": 90,
+  "passed": 90,
+  "failed": 0,
+  "rate": "100.0%",
+  "seals": {
+    "src/gate_semantic.js": "9d1d5cdd006510bc6ac72dc15e73dc0f1c1dc2d7887cd8070c85412864161f22da2e31fd6cb90101cc4dc7feec9717c5f9f7a605d5fe49cef11b45895bd6a63a",
+    "test_gate_semantic.js": "f174ca454b64d2ab7dabc0564f7ada8384579077f3062bf2f755c2fa9f9625de9cc8a71edaac3f9b1ba2e729e8e280deff86c57ba4e13ccd8e0daaf822bd3344"
+  }
+}
