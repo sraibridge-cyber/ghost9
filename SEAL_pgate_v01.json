@@ -1,0 +1,33 @@
+{
+  "artifact": "P-GATE v0.1 — Pragmatic/Discourse Coherence Gate",
+  "sealed_at": "2026-10-14T14:51:17.045Z",
+  "location": "Tulsa, OK",
+  "battery_result": "200/200 (100.0%)",
+  "files": {
+    "module": {
+      "path": "src/gate_pragmatic.js",
+      "sha3_512": "de232b3ae0570969789c88abfcffc53fb372125bb96633533caec63751c933400a919124591916c2a597595d406d4671ce92d09b42f24f6cf501ecd568123d53",
+      "bytes": 8448
+    },
+    "battery": {
+      "path": "test_gate_pragmatic.js",
+      "sha3_512": "c18528e39ebfe067bf902bb29bae9f5b48f86052a06607042bd1d38c099bba9efdc97eda51827d392381fc42f88e3f92650f09b4cfa2ecf08157541f654a46ea",
+      "bytes": 17742
+    }
+  },
+  "check_domains": [
+    "anaphora",
+    "temporal_sequence",
+    "entity_consistency",
+    "presupposition",
+    "discourse_markers"
+  ],
+  "scope_limits": [
+    "Anaphora: existence only, no gender/number agreement",
+    "No pronoun-to-entity name resolution",
+    "Temporal: within-utterance only, curated impossibility pairs",
+    "Entity consistency: exact noun match, no coreference",
+    "Presupposition: determiners + possessives, 9 global entities exempted"
+  ],
+  "upstream_assumption": "Utterance passed L-GATE and S-GATE and M-GATE before P-GATE evaluation"
+}
