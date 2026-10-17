@@ -1,0 +1,38 @@
+{
+  "artifact": "Q-GATE v0.1 — Quarantine Gate (harm vectors and integrity threats)",
+  "sealed_at": "2026-10-17T05:09:35.505Z",
+  "location": "Tulsa, OK",
+  "battery_result": "200/200 (100.0%)",
+  "files": {
+    "module": {
+      "path": "src/gate_quarantine.js",
+      "sha3_512": "d66bc5a8fb9ba8cf3c0a70055b2863ce7cd276f39bf0d3f5a21700d1ad429b6f8389788eec2cefd491872c409daae23cf79b700e2a139fa835f21eacbae11bf3",
+      "bytes": 3277
+    },
+    "battery": {
+      "path": "test_gate_quarantine.js",
+      "sha3_512": "04b36f5509e52fc0730737505ddb225f332f5c855f079fa68f666b9ccc11456e34d44c27e5699a11cc99e202ecc59e7256519e84663f711a520acc74215d41e1",
+      "bytes": 16519
+    }
+  },
+  "detection_domains": [
+    "operator_harm",
+    "third_party_harm",
+    "kernel_integrity",
+    "operator_deception"
+  ],
+  "severity_tiers": {
+    "CRITICAL": "block",
+    "HIGH": "quarantine",
+    "MEDIUM": "log"
+  },
+  "design_principle": "NOT a morality gate. No observer-dependent judgment. Immune system, not arbiter.",
+  "scope_limits": [
+    "Within-utterance only, no cross-context tracking",
+    "English v0.1, seed pattern lists frozen at seal",
+    "No context sensitivity: fiction, quotes, and meta-discussion containing patterns WILL quarantine (documented bluntness)",
+    "Substring matching with case folding and apostrophe normalization only",
+    "Severity tiers fixed per domain, no adjudication"
+  ],
+  "upstream_assumption": "Utterance passed L, S, M, P gates before Q-GATE evaluation; runs before CC and SS to quarantine cheaply"
+}
