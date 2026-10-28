@@ -21,6 +21,7 @@ const CC      = require('./coherence_calculus');
 const T       = require('./tesseract');
 const { classifyTier, VoidSpace } = require('./taotie');
 const { SpatialWeb }              = require('./spatial_web');
+const { runPrefilter }                = require('./prefilter');
 
 const PORT         = 7766;
 const DATA_DIR     = path.join(__dirname, '..', 'data');
@@ -210,6 +211,15 @@ const routes = {
     const state = loadState();
     const ts    = body.ts || Date.now();
 
+    const pre = runPrefilter(text, state.nodes.slice(-5).map(n => n.content));
+    if (!pre.pass) {
+      log(`PREFILTER BLOCK gate=${pre.blockedBy} reason=${pre.reason} "${text.slice(0, 60)}"`);
+      return json(res, {
+        admitted: false, layer: 0, gate: pre.blockedBy, reason: pre.reason,
+        prefilter: pre.stages, elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
+      });
+    }
+
     const cc = runCCGate(text, state, { ts });
     if (!cc.pass) {
       log(`REJECT μ=${cc.mu.toFixed(6)} "${text.slice(0, 60)}"`);
@@ -251,7 +261,7 @@ const routes = {
     log(`ADMIT tier=${sep.tier} vertex=${sep.vertex} μ=${cc.mu.toFixed(6)} n=${state.n} edges_added=${webResult.edgesAdded} (${elapsed}ms)`);
 
     return json(res, {
-      admitted: true, layer: 2, tier: sep.tier, vertex: sep.vertex,
+      admitted: true, layer: 2, prefilter: 'pass', tier: sep.tier, vertex: sep.vertex,
       mu: cc.mu, hash: sep.hash, hash_preview: sep.hash.slice(0, 32) + '…',
       n: state.n, merkle_root: state.merkle_root ? state.merkle_root.slice(0, 32) + '…' : null,
       whitlock: cc.whitlock,
