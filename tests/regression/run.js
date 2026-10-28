@@ -244,6 +244,7 @@ async function runE2E() {
   console.log('\nEnd to end: FACE :7766 and KERNEL :7767 on a scratch copy');
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'ghost9-e2e-'));
   copyDir(SRC, path.join(scratch, 'src'));
+  copyDir(path.join(ROOT, 'config'), path.join(scratch, 'config'));
 
   const face = spawn(process.execPath, [path.join(scratch, 'src', 'ghost_face.js')], { cwd: scratch, stdio: 'ignore' });
   const kernel = spawn(process.execPath, [path.join(scratch, 'src', 'ghost_kernel.js')], { cwd: scratch, stdio: 'ignore' });

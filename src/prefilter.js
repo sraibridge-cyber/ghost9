@@ -1,13 +1,15 @@
 // =====================================================================
-// PREFILTER — runs the five gates in front of Coherence Calculus
+// PREFILTER — runs the gates in front of Coherence Calculus
 // Order: L (lexical) -> S (syntactic) -> M (semantic) -> P (pragmatic) -> Q (quarantine)
-// Cheapest first, per CC doc section 4.5. Q runs last of the gates, matching the
+//        -> QC (local classifier, async, only if everything above passed)
+// Cheapest first, per CC doc section 4.5. Q runs last of the sync gates, matching the
 // Q-GATE seal's upstream assumption that L, S, M and P have already passed.
 //
 // Each gate reports a verdict. A verdict only stops the pipeline when that gate
 // is in 'block' mode. DEFAULT_MODE is PROVISIONAL. S (now tag-based, no lists)
 // blocks; M is off because its lists were removed; P is advisory; L is advisory;
-// Q blocks. See docs/review/measured-coherence.md.
+// Q blocks; QC is advisory until config/clf.json is validated on a sealed holdout.
+// See docs/review/measured-coherence.md and docs/review/prefilter.md.
 // =====================================================================
 'use strict';
 
@@ -16,9 +18,10 @@ const { gateSyntactical } = require('./gate_syntactic');
 const { gateSemantic } = require('./gate_semantic');
 const { gatePragmatic } = require('./gate_pragmatic');
 const { gateQuarantine } = require('./gate_quarantine');
+const { classify, config: CLF } = require('./clf_client');
 
-const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block' });
-const ORDER = ['L', 'S', 'M', 'P', 'Q'];
+const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode });
+const ORDER = ['L', 'S', 'M', 'P', 'Q', 'QC'];
 
 function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
   const t0 = performance.now();
@@ -74,4 +77,41 @@ function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
   };
 }
 
-module.exports = { runPrefilter, DEFAULT_MODE, ORDER };
+// Sync gates first. If they pass and QC is not 'off', ask the local classifier.
+// Fail-closed only in 'block' mode: an unreachable classifier blocks, in 'advisory'
+// it is reported and the sentence goes on. clf.classify/clf.opts are injectable for tests.
+async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = {}) {
+  const pre = runPrefilter(text, context, mode);
+  const qcMode = mode.QC || 'off';
+  if (!pre.pass || qcMode === 'off') return pre;
+
+  const t0 = performance.now();
+  const classifyFn = clf.classify || classify;
+  const r = await classifyFn(text, clf.opts || {});
+  let stage;
+  if (!r.ok) {
+    stage = { mode: qcMode, pass: qcMode !== 'block', reason: 'classifier_unavailable', error: r.error, score: null, flagged: null };
+  } else {
+    const score = r.scores[0];
+    const flagged = score >= CLF.threshold;
+    stage = {
+      mode: qcMode,
+      pass: !(flagged && qcMode === 'block'),
+      reason: flagged ? 'quarantine_classifier' : 'ok',
+      score,
+      threshold: CLF.threshold,
+      flagged,
+      model: r.model,
+    };
+  }
+  stage.elapsed_ms = parseFloat((performance.now() - t0).toFixed(3));
+  pre.stages.QC = stage;
+  if (!stage.pass) {
+    pre.pass = false;
+    pre.blockedBy = 'QC';
+    pre.reason = stage.reason;
+  }
+  return pre;
+}
+
+module.exports = { runPrefilter, runPrefilterAsync, DEFAULT_MODE, ORDER };

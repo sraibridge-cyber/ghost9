@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:7768",
+  "timeout_ms": 2000,
+  "mode": "advisory",
+  "threshold": 0.004992,
+  "threshold_status": "provisional: 1% false positives on the 91 dev benign sentences; not validated on a sealed holdout",
+  "model": "Xenova/toxic-bert@65cbc2607cb7fad64f98d1e8a5a3d1f8577895fd",
+  "license": "Apache-2.0"
+}

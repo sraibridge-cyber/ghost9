@@ -21,7 +21,7 @@ const CC      = require('./coherence_calculus');
 const T       = require('./tesseract');
 const { classifyTier, VoidSpace } = require('./taotie');
 const { SpatialWeb }              = require('./spatial_web');
-const { runPrefilter }                = require('./prefilter');
+const { runPrefilterAsync } = require('./prefilter');
 
 const PORT         = 7766;
 const DATA_DIR     = path.join(__dirname, '..', 'data');
@@ -211,7 +211,7 @@ const routes = {
     const state = loadState();
     const ts    = body.ts || Date.now();
 
-    const pre = runPrefilter(text, state.nodes.slice(-5).map(n => n.content));
+    const pre = await runPrefilterAsync(text, state.nodes.slice(-5).map(n => n.content));
     if (!pre.pass) {
       log(`PREFILTER BLOCK gate=${pre.blockedBy} reason=${pre.reason} "${text.slice(0, 60)}"`);
       return json(res, {

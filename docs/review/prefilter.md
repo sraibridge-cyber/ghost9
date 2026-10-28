@@ -59,3 +59,29 @@ These are gate-quality findings, not wiring problems. I did not tune the gates a
 - `src/gate_router.js` imports `scanSyntactic` and `scanSemantic`, which do not exist. `threeGateScan` throws. The prefilter replaces it; the router is still unused and broken.
 - The sealed batteries for S, M, P and Q pass in isolation (280, 210, 200, 200). They do not exercise the pipeline, and they do not show that real text is admitted.
 - `tests/batteries/test_gate_lexical.js` passes 280 of 280 only with `src/gate_lexical_words.json` present. Without that file it fails 146 of 280.
+
+## QC stage: local classifier (review/clf-wiring)
+
+QC runs after the synchronous gates pass, and only if they did. It calls the
+loopback service in `services/clf` (see that folder's `clf_service.py`). Config
+lives in `config/clf.json`.
+
+- **Mode:** `advisory` by default. Every `/devour` response carries the QC stage
+  (`score`, `threshold`, `flagged`, `model`). Nothing is blocked by QC until the
+  mode is switched to `block`.
+- **Threshold:** `0.004992`, the score at 1% false positives on the 91 dev benign
+  sentences. Status is provisional. It was chosen on dev data, so the recall it
+  implies is optimistic: seed 47%, paraphrase 47% on the same sets.
+- **Fail policy:** when the service is unreachable or returns a bad response,
+  `advisory` reports `classifier_unavailable` and lets the sentence through.
+  `block` fails closed.
+- **Transport:** the client sends requests with an explicit `http.Agent`, which
+  bypasses `HTTP_PROXY` for loopback. Without this, sandboxes with an egress proxy
+  get 403s from the local service.
+- **Tests:** `node tests/regression/clf_wiring.js`. Stage logic runs on injected
+  classifiers. The client runs against a fake server. A live check runs only when
+  the real service answers.
+
+Switching QC to `block` requires a sealed harm-intent holdout. The threshold gets
+chosen on dev, then the holdout is scored once. The classifier is a toxicity model,
+not a harm-intent model, so that holdout comes first.
