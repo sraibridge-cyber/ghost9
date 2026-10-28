@@ -277,12 +277,14 @@ const SHORT = [
   'Birds sing in the morning.',
 ];
 
+const CCV4 = require('../../src/cc_v4');
+const CC_STEP = process.env.CC_VERSION === 'v4' ? (t => CCV4.evaluate(t, {})) : (t => CC.evaluate(t, {}));
 const MODE = process.env.PREFILTER_MODE ? JSON.parse(process.env.PREFILTER_MODE) : undefined;
 
 function admit(text, context) {
   const pre = runPrefilter(text, context || [], MODE);
   if (!pre.pass) return { admitted: false, stage: pre.blockedBy, reason: pre.reason };
-  const cc = CC.evaluate(text, {});
+  const cc = CC_STEP(text);
   if (!cc.pass) return { admitted: false, stage: 'CC', reason: `mu=${cc.mu.toFixed(4)}` };
   return { admitted: true, stage: 'pass', reason: 'ok' };
 }
