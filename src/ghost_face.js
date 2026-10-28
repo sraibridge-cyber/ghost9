@@ -256,8 +256,8 @@ const routes = {
       n: state.n, merkle_root: state.merkle_root ? state.merkle_root.slice(0, 32) + '…' : null,
       whitlock: cc.whitlock,
       spatial_web: {
-        nodes: web.getNodeCount() + " nodes, " + web.getClusterCount() + " clusters".nodes, edges: web.stats().edges,
-        edges_added: webResult.edgesAdded, learning_cycles: web.getNodeCount() + " nodes, " + web.getClusterCount() + " clusters".learningCycles
+        nodes: `${web.getNodeCount()} nodes, ${web.getClusterCount()} clusters`, edges: web.stats().edges,
+        edges_added: webResult.edgesAdded, learning_cycles: web.stats().learningCycles
       },
       taotie: taotie_report, elapsed_ms: elapsed
     });

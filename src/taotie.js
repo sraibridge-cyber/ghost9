@@ -47,87 +47,58 @@ class VoidSpace {
   sweep(nodes) {
     this.nodes = nodes || [];
     this.lastSweep = Date.now();
+    const inputCount = nodes ? nodes.length : 0;
 
     if (!nodes || nodes.length === 0 || nodes.length < this.threshold) {
       this.skipped = true;
-      const result = { 
-        skipped: true, 
-        merged: [], 
-        nodes: nodes || [], 
-        survivors: nodes || [], 
-        count: nodes ? nodes.length : 0,
-        devoured: 0,
-      devoured_count: 0
-      };
-      this.sweepLog.push({
-        before: nodes ? nodes.length : 0,
-        ltmProtected: 0,
-        strategy: 'skip_below_threshold',
-        ts: Date.now(),
-        totalDevoured: this.totalDevoured
-      });
-      return result;
+      this.sweepLog.push({ before: inputCount, ltmProtected: 0, strategy: 'skip_below_threshold', ts: Date.now(), totalDevoured: this.totalDevoured });
+      return { skipped: true, merged: [], nodes: nodes || [], survivors: nodes || [], count: inputCount, devoured: [], devoured_count: 0, before: inputCount, after: inputCount, clusterCount: 0, strategy: 'skip_below_threshold' };
     }
 
     const allLTM = nodes.every(n => (n.mu || 0) >= 0.9998);
     if (allLTM) {
       this.skipped = true;
-      const result = {
-        skipped: true,
-        merged: [],
-        nodes: nodes,
-        survivors: nodes,
-        count: nodes.length,
-        devoured: 0,
-      devoured_count: 0
-      };
-      this.sweepLog.push({
-        before: nodes.length,
-        ltmProtected: nodes.length,
-        strategy: 'skip_all_ltm',
-        ts: Date.now(),
-        totalDevoured: this.totalDevoured
-      });
-      return result;
+      this.sweepLog.push({ before: nodes.length, ltmProtected: nodes.length, strategy: 'skip_all_ltm', ts: Date.now(), totalDevoured: this.totalDevoured });
+      return { skipped: true, merged: [], nodes: nodes, survivors: nodes, count: nodes.length, devoured: [], devoured_count: 0, before: nodes.length, after: nodes.length, clusterCount: 0, strategy: 'skip_all_ltm' };
     }
 
     this.sweepCount++;
     this.skipped = false;
 
-    const validNodes = nodes.filter(n => {
-      if (n.mu !== undefined) return n.mu >= 0.9995;
-      return true;
-    });
+    // Only nodes at or above the constitutional bar are merged. Everything else
+    // is kept as-is, so no node disappears from state without being archived.
+    const validNodes = nodes.filter(n => n.mu === undefined || n.mu >= 0.9995);
+    const kept = nodes.filter(n => !validNodes.includes(n));
 
     const merged = [];
-    let devoured = 0;
+    const devoured = [];
     for (let i = 0; i < validNodes.length; i += this.batchSize) {
       const batch = validNodes.slice(i, i + this.batchSize);
-      if (batch.length > 0) {
+      if (batch.length >= 2) {
         merged.push(mergeCluster(batch));
-        devoured += batch.length;
+        devoured.push(...batch);
         this.totalDevoured += batch.length;
+      } else {
+        kept.push(...batch);
       }
     }
 
+    const survivors = [...kept, ...merged];
     const result = {
       skipped: false,
       merged: merged,
-      nodes: validNodes,
-      survivors: validNodes,
-      count: validNodes.length,
+      nodes: survivors,
+      survivors: survivors,
+      count: survivors.length,
       devoured: devoured,
-      devoured_count: devoured
+      devoured_count: devoured.length,
+      before: inputCount,
+      after: survivors.length,
+      clusterCount: merged.length,
+      strategy: 'merge'
     };
 
-    this.sweepLog.push({
-      before: nodes.length,
-      ltmProtected: nodes.length - validNodes.length,
-      strategy: 'merge',
-      ts: Date.now(),
-      totalDevoured: this.totalDevoured
-    });
-
+    this.sweepLog.push({ before: inputCount, ltmProtected: kept.length, strategy: 'merge', ts: Date.now(), totalDevoured: this.totalDevoured });
     return result;
   }
 

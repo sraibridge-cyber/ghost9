@@ -144,8 +144,8 @@ const routes = {
     if (n === 0)       advice = 'GHOST kernel is empty. Begin devouring with POST /devour.';
     else if (n < 4)    advice = `Early kernel (n=${n}). Feed high-coherence entries to seed the Tesseract.`;
     else if (wc.magnitude < 1.0) advice = `Pre-unity phase. ${Math.ceil(16.52 - n)} entries to unity crossing at n≈17.`;
-    else if (Math.abs(wc.phase_deg - 45) < 5) advice = `Phase ≈ 45°: equal-component balance. Kernel is harmonically centered.`;
-    else advice = `n=${n}, |W|=${wc.magnitude.toFixed(5)}, φ=${wc.phase_deg.toFixed(2)}°. Carrier: ${wc.freq_mhz.toFixed(3)} MHz.`;
+    else if (Math.abs(wc.phase - 45) < 5) advice = `Phase ≈ 45°: equal-component balance. Kernel is harmonically centered.`;
+    else advice = `n=${n}, |W|=${wc.magnitude.toFixed(5)}, φ=${wc.phase.toFixed(2)}°.`;
 
     return json(res, {
       n, advice, whitlock: wc, stm_count: stm, ltm_count: ltm,

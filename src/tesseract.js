@@ -127,3 +127,52 @@ module.exports = {
   getFaceCount,
   getCellCount
 };
+
+// --- Compatibility API used by ghost_face.js and ghost_kernel.js (review fix) ---
+function routeVertex(scores) {
+  return assignVertex(scores);
+}
+
+function vertexDistribution(nodes) {
+  const dist = {};
+  for (const v of TESSERACT_VERTICES) dist[v] = 0;
+  for (const n of nodes || []) {
+    if (n && Object.prototype.hasOwnProperty.call(dist, n.vertex)) dist[n.vertex]++;
+  }
+  return dist;
+}
+
+function dominantVertex(nodes) {
+  const dist = vertexDistribution(nodes);
+  let best = null;
+  let bestCount = 0;
+  for (const v of TESSERACT_VERTICES) {
+    if (dist[v] > bestCount) { best = v; bestCount = dist[v]; }
+  }
+  return best;
+}
+
+function vertexNeighbors(vertex) {
+  return isValidVertex(vertex) ? neighbors(vertex) : [];
+}
+
+function tesseractEdges() {
+  const edges = [];
+  for (let i = 0; i < TESSERACT_VERTICES.length; i++) {
+    for (let j = i + 1; j < TESSERACT_VERTICES.length; j++) {
+      if (distance(TESSERACT_VERTICES[i], TESSERACT_VERTICES[j]) === 1) {
+        edges.push([TESSERACT_VERTICES[i], TESSERACT_VERTICES[j]]);
+      }
+    }
+  }
+  return edges;
+}
+
+Object.assign(module.exports, {
+  VERTICES: TESSERACT_VERTICES,
+  routeVertex,
+  vertexDistribution,
+  dominantVertex,
+  vertexNeighbors,
+  tesseractEdges,
+});
