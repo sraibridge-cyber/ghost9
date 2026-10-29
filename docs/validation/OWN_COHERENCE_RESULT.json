@@ -1,0 +1,23 @@
+{
+  "sealed_sha256": "f59a8a5f8cf18e2b4ea1907b87ae80481df49ab4603e166baf17f4348a11859c",
+  "t": 0.6571888682189045,
+  "weights_std": [
+    2.6721,
+    -0.3421,
+    -0.2613,
+    -0.0532
+  ],
+  "bias": 1.7231,
+  "training_balanced_accuracy": 0.8709,
+  "nonauthor_auc": 0.7856,
+  "nonauthor_balanced_accuracy": 0.6125,
+  "nonauthor_negatives_caught": 0.275,
+  "prose_flagged": 0.05,
+  "targets": {
+    "auc_min": 0.9,
+    "balanced_accuracy_min": 0.8,
+    "prose_flagged_max": 0.05
+  },
+  "pass": false,
+  "note": "Second execution of the pre-registered run. The first crashed on JSON serialization after computing the same values."
+}
