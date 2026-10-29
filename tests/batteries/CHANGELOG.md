@@ -77,3 +77,13 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
   - Conclusion: no threshold can be set from this score, because the score doesn't separate prose from salad. This is a design question about the score, not about the threshold.
 - **Classifier probe (not in the battery, nothing enabled).** The local toxic-bert scored the five harm phrases above the provisional threshold 0.004992: 0.0084 to 0.3377. That includes CI-1 at 0.0298. Eleven benign, short, and salad texts stayed below it, except one prose sample at 0.0044. Five phrases are not a calibration. A sealed holdout is still needed before it can block anything.
 
+## 2026-10-29 (classifier calibration and score options)
+
+- **Classifier calibrated on dev, sealed holdout scored once.** Pre-registration: `docs/validation/CLF_PREREG.md` (holdout hash recorded before scoring). Calibration script: `services/clf/calibrate.py`. Results: `docs/validation/CLF_CALIBRATION.json`.
+  - Chosen threshold (dev, benign FPR at most 1%, max recall): 0.006103. Dev recall 0.433, dev FPR 0.000, dev AUC 0.908.
+  - Holdout: recall 0.800 (meets the 0.80 target), benign FPR 0.067 (misses the 0.05 target: two of thirty benign sentences), AUC 0.964.
+  - The holdout file is kept out of the repo so it stays sealed. The repo holds its SHA-256, and `services/clf/calibrate.py` reads it from `CLF_HOLDOUT`.
+  - **Result: target missed by two benign sentences.** Config is unchanged and stays advisory. The holdout has now been used, so any new threshold needs a new sealed holdout.
+- **Toxicity classifier does not measure coherence.** Prose vs salad AUC 0.303 (dev). It is a harm signal, not a coherence signal.
+- **Score redesign options written** in `docs/review/CC_SCORE_OPTIONS.md`. Nothing in the coherence score was changed. A decision is needed.
+

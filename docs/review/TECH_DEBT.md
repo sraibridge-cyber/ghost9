@@ -91,3 +91,8 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **G (canonical TAU): measured, not set.** `tests/batteries/tau_empirical_battery.js` is red. The CC score doesn't separate prose from word salad (dev AUC 0.64, holdout AUC 0.50). No threshold can be chosen from it. Decision needed: redesign the score, or change what the battery measures. The threshold can't be fixed first.
 - **K (classifier as harm signal): probed, not validated.** Five harm phrases, including CI-1, score above the provisional threshold 0.004992, and the benign and salad samples mostly score below it. Needs a new sealed holdout before it can block (`config/clf.json` is still marked provisional).
 
+## Update 2026-10-29 (classifier and score)
+
+- **K (classifier as harm signal): calibrated, target missed.** Holdout recall 0.80 (target met), holdout benign FPR 0.067 (target 0.05, missed by two sentences). Threshold 0.006103 from dev. Holdout now used, so a new threshold needs a new sealed holdout. Config stays advisory. See `docs/validation/CLF_CALIBRATION.json`.
+- **G (canonical TAU): blocked by the score.** The coherence score cannot separate prose from salad (AUC 0.64 dev, 0.50 holdout). The toxicity classifier can't measure coherence either (AUC 0.30). Options are in `docs/review/CC_SCORE_OPTIONS.md`. Decision needed. Recommendation: option C (pinned local language model perplexity).
+
