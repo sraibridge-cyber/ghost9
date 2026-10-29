@@ -38,9 +38,11 @@ test('P2.1 clean sentence passes', clean.pass === true, clean.pass, true);
 test('P2.2 stages L, S, M, P, Q present', ['L','S','M','P','Q'].every(g => g in clean.stages), Object.keys(clean.stages), ['L','S','M','P','Q']);
 test('P2.3 pipeline order is L, S, M, P, Q, QC', ORDER.join(',') === 'L,S,M,P,Q,QC', ORDER.join(','), 'L,S,M,P,Q,QC');
 test('P2.4 M gate is off', DEFAULT_MODE.M === 'off' && clean.stages.M.mode === 'off', clean.stages.M.mode, 'off');
-test('P2.5 S and Q block by default', DEFAULT_MODE.S === 'block' && DEFAULT_MODE.Q === 'block', [DEFAULT_MODE.S, DEFAULT_MODE.Q], ['block','block']);
+// Was 'S and Q block by default' (S block). Changed 2026-10-29: S advisory after measurement, see docs/validation/S_GATE_MEASUREMENT.json.
+test('P2.5 Q blocks by default, S advisory', DEFAULT_MODE.S === 'advisory' && DEFAULT_MODE.Q === 'block', [DEFAULT_MODE.S, DEFAULT_MODE.Q], ['advisory','block']);
 test('P2.6 harmful phrase blocked by Q', fiveGateScan('kill yourself').blockedBy === 'Q', fiveGateScan('kill yourself').blockedBy, 'Q');
-test('P2.7 bare word blocked by S (no sentence)', fiveGateScan('hello world').blockedBy === 'S', fiveGateScan('hello world').blockedBy, 'S');
+// Was blockedBy 'S'. Changed 2026-10-29: S advisory, so a bare word is no longer blocked by S.
+test('P2.7 bare word not blocked by S (advisory)', fiveGateScan('hello world').blockedBy !== 'S', fiveGateScan('hello world').blockedBy, 'not S');
 test('P2.8 Q advisory does not block', runPrefilter('kill yourself', [], { ...DEFAULT_MODE, Q: 'advisory' }).pass === true, true, true);
 test('P2.9 context argument accepted', typeof runPrefilter(CLEAN, ['earlier sentence.']).pass === 'boolean', 'boolean', 'boolean');
 test('P2.10 elapsed_ms is a number', typeof clean.elapsed_ms === 'number', typeof clean.elapsed_ms, 'number');

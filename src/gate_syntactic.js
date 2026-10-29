@@ -16,6 +16,9 @@ const SUBJECT = new Set(['NN', 'NNS', 'NNP', 'NNPS', 'PRP', 'CD', 'EX', 'WP', 'J
 // A past participle directly after a noun is usually a simple past the tagger mislabelled.
 const SUBJECT_HEAD = new Set(['NN', 'NNS', 'NNP', 'NNPS', 'PRP']);
 const VERB = /^VB/;
+// Auxiliaries and modals stack legitimately ("had been restored", "will have gone"), so they never make a verb pile.
+const AUX = new Set(['be', 'been', 'being', 'am', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'do', 'does', 'did',
+  'will', 'would', 'shall', 'should', 'can', 'could', 'may', 'might', 'must']);
 
 function punctuationBalanced(text) {
   const pairs = [['(', ')'], ['[', ']'], ['{', '}']];
@@ -39,12 +42,15 @@ function checkSentence(tags) {
   let firstFinite = -1;
   for (let i = 0; i < tags.length; i++) { if (finiteAt(i)) { firstFinite = i; break; } }
   if (firstFinite < 0 && !imperative) v.push('missing_verb');
-  if (firstFinite >= 0 && !imperative && !tags.slice(0, firstFinite).some(t => SUBJECT.has(t.pos))) {
+  // Questions invert: "How do I file..." has the subject after the auxiliary. That is well formed.
+  const inverted = firstFinite >= 0 && AUX.has(tags[firstFinite].word) &&
+    tags.slice(firstFinite + 1).some(t => SUBJECT.has(t.pos));
+  if (firstFinite >= 0 && !imperative && !inverted && !tags.slice(0, firstFinite).some(t => SUBJECT.has(t.pos))) {
     v.push('missing_subject');
   }
   let run = 0;
   for (const t of tags) {
-    run = VERB.test(t.pos) ? run + 1 : 0;
+    run = VERB.test(t.pos) && !AUX.has(t.word) ? run + 1 : 0;
     if (run >= 3) { v.push('verb_pile'); break; }
   }
   for (let i = 1; i < tags.length; i++) {

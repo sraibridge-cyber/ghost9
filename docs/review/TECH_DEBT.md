@@ -164,3 +164,9 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **Z (harm-vector stage is advisory, validated only on the author's data): open.** config/hv.json mode advisory. Blocking needs approval, and holdout v4 was written by the same author as dev v4.
 - **AA (threshold ordering between QC and HV): open.** The live QC block threshold is 0.007265. The combined rule's classifier threshold is 0.001236. HV only reaches sentences QC already passed, so the combined rule catches only the band 0.001236 to 0.007265 today. Before HV is promoted to block, decide the ordering explicitly: replace the QC threshold with the combined rule, or keep both and say which one blocks.
 
+## Update 2026-10-29 (S gate measured and moved to advisory)
+
+- **Y (S gate false blocks): closed, with a trade-off.** Grammar fixes (abbreviation-safe splitter, auxiliaries not counted as verb piles, subject-after-auxiliary in questions) cut benign flags from 3.4% to 1.5% on dev v4, 3% to 2% on holdout v3, 4% to 0% on holdout v4. S then moved to advisory. Evidence: docs/validation/S_GATE_MEASUREMENT.json.
+- **Y2 (salad detection regressed): open.** S used to catch 2 of 31 salad sentences in the prefilter, and now catches none. The prefilter integration battery's incoherent and discourse rows went from 2/31 and 1/20 to 0/31 and 0/20. Salad detection now rests on the Coherence Calculus score, which is red (TAU battery, AUC 0.64 dev and 0.50 holdout). Fixing this is part of the CC work, not the S gate.
+- **Y3 (missing_verb from tagger noun/verb confusion): open, residual 1.5%.** "cut" and "closes" get tagged as nouns, so S still flags some benign prose. This is a limit of tag-based checks.
+

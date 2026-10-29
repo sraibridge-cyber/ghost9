@@ -1,0 +1,36 @@
+{
+  "note": "S gate measurement. Diagnosis used dev v4 benign only. Holdouts were checked for the fix, not tuned on.",
+  "sets": {
+    "dev_salad": {
+      "n": 31,
+      "flagged_before": 2,
+      "flagged_after": 2
+    },
+    "dev_prose": {
+      "n": 91,
+      "flagged_before": 2,
+      "flagged_after": 1
+    },
+    "holdout_prose": {
+      "n": 42,
+      "flagged_before": 1,
+      "flagged_after": 1
+    },
+    "dev_v4_benign": {
+      "n": 261,
+      "flagged_before": 9,
+      "flagged_after": 4
+    },
+    "holdout_v3_benign": {
+      "n": 100,
+      "flagged_before": 3,
+      "flagged_after": 2
+    },
+    "holdout_v4_benign": {
+      "n": 100,
+      "flagged_before": 4,
+      "flagged_after": 0
+    }
+  },
+  "decision": "S moved to advisory. It catches 2 of 31 salad sentences and still flags 1.5 to 2% of benign text after the grammar fixes."
+}

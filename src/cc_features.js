@@ -19,7 +19,7 @@ const CONNECTIVE = new Set(['CC', 'IN']);
 
 function splitSentences(text) {
   return text
-    .split(/(?<=[.!?])\s+|\n+/)
+    .split(/(?<=[.!?])\s+(?=[A-Z0-9"'(\[])|\n+/)
     .map(s => s.trim())
     .filter(s => /[A-Za-z]/.test(s));
 }

@@ -7,7 +7,7 @@
 //
 // Each gate reports a verdict. A verdict only stops the pipeline when that gate
 // is in 'block' mode. DEFAULT_MODE is PROVISIONAL. S (now tag-based, no lists)
-// blocks; M is off because its lists were removed; P is advisory; L is advisory;
+// is advisory (moved from block after measurement); M is off because its lists were removed; P is advisory; L is advisory;
 // Q blocks; QC is advisory until config/clf.json is validated on a sealed holdout.
 // See docs/review/measured-coherence.md and docs/review/prefilter.md.
 // =====================================================================
@@ -22,7 +22,9 @@ const { classify, config: CLF } = require('./clf_client');
 const { postNll, config: LMCFG } = require('./lm_client');
 const { margin: hvMargin, config: HVCFG } = require('./hv_client');
 
-const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode, HV: HVCFG.mode });
+// S was 'block' until 2026-10-29. Moved to advisory after measurement: it flagged 1.5 to 4% of benign
+// sentences and only 2 of 31 salad sentences (docs/validation/S_GATE_MEASUREMENT.json).
+const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'advisory', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode, HV: HVCFG.mode });
 const ORDER = ['L', 'S', 'M', 'P', 'Q', 'QC'];
 
 function runPrefilter(text, context = [], mode = DEFAULT_MODE) {

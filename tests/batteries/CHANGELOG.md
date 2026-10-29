@@ -201,3 +201,13 @@ Pre-registration `docs/validation/CLF_PREREG_V4.md` written before the v4 holdou
 - `src/prefilter.js`: HV stage after QC and LM. Flags only when classifier score >= 0.001236 and margin >= 0.092375. Advisory, never blocks. Fails open. Refuses block mode in this build.
 - Tests: `tests/regression/harm_vector_service_contract.py` (13 checks), `tests/regression/prefilter_hv_advisory.js` (7 checks). All JS suites pass.
 
+## 2026-10-29 (S gate: grammar fixes, moved to advisory)
+
+- `src/cc_features.js`: sentence splitter splits only before an uppercase, digit, or quote. "8 p.m. tonight" no longer splits.
+- `src/gate_syntactic.js`: auxiliaries are not counted as verb piles; subject-after-auxiliary is accepted in questions.
+- `src/prefilter.js`: S moved from block to advisory (old value in a comment). Evidence in docs/validation/S_GATE_MEASUREMENT.json.
+- `tests/regression/quarantine_live.sh`: the sync-gate sentence is now one Q stops ('gate_Q', was 'gate_S').
+- `tests/batteries/five_gate_battery.js`: P2.5 and P2.7 updated, old values noted.
+- All JS regression suites pass. quarantine_live.sh: 11 of 11. five_gate_battery: 40 of 40.
+- Known red, not changed: prefilter integration battery (incoherent and discourse rows), five-gate empirical battery.
+

@@ -19,8 +19,9 @@ H=$(curl -s -m 60 -X POST http://127.0.0.1:7766/devour -H 'Content-Type: applica
 check "harm sentence stored as pending, not admitted to the served set" "$(echo "$H" | j "d.get('screen')")" "pending"
 B=$(curl -s -m 60 -X POST http://127.0.0.1:7766/devour -H 'Content-Type: application/json' -d '{"text":"The city council voted to expand the bike lanes along the river next spring after months of public hearings."}')
 check "benign sentence stored as pending" "$(echo "$B" | j "d.get('screen')")" "pending"
-G=$(curl -s -m 60 -X POST http://127.0.0.1:7766/devour -H 'Content-Type: application/json' -d '{"text":"The quick brown fox jumps over the lazy dog"}')
-check "sync-gate block is held, not dropped" "$(echo "$G" | j "d.get('disposition')")" "gate_S"
+G=$(curl -s -m 60 -X POST http://127.0.0.1:7766/devour -H 'Content-Type: application/json' -d '{"text":"I will find you and make you pay for this."}')
+# Q is the block-mode sync gate now. S moved to advisory on 2026-10-29, so this used to be gate_S.
+check "sync-gate block is held, not dropped" "$(echo "$G" | j "d.get('disposition')")" "gate_Q"
 GID=$(echo "$G" | j "d.get('id')")
 check "nothing pending is served by /nodes" "$(curl -s -m 10 http://127.0.0.1:7766/nodes | j "d['total']")" "0"
 echo "rescreen: classifier comes up"
@@ -30,7 +31,7 @@ R=$(curl -s -m 120 -X POST http://127.0.0.1:7766/rescreen)
 check "rescreen quarantines the harm sentence" "$(echo "$R" | j "d['quarantined']")" "1"
 check "rescreen passes the benign sentence" "$(echo "$R" | j "d['passed']")" "1"
 check "/nodes serves only the passed sentence" "$(curl -s -m 10 http://127.0.0.1:7766/nodes | j "d['total']")" "1"
-check "logs carry no text of held or pending sentences" "$(curl -s -m 10 http://127.0.0.1:7766/logs | python3 -c "import json,sys; t=json.load(sys.stdin)['lines']; print(sum('breaks your legs' in l or 'quick brown fox' in l for l in t))")" "0"
+check "logs carry no text of held or pending sentences" "$(curl -s -m 10 http://127.0.0.1:7766/logs | python3 -c "import json,sys; t=json.load(sys.stdin)['lines']; print(sum('breaks your legs' in l or 'make you pay for this' in l for l in t))")" "0"
 echo "override: a human releases the held sync-gate block"
 O=$(curl -s -m 60 -X POST http://127.0.0.1:7766/quarantine/release -H 'Content-Type: application/json' -d "{\"id\":\"$GID\",\"override\":true}")
 check "override release admits the held sentence" "$(echo "$O" | j "d['released']")" "True"
