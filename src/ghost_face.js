@@ -25,6 +25,7 @@ const { runPrefilterAsync, DEFAULT_MODE } = require('./prefilter');
 const { Readable } = require('stream');
 
 const PORT         = 7766;
+const { readSealedJson, writeSealedJson } = require('./at_rest');
 const DATA_DIR     = path.join(__dirname, '..', 'data');
 const STATE_FILE   = path.join(DATA_DIR, 'state.json');
 const ARCHIVE_FILE = path.join(DATA_DIR, 'archive.json');
@@ -51,13 +52,12 @@ function atomicWrite(filePath, data) {
 function loadState() {
   ensureDataDir();
   if (!fs.existsSync(STATE_FILE)) return { nodes: [], merkle_root: null, n: 0 };
-  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); }
-  catch { return { nodes: [], merkle_root: null, n: 0 }; }
+  return readSealedJson(STATE_FILE, null) || { nodes: [], merkle_root: null, n: 0 };
 }
 
 function saveState(state) {
   ensureDataDir();
-  atomicWrite(STATE_FILE, JSON.stringify(state, null, 2));
+  writeSealedJson(STATE_FILE, state);
 }
 
 function loadSpatialWeb() {
@@ -88,11 +88,11 @@ function archiveNodes(nodes) {
   ensureDataDir();
   let existing = [];
   if (fs.existsSync(ARCHIVE_FILE)) {
-    try { existing = JSON.parse(fs.readFileSync(ARCHIVE_FILE, 'utf8')); } catch {}
+    existing = readSealedJson(ARCHIVE_FILE, []);
   }
   const ts = Date.now();
   const records = nodes.map(n => ({ ...n, archived_at: ts }));
-  atomicWrite(ARCHIVE_FILE, JSON.stringify([...existing, ...records], null, 2));
+  writeSealedJson(ARCHIVE_FILE, [...existing, ...records]);
 }
 
 function computeMerkle(nodes) {
@@ -403,7 +403,7 @@ const routes = {
 
     let archiveCount = 0;
     if (fs.existsSync(ARCHIVE_FILE)) {
-      try { archiveCount = JSON.parse(fs.readFileSync(ARCHIVE_FILE, 'utf8')).length; } catch {}
+      archiveCount = readSealedJson(ARCHIVE_FILE, []).length;
     }
 
     return json(res, {
@@ -508,7 +508,7 @@ const routes = {
     ensureDataDir();
     let archive = [];
     if (fs.existsSync(ARCHIVE_FILE)) {
-      try { archive = JSON.parse(fs.readFileSync(ARCHIVE_FILE, 'utf8')); } catch {}
+      archive = readSealedJson(ARCHIVE_FILE, []);
     }
     const url    = new URL(req.url, `http://localhost:${PORT}`);
     const limit  = Math.min(parseInt(url.searchParams.get('limit') || '20'), 100);

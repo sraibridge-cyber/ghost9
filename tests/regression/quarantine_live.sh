@@ -12,7 +12,7 @@ check() { if [ "$2" = "$3" ]; then echo "  ok    $1"; else echo "  FAIL  $1 (got
 j() { python3 -c "import json,sys; d=json.load(sys.stdin); print($1)"; }
 stop_all() { for p in /proc/[0-9]*; do c=$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null); case "$c" in *ghost_face*|*clf_service*) kill -9 "$(basename "$p")" 2>/dev/null;; esac; done 2>/dev/null; }
 stop_all; sleep 1
-(cd "$S" && node src/ghost_face.js > "$S/kernel.log" 2>&1 &)
+(cd "$S" && GHOST9_KEY_FILE="$S/at_rest.key" node src/ghost_face.js > "$S/kernel.log" 2>&1 &)
 sleep 8
 echo "device-only: classifier not running"
 H=$(curl -s -m 60 -X POST http://127.0.0.1:7766/devour -H 'Content-Type: application/json' -d '{"text":"I hope someone breaks your legs for what you did to my brother."}')
@@ -37,6 +37,7 @@ O=$(curl -s -m 60 -X POST http://127.0.0.1:7766/quarantine/release -H 'Content-T
 check "override release admits the held sentence" "$(echo "$O" | j "d['released']")" "True"
 check "/nodes now serves the released sentence too" "$(curl -s -m 10 http://127.0.0.1:7766/nodes | j "d['total']")" "2"
 check "the harm sentence is still held in quarantine" "$(curl -s -m 10 http://127.0.0.1:7766/quarantine | j "d['held']")" "1"
+check "state file on disk holds no plaintext held text" "$(python3 -c "import sys;t=open(sys.argv[1],errors='ignore').read();print(sum(s in t for s in ['breaks your legs','make you pay for this']))" "$S/data/state.json")" "0"
 stop_all
 rm -rf "$S"
 exit $fail

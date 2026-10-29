@@ -243,6 +243,7 @@ async function waitFor(url, ms = 8000) {
 async function runE2E() {
   console.log('\nEnd to end: FACE :7766 and KERNEL :7767 on a scratch copy');
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'ghost9-e2e-'));
+  process.env.GHOST9_KEY_FILE = path.join(scratch, 'at_rest.key');
   copyDir(SRC, path.join(scratch, 'src'));
   copyDir(path.join(ROOT, 'config'), path.join(scratch, 'config'));
   // This run covers the coherence path. No classifier is running here, so the scratch copy uses advisory mode.
@@ -282,7 +283,7 @@ async function runE2E() {
     assert.strictEqual(admitted, texts.length, 'every test sentence should pass the coherence gate');
     console.log(`  ok    POST /devour: ${admitted}/${texts.length} admitted, no 500s`);
 
-    const state = JSON.parse(fs.readFileSync(path.join(scratch, 'data', 'state.json'), 'utf8'));
+    const state = require(path.join(scratch, 'src', 'at_rest')).readSealedJson(path.join(scratch, 'data', 'state.json'), null);
     assert.ok(state.nodes.length > 0, 'state.json should hold nodes after ingest');
     console.log(`  ok    state.json holds ${state.nodes.length} nodes after the sweeps`);
 

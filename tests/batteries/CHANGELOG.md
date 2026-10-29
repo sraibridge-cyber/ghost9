@@ -211,3 +211,12 @@ Pre-registration `docs/validation/CLF_PREREG_V4.md` written before the v4 holdou
 - All JS regression suites pass. quarantine_live.sh: 11 of 11. five_gate_battery: 40 of 40.
 - Known red, not changed: prefilter integration battery (incoherent and discourse rows), five-gate empirical battery.
 
+## 2026-10-29 (at-rest encryption, threshold ordering decided)
+
+- `src/at_rest.js`: AES-256-GCM sealing. Key file 0600, created on first use. Tampered or corrupt files throw.
+- `src/ghost_face.js`: state and archive read and write through at_rest. Vectors and logs unchanged.
+- `tests/regression/at_rest.js`: 8 checks, all pass.
+- `tests/regression/run.js`: scratch run uses its own key file and reads sealed state through the module.
+- `tests/regression/quarantine_live.sh`: 12 checks, including no plaintext held text in the state file on disk.
+- Decision: QC block stays at 0.007265; harm-vector check stays advisory.
+
