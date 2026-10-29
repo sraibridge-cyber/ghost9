@@ -85,3 +85,9 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 | I | UI endpoints hard-coded to LAN addresses (`ui/ghost_api.js`) | Decision needed |
 | J | Five-gate S gate blocks the benign pangram "The quick brown fox..." | Open, found while probing |
 
+## Update 2026-10-29 (later)
+
+- **I (UI LAN addresses): closed.** `ui/ghost_api.js` uses `localhost`. The UI reaches only the device it runs on.
+- **G (canonical TAU): measured, not set.** `tests/batteries/tau_empirical_battery.js` is red. The CC score doesn't separate prose from word salad (dev AUC 0.64, holdout AUC 0.50). No threshold can be chosen from it. Decision needed: redesign the score, or change what the battery measures. The threshold can't be fixed first.
+- **K (classifier as harm signal): probed, not validated.** Five harm phrases, including CI-1, score above the provisional threshold 0.004992, and the benign and salad samples mostly score below it. Needs a new sealed holdout before it can block (`config/clf.json` is still marked provisional).
+

@@ -66,3 +66,14 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - `ui_empirical_battery` L9.1.3: `ui/ghost_api.js` hard-codes LAN addresses (`192.0.0.8`), not localhost. Decision needed.
 - `five_gate_empirical_battery` (62) and `prefilter_integration_battery` (paraphrase 16.7%): known gaps, documented.
 
+## 2026-10-29 (later): UI on localhost, TAU measured, classifier probed
+
+- **UI endpoints are `localhost`** (`ui/ghost_api.js`). They were hard-coded LAN addresses (`192.0.0.8`). The UI should only reach the kernel on the device it's installed on. `ui_empirical_battery` is now 399/0.
+- **Added `tests/batteries/tau_empirical_battery.js`.** It calibrates on dev (Youden J) and scores the holdout once. Targets were fixed before the run: AUC >= 0.80 on dev and holdout, holdout balanced accuracy >= 0.80. **Result: red, as a finding.**
+  - Dev: AUC 0.641. Holdout (word-shuffled prose as negatives): AUC 0.503, 95% CI [0.375, 0.623].
+  - Dev-optimal TAU is 0.9849 (J = 0.357), but holdout balanced accuracy is 0.50 there.
+  - Code TAU 0.943 accepts every prose and salad text. The gate blocks nothing on these sets.
+  - Per domain, dev AUC: D1 0.89. D2, D5, D6, D8 are near 0.55. D3, D4, D7 are inverted (salad scores higher).
+  - Conclusion: no threshold can be set from this score, because the score doesn't separate prose from salad. This is a design question about the score, not about the threshold.
+- **Classifier probe (not in the battery, nothing enabled).** The local toxic-bert scored the five harm phrases above the provisional threshold 0.004992: 0.0084 to 0.3377. That includes CI-1 at 0.0298. Eleven benign, short, and salad texts stayed below it, except one prose sample at 0.0044. Five phrases are not a calibration. A sealed holdout is still needed before it can block anything.
+
