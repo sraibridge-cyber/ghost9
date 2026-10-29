@@ -338,17 +338,15 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: serve from cache when offline
+// Fetch: bundled assets only. No network fallback. A cache miss returns 404,
+// so the worker never reaches a third party (SOVEREIGNTY.md rule 1).
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) return response;
-      return fetch(event.request).catch(() => {
-        // Offline fallback
-        return new Response('GHOST offline mode — cache only', {
-          status: 503,
-          headers: { 'Content-Type': 'text/plain' }
-        });
+      return new Response('GHOST: asset not bundled', {
+        status: 404,
+        headers: { 'Content-Type': 'text/plain' }
       });
     })
   );

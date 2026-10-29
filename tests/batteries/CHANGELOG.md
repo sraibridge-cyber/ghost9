@@ -26,6 +26,15 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
   - Conclusion: WordNet hypernyms do not capture paraphrased harm intent. A harm-intent signal needs something that reads context, not word-level ancestry. The local classifier (QC) scored paraphrases higher earlier (AUC 0.93), so it is the next candidate.
 - **Added** four M-gate aggregate checks to `five_gate_empirical_battery.js`. They fail and are reported as known gaps.
 
+- **Service worker is cache-only** (`src/ghost_persistence.js`). A cache miss returns 404 and never calls the network (SOVEREIGNTY rule 1). Regression test: `tests/regression/sw_offline.js` (4/4).
+- **Updated** `tests/batteries/persistence_empirical_battery.js` (255 tests, exit 0). Its require paths were fixed (`./src/` to `../../src/`). Expectations changed, with old values kept in comments:
+  - P1.2.15, P5.3.4: offline message text now 'GHOST: asset not bundled'.
+  - P2.1.11: cache miss returns 404, not 503.
+  - P2.3.2: no network fallback is expected now. Old: `fetch(event.request)` present.
+  - P2.3.3: no offline catch is expected now.
+  - P1.3.9, P3.3.2: CC version is v3.2. Old: '3.0'.
+  - P1.3.10, P3.3.3: UI docs test count claim is 207/207. Old: 315/315. This count is hard-coded, not measured (see TECH_DEBT).
+
 ## Not yet audited
 
 - `tests/batteries/backend_empirical_battery.js`, `backend_empirical_battery_v2.js`, `persistence_empirical_battery.js`: read `test_tmp/`. Audit before `test_tmp/` is archived.

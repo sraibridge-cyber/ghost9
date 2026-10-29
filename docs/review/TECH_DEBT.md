@@ -4,6 +4,7 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 
 ## Closed this round
 
+- Service worker made cache-only; persistence battery updated (255 tests, exit 0).
 - Model integrity moved from SHA-256 to SHA3-512 to match the Ghost kernel.
 - WordNet added as a second required Node dependency (Kyle's decision, 2026-10-28). README updated.
 - Gate router rewritten for the five-gate design; three-gate battery archived; five-gate battery added (40/40). Batteries updated in the same sprint, per Kyle's rule.
@@ -34,7 +35,8 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 | # | Item | Status | Needs |
 |---|------|--------|-------|
 | S1 | ~~The model is fetched from Hugging Face at setup.~~ | Closed 2026-10-28 | Model is stored as 5 chunks in `models/toxic-bert/` with a SHA3-512 manifest. The fetch script and the Gradle step assemble and verify it. Nothing is downloaded. Gradle step not yet built in CI. |
-| S2 | `src/ghost_persistence.js:346` falls back to the network on a cache miss. | Open | Confirm the core works offline, or serve from a bundled cache only. |
+| S2 | ~~Service worker fell back to the network on a cache miss.~~ | Closed 2026-10-28 | Worker is cache-only, returns 404 on a miss. Regression test `tests/regression/sw_offline.js`. |
+| S6 | UI self-documentation hard-codes test counts (`generateUIDocs`: CC '207/207', etc.). They are claims, not measured results. | Open | Generate counts from the battery runs, or drop the field. |
 | S3 | GitHub Actions actions are pinned by tag, not by commit SHA. | Open | Pin each action to a commit SHA. The workflow file needs a web UI edit. |
 | S4 | Android build inputs come from Maven Central and Google Maven. | Open | Vendor the AARs or mirror them in the repo. Decide which. |
 | S5 | GitHub is the only copy of the repo and of the releases. | Open | A second copy under the user's control. |

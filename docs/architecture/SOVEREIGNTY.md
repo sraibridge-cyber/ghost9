@@ -21,7 +21,7 @@ Once Ghost9 is installed, it belongs to the person who installed it. No outside 
 | Outbound URLs in `src/` and `services/` | The Hugging Face fetch is removed. The model is assembled from repo chunks. | Pass (after this push) |
 | Loopback enforcement | `clf_client.js` refuses non-loopback URLs at load. `clf_service.py` refuses non-loopback binds. | Pass |
 | License checks, remote config, telemetry in `src/` | None found. | Pass |
-| Service-worker fetch in `src/ghost_persistence.js:346` | Falls back to the network when the cache misses. | Open: confirm core works offline, or serve from bundled cache only. |
+| Service-worker fetch in `src/ghost_persistence.js` | Cache-only now. A miss returns 404 and makes no network call. Regression test `tests/regression/sw_offline.js`. | Pass |
 | GitHub Actions pinning | `actions/checkout@v4`, `setup-java@v4`, `setup-gradle@v4`, `upload-artifact@v4`. Pinned by tag, not by commit SHA. | Open: pin by SHA. |
 | Android build inputs | Maven Central (`onnxruntime-android`) and Google Maven (Android Gradle Plugin) at build time. | Open: decide on vendoring or a mirror. |
 | Distribution | GitHub only. | Open: second copy under the user's control. |
