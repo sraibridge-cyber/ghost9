@@ -1,0 +1,14 @@
+{
+  "holdout_sha256": "30fba337a3df0967d73810c29de2873103cfff94680ac7848bd8b98d4652fc57",
+  "threshold": 6.105245113372803,
+  "auc": 1.0,
+  "balanced_accuracy": 1.0,
+  "salad_caught": 1.0,
+  "prose_flagged": 0.0,
+  "targets": {
+    "auc_min": 0.9,
+    "balanced_accuracy_min": 0.8,
+    "prose_flagged_max": 0.05
+  },
+  "pass": true
+}
