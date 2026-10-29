@@ -245,6 +245,7 @@ async function runE2E() {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'ghost9-e2e-'));
   copyDir(SRC, path.join(scratch, 'src'));
   copyDir(path.join(ROOT, 'config'), path.join(scratch, 'config'));
+  fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(scratch, 'node_modules'), 'dir');
 
   const face = spawn(process.execPath, [path.join(scratch, 'src', 'ghost_face.js')], { cwd: scratch, stdio: 'ignore' });
   const kernel = spawn(process.execPath, [path.join(scratch, 'src', 'ghost_kernel.js')], { cwd: scratch, stdio: 'ignore' });
