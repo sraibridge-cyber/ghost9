@@ -1,0 +1,23 @@
+{
+  "model_id": "Xenova/all-MiniLM-L6-v2 (quantized ONNX, mean-pooled, L2-normalized)",
+  "upstream": "Xenova/all-MiniLM-L6-v2, Apache-2.0",
+  "dim": 384,
+  "algorithm": "sha3-512",
+  "note": "Second signal for the harm-vector web. Independent of the toxic-bert classifier.",
+  "files": [
+    {
+      "name": "model_quantized.onnx",
+      "source_path": "onnx/model_quantized.onnx",
+      "size": 22972370,
+      "sha3_512": "ff7640baedc7077dd91bdbd38f709665510156fa3599154be36c975793181de900a4f0f5fd6c9a57bbf608476a4b09e7e888b33f662dae573cc98bc6412aeac9",
+      "sha256": "afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1"
+    },
+    {
+      "name": "tokenizer.json",
+      "source_path": "tokenizer.json",
+      "size": 711661,
+      "sha3_512": "54fb7f92dac17d2a445cc1e22160c54035690c1aa3aa5c475c8104675c3da33b32e4acdd678c512ca88a54cd78ba95fe57f1c269cf10c02a9c5178e9c1968419",
+      "sha256": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0"
+    }
+  ]
+}

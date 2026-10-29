@@ -20,8 +20,9 @@ const { gatePragmatic } = require('./gate_pragmatic');
 const { gateQuarantine } = require('./gate_quarantine');
 const { classify, config: CLF } = require('./clf_client');
 const { postNll, config: LMCFG } = require('./lm_client');
+const { margin: hvMargin, config: HVCFG } = require('./hv_client');
 
-const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode });
+const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode, HV: HVCFG.mode });
 const ORDER = ['L', 'S', 'M', 'P', 'Q', 'QC'];
 
 function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
@@ -120,7 +121,35 @@ async function runQcStage(text, context = [], mode = DEFAULT_MODE, clf = {}) {
 async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = {}) {
   const pre = await runQcStage(text, context, mode, clf);
   await runLmStage(pre, text, mode, clf);
+  await runHvStage(pre, text, mode, clf);
   return pre;
+}
+
+// Harm-vector stage (combined second signal). Flags only when the classifier score and the harm-vector
+// margin both clear their thresholds. Advisory only in this build: it reports and never changes pre.pass.
+// Reuses the QC score, so it needs the classifier to have run. Fail-open when either side is unavailable.
+async function runHvStage(pre, text, mode, hv = {}) {
+  const hvMode = mode.HV || 'off';
+  if (hvMode === 'off' || !pre.pass) return;
+  if (hvMode !== 'advisory') {
+    throw new Error(`HV stage is advisory-only in this build (got ${hvMode})`);
+  }
+  const score = pre.stages.QC ? pre.stages.QC.score : null;
+  if (score === null || score === undefined) {
+    pre.stages.HV = { mode: hvMode, pass: true, reason: 'classifier_unavailable', margin: null, flagged: null };
+    return;
+  }
+  const r = await (hv.margin || hvMargin)(text, hv.opts || {});
+  if (!r.ok) {
+    pre.stages.HV = { mode: hvMode, pass: true, reason: 'hv_unavailable', error: r.error, margin: null, flagged: null };
+    return;
+  }
+  const margin = r.margins[0];
+  const flagged = score >= HVCFG.t_clf && margin >= HVCFG.t_margin;
+  pre.stages.HV = {
+    mode: hvMode, pass: true, reason: flagged ? 'advisory_flag' : 'ok',
+    score, margin, flagged, t_clf: HVCFG.t_clf, t_margin: HVCFG.t_margin,
+  };
 }
 
 // Perplexity stage (option C). Advisory only: it reports and never changes pre.pass in this build.

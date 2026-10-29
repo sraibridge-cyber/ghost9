@@ -1,0 +1,9 @@
+{
+  "url": "http://127.0.0.1:7769",
+  "timeout_ms": 2000,
+  "mode": "advisory",
+  "t_clf": 0.001236,
+  "t_margin": 0.092375,
+  "threshold_status": "combined rule from docs/validation/CLF_PREREG_V4.md (dev v4 selection; holdout v4: recall 0.86, benign FPR 0.02). Advisory until Kyle approves block.",
+  "mode_status": "advisory only in this build. Blocking needs approval and a fresh validation of any learned web (TECH_DEBT W)."
+}

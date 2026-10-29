@@ -192,3 +192,12 @@ Pre-registration `docs/validation/CLF_PREREG_V4.md` written before the v4 holdou
 - `tests/regression/harm_web_incremental.py`: 12 checks, all pass.
 - Not yet wired into the prefilter. The web needs the embedding model bundled first.
 
+## 2026-10-29 (harm-vector stage: bundled model, loopback service, advisory wiring)
+
+- `models/minilm-embed/`: all-MiniLM-L6-v2 (quantized ONNX, 23 MB) and tokenizer, pinned by SHA3-512 in manifest.json.
+- `services/clf/harm_vector_service.py`: loopback service. GET /health, POST /margin, POST /learn (human reviewer required). Request text never logged. Refuses non-loopback binds.
+- `services/clf/seed_harm_web.py`: seeds the web from the committed dev v4 set only, with provenance 'seed:clf_dev_v4'.
+- `src/hv_client.js`, `config/hv.json`: loopback client. Advisory mode.
+- `src/prefilter.js`: HV stage after QC and LM. Flags only when classifier score >= 0.001236 and margin >= 0.092375. Advisory, never blocks. Fails open. Refuses block mode in this build.
+- Tests: `tests/regression/harm_vector_service_contract.py` (13 checks), `tests/regression/prefilter_hv_advisory.js` (7 checks). All JS suites pass.
+

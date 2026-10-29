@@ -158,3 +158,9 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **W (learned vectors can shift thresholds): open.** Learning a vector moves the centroids, so the margin distribution changes. Any threshold used with the learned web must be re-validated on a fresh holdout before it is trusted. The combined rule (CLF_PREREG_V4) was validated on the v4 web only.
 - **X (learning source is human-only): by design.** learn() requires a reviewer id. Keep it that way: learning from the classifier's own flags would let the web train itself on its own mistakes.
 
+## Update 2026-10-29 (harm-vector advisory stage)
+
+- **Y (syntactic gate S false-blocks ordinary sentences): open, in block mode.** S reports "missing_verb" on "The farmers market moves to the courthouse lawn next month." and blocks it. Benign sentences get blocked by a rule-based gate, not only by the classifier. Measure S's benign false-positive rate on a fresh set before trusting it in block mode.
+- **Z (harm-vector stage is advisory, validated only on the author's data): open.** config/hv.json mode advisory. Blocking needs approval, and holdout v4 was written by the same author as dev v4.
+- **AA (threshold ordering between QC and HV): open.** The live QC block threshold is 0.007265. The combined rule's classifier threshold is 0.001236. HV only reaches sentences QC already passed, so the combined rule catches only the band 0.001236 to 0.007265 today. Before HV is promoted to block, decide the ordering explicitly: replace the QC threshold with the combined rule, or keep both and say which one blocks.
+
