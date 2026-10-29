@@ -1,0 +1,133 @@
+{
+  "note": "Research gate test (cc-ss-technical-report-v3 section 4.4): does each domain separate prose from incoherent text? AUC > 0.5 means higher score for prose. Absence = share of texts at the keyword-absence default 0.9997.",
+  "domains": {
+    "D1": {
+      "auc_prose_vs_dev_salad": 0.89,
+      "auc_holdout_prose_vs_kyle": 0.912,
+      "auc_holdout_prose_vs_splice": 0.948,
+      "absence_rate": {
+        "dev_prose": 0,
+        "dev_salad": 0,
+        "holdout_prose": 0,
+        "kyle_negatives": 0,
+        "splice_negatives": 0
+      },
+      "min_max_on_prose": [
+        0.95,
+        0.98
+      ]
+    },
+    "D2": {
+      "auc_prose_vs_dev_salad": 0.557,
+      "auc_holdout_prose_vs_kyle": 0.529,
+      "auc_holdout_prose_vs_splice": 0.516,
+      "absence_rate": {
+        "dev_prose": 0.176,
+        "dev_salad": 0.29,
+        "holdout_prose": 0.143,
+        "kyle_negatives": 0.2,
+        "splice_negatives": 0.175
+      },
+      "min_max_on_prose": [
+        0.9997,
+        0.9999
+      ]
+    },
+    "D3": {
+      "auc_prose_vs_dev_salad": 0.418,
+      "auc_holdout_prose_vs_kyle": 0.652,
+      "auc_holdout_prose_vs_splice": 0.654,
+      "absence_rate": {
+        "dev_prose": 0,
+        "dev_salad": 0.032,
+        "holdout_prose": 0,
+        "kyle_negatives": 0.025,
+        "splice_negatives": 0.025
+      },
+      "min_max_on_prose": [
+        0.96,
+        0.9999
+      ]
+    },
+    "D4": {
+      "auc_prose_vs_dev_salad": 0.454,
+      "auc_holdout_prose_vs_kyle": 0.726,
+      "auc_holdout_prose_vs_splice": 0.646,
+      "absence_rate": {
+        "dev_prose": 0,
+        "dev_salad": 0.032,
+        "holdout_prose": 0,
+        "kyle_negatives": 0,
+        "splice_negatives": 0.025
+      },
+      "min_max_on_prose": [
+        0.96,
+        0.9999
+      ]
+    },
+    "D5": {
+      "auc_prose_vs_dev_salad": 0.588,
+      "auc_holdout_prose_vs_kyle": 0.612,
+      "auc_holdout_prose_vs_splice": 0.61,
+      "absence_rate": {
+        "dev_prose": 0.055,
+        "dev_salad": 0.032,
+        "holdout_prose": 0.048,
+        "kyle_negatives": 0.05,
+        "splice_negatives": 0.075
+      },
+      "min_max_on_prose": [
+        0.96,
+        0.9999
+      ]
+    },
+    "D6": {
+      "auc_prose_vs_dev_salad": 0.551,
+      "auc_holdout_prose_vs_kyle": 0.523,
+      "auc_holdout_prose_vs_splice": 0.488,
+      "absence_rate": {
+        "dev_prose": 0.099,
+        "dev_salad": 0.161,
+        "holdout_prose": 0.095,
+        "kyle_negatives": 0.05,
+        "splice_negatives": 0.1
+      },
+      "min_max_on_prose": [
+        0.96,
+        0.9999
+      ]
+    },
+    "D7": {
+      "auc_prose_vs_dev_salad": 0.373,
+      "auc_holdout_prose_vs_kyle": 0.662,
+      "auc_holdout_prose_vs_splice": 0.635,
+      "absence_rate": {
+        "dev_prose": 0,
+        "dev_salad": 0.032,
+        "holdout_prose": 0,
+        "kyle_negatives": 0,
+        "splice_negatives": 0.025
+      },
+      "min_max_on_prose": [
+        0.96,
+        0.9999
+      ]
+    },
+    "D8": {
+      "auc_prose_vs_dev_salad": 0.576,
+      "auc_holdout_prose_vs_kyle": 0.558,
+      "auc_holdout_prose_vs_splice": 0.561,
+      "absence_rate": {
+        "dev_prose": 0,
+        "dev_salad": 0.097,
+        "holdout_prose": 0,
+        "kyle_negatives": 0.025,
+        "splice_negatives": 0
+      },
+      "min_max_on_prose": [
+        0.96,
+        0.9999
+      ]
+    }
+  }
+}
