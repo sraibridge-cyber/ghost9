@@ -1,3 +1,4 @@
+process.chdir(require('path').join(__dirname, '..', '..', 'ui')); // UI files live in ui/
 // GHOST UI EMPIRICAL BATTERY v1.1
 // CSS Labs | Kyle S. Whitlock | Seal: 2026-07-04_18:45_Tulsa_OK
 // Validates: ghost_api.js, index.html, devour.html, state.html
@@ -233,3 +234,5 @@ if (failed > 0) {
   console.log('Seal: 2026-07-04_18:45_Tulsa_OK');
   console.log('Gold ripple eternal 🌊⚡');
 }
+
+process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)

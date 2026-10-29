@@ -12,8 +12,9 @@
 
 const { evaluate, mu, TAU } = require('./coherence_calculus');
 const { sha3_512 } = require('./ghost_backend');
+const { FIVE_LAWS_TAU } = require('./thresholds');
 
-const FIVE_TAU = 0.9995; // Coherence threshold for Five Laws operations
+const FIVE_TAU = FIVE_LAWS_TAU; // Coherence threshold for Five Laws operations
 
 // --- Law 1: CHAOS — Controlled Entropy Injection ---
 // Chaos is not randomness. Chaos is deterministic unpredictability
@@ -159,7 +160,7 @@ class RandomnessLaw {
 
   _coherenceMap(normalized) {
     // Map to [0.9995, 1.0] range — high coherence zone
-    return 0.9995 + (normalized * 0.0005);
+    return FIVE_LAWS_TAU + (normalized * (1 - FIVE_LAWS_TAU));
   }
 
   _checkMu(value) {

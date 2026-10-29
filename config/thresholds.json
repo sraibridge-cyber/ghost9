@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "stm_min": 0.9995,
+  "ltm_min": 0.9998,
+  "five_laws_tau": 0.9995,
+  "bonsai_ltm_tau": 0.9995,
+  "_note": "Tier thresholds, read by src/thresholds.js. Changing a value changes behaviour: re-run the batteries and update docs/review/TECH_DEBT.md. bonsai_ltm_tau differs from ltm_min on purpose until the decision in TECH_DEBT is made."
+}

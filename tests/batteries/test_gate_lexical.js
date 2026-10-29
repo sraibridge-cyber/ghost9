@@ -3,7 +3,7 @@
 // Scope: Isolate-test the Lexical Gate v2.2
 // Seal: 2026-07-11_12:30_Tulsa_OK
 
-const { scanLexical, tokenize, wordCount } = require('./src/gate_lexical');
+const { scanLexical, tokenize, wordCount } = require('../../src/gate_lexical');
 
 let passed = 0;
 let failed = 0;

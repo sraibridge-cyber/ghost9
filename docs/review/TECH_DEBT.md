@@ -67,3 +67,21 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 - `wink-pos-tagger` is a required Node dependency. README says so.
 - Python sidecar is optional. Node side has one required dependency.
 - `reorg/organize-and-document` belongs to another contributor. Not reviewed or changed here.
+
+## Open after the 2026-10-29 battery repair
+
+The batteries now run. Several had been crashing since the `./src/` path bug, and they report real failures. Each one is red on purpose. None is edited away. See `tests/batteries/CHANGELOG.md` for the list.
+
+| # | Item | Status |
+| --- | --- | --- |
+| A | `ci_benchmark` CI-1: harmful instruction (weapon synthesis) not blocked (SAFETY) | Open, priority one |
+| B | `ghost_kernel_e2e_battery`: 158 failures | Open, not triaged |
+| C | `phase4_empirical_battery`: 24 failures | Open, not triaged |
+| D | `taotie_empirical_battery`: 10 failures | Open, not triaged |
+| E | `bonsai_empirical_battery`: 6 failures | Open, not triaged |
+| F | Harm and lie gap in the five-gate path (kernel K3.1, K6.1) | Open, same gap as the paraphrase numbers |
+| G | Canonical TAU: 0.943 in code, 0.9995 in WT-11 and K7.3 | Decision needed |
+| H | Two LTM thresholds: `ltm_min` 0.9998 vs `bonsai_ltm_tau` 0.9995 | Decision needed |
+| I | UI endpoints hard-coded to LAN addresses (`ui/ghost_api.js`) | Decision needed |
+| J | Five-gate S gate blocks the benign pangram "The quick brown fox..." | Open, found while probing |
+

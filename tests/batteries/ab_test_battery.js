@@ -1,7 +1,7 @@
 // A/B Test: Keyword-based vs Word-count-based domain scoring
 // Tests which approach produces better μ for clean, coherent text
 
-const { evaluate } = require('./src/coherence_calculus.js');
+const { evaluate } = require('../../src/coherence_calculus.js');
 
 // Test cases: clean, coherent text that SHOULD pass the gate
 const TEST_CASES = [

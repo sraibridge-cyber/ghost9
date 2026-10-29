@@ -8,7 +8,7 @@ const D_TO_NAMED = {
     D5: 'cognitive', D6: 'ethical', D7: 'declarative', D8: 'novelty'
 };
 const UPSERT_RADIUS = 0.05;
-const DEFAULT_SCORE = 0.9995;
+const DEFAULT_SCORE = require('./thresholds').STM_MIN;
 
 // Accepts CC scores keyed D1..D8 or named keys; returns named keys.
 function namedScores(scores) {

@@ -11,7 +11,7 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { VoidSpace, classifyTier, mergeCluster } = require('./src/taotie');
+const { VoidSpace, classifyTier, mergeCluster } = require('../../src/taotie');
 
 function makeNode(mu, content, hash) {
   return {
@@ -296,8 +296,8 @@ test('P3.10.3 Custom target', vsCustom.targetCount === 30, vsCustom.targetCount,
 console.log('\n=== P4: Cross-Module Integration ===');
 
 // P4.1: Taotie + SpectralGraph pipeline (10 tests)
-const { SpectralGraph } = require('./src/spectral_graph');
-const { SpatialWeb } = require('./src/spatial_web');
+const { SpectralGraph } = require('../../src/spectral_graph');
+const { SpatialWeb } = require('../../src/spatial_web');
 
 function makeScores(s, e, t, sp, c, eth, d, n) {
   return { signal: s, energy: e, temporal: t, spatial: sp, cognitive: c, ethical: eth, declarative: d, novelty: n };
@@ -374,7 +374,7 @@ test('P4.4.4 All vertices', Array.from(sw2.clusters.values()).every(c => c.verte
 test('P4.4.5 Vertex count', sw2.getVertices().length > 0, sw2.getVertices().length, '>0');
 
 // P4.5: Taotie + CC v3.0 coherence (5 tests)
-const { evaluate, mu, whitlock, assignTesseractVertex } = require('./src/coherence_calculus');
+const { evaluate, mu, whitlock, assignTesseractVertex } = require('../../src/coherence_calculus');
 // CC v3.0 functional API — evaluate(text, opts)
 const ccScores = { D1: 0.9997, D2: 0.9997, D3: 0.9997, D4: 0.9997, D5: 0.9997, D6: 0.9997, D7: 0.9997, D8: 0.9997 };
 const ccResult = evaluate('test content with high coherence', { nodeCount: 10 });
@@ -557,3 +557,5 @@ if (failed === 0) {
   failures.forEach(f => console.log('  ' + f));
 }
 
+
+process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)

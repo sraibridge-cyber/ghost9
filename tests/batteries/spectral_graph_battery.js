@@ -19,7 +19,7 @@ function testApprox(name, actual, expected, tolerance = 1e-10) {
 }
 
 // Import the module
-const { SpectralGraph } = require('./spectral_graph.js');
+const { SpectralGraph } = require('../../src/spectral_graph.js');
 
 // Helper: create sample CC v3.0 scores
 function makeScores(signal, energy, temporal, spatial, cognitive, ethical, declarative, novelty) {

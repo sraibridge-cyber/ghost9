@@ -11,7 +11,7 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { MerkleBonsai, BonsaiNode, NODE_TYPES, fidelityTest, BONSAI_TAU, BONSAI_TAU_LTM } = require('./src/merkle_bonsai');
+const { MerkleBonsai, BonsaiNode, NODE_TYPES, fidelityTest, BONSAI_TAU, BONSAI_TAU_LTM } = require('../../src/merkle_bonsai');
 
 function makeScores(mu) {
   return { signal: mu, energy: mu, temporal: mu, spatial: mu, cognitive: mu, ethical: mu, declarative: mu, novelty: mu };
@@ -258,7 +258,7 @@ test('P3.6.1 Depth recon limited', depthRecon.every(n => n.depth <= 2), true, tr
 console.log('\n=== P4: Cross-Module Integration ===');
 
 // P4.1: Bonsai + Taotie pipeline (10 tests)
-const { VoidSpace, classifyTier, mergeCluster } = require('./src/taotie');
+const { VoidSpace, classifyTier, mergeCluster } = require('../../src/taotie');
 const taotie = new VoidSpace();
 const bonsaiTaotie = new MerkleBonsai();
 
@@ -284,7 +284,7 @@ test('P4.1.4 Taotie hash 128', bonsaiTaotie.reconstruct(0.9995)[0].hash.length =
 test('P4.1.5 Taotie merkle 128', bonsaiTaotie.reconstruct(0.9995)[0].merkleRoot.length === 128, true, true);
 
 // P4.2: Bonsai + CC v3.0 gating (5 tests)
-const { evaluate } = require('./src/coherence_calculus');
+const { evaluate } = require('../../src/coherence_calculus');
 const ccBonsai = new MerkleBonsai();
 const ccText = 'This is a coherent statement with high integrity and truth value';
 const ccResult = evaluate(ccText, { nodeCount: 5 });
@@ -295,7 +295,7 @@ test('P4.2.2 CC mu > 0.5', ccBonsai.reconstruct(0.5)[0].mu > 0.5, true, true);
 test('P4.2.3 CC verify valid', ccBonsai.verify().valid === true, true, true);
 
 // P4.3: Bonsai + SpectralGraph (5 tests)
-const { SpectralGraph } = require('./src/spectral_graph');
+const { SpectralGraph } = require('../../src/spectral_graph');
 const sgBonsai = new MerkleBonsai();
 const sg = new SpectralGraph();
 for (let i = 0; i < 4; i++) {
@@ -309,7 +309,7 @@ test('P4.3.1 Spectral in Bonsai', sgBonsai.root !== null, true, true);
 test('P4.3.2 Spectral verify valid', sgBonsai.verify().valid === true, true, true);
 
 // P4.4: Bonsai + SpatialWeb (5 tests)
-const { SpatialWeb } = require('./src/spatial_web');
+const { SpatialWeb } = require('../../src/spatial_web');
 const swBonsai = new MerkleBonsai();
 const sw = new SpatialWeb();
 sw.ingest(sg);
@@ -488,3 +488,5 @@ if (failed === 0) {
   failures.forEach(f => console.log('  ' + f));
 }
 
+
+process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)

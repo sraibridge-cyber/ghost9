@@ -15,7 +15,7 @@
  *   determined.
  */
 
-const { evaluate, computeDomainScore, weightedGeometricMean, whitlock, CC_WEIGHTS, TAU, N_DOMAINS, CC_VERSION, DOMAIN_KEYWORDS, D1_TIERS } = require('./src/coherence_calculus.js');
+const { evaluate, computeDomainScore, weightedGeometricMean, whitlock, CC_WEIGHTS, TAU, N_DOMAINS, CC_VERSION, DOMAIN_KEYWORDS, D1_TIERS } = require('../../src/coherence_calculus.js');
 
 const GHOST9_TAU = 0.9430;
 
@@ -444,4 +444,3 @@ console.log('FOUNDATION: v3.2 162/162 clean sweep');
 console.log('PRINCIPLE: Zero duct tape. Only known patterns.');
 console.log('Seal: 2026-07-07_22:12_Tulsa_OK');
 process.exit(failed > 0 ? 1 : 0);
-Seal: 2026-07-07_22:23_Tulsa_OK | 207/207

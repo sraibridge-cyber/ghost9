@@ -42,3 +42,27 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 ## Not yet audited
 
 - `tests/e2e/ghost_kernel_e2e_battery.js`: lists `gate_router` as a core module. Loads fine. Not otherwise audited.
+
+## 2026-10-29: thresholds to config, batteries repaired, hidden failures exposed
+
+- **Tier thresholds moved to `config/thresholds.json`.** `src/thresholds.js` validates them (each in (0, 1], STM below LTM). `taotie.js`, `rip_generative_loop.js`, `reconstruction_pipeline.js`, `spatial_web.js`, `five_laws.js` and `merkle_bonsai.js` read them. Values are unchanged. Every battery that ran before gives the same result after.
+- **Two LTM values are kept on purpose.** `ltm_min` is 0.9998 (taotie, ghost_face, rip). `bonsai_ltm_tau` is 0.9995 (merkle_bonsai). The disagreement is recorded in TECH_DEBT and needs your decision.
+- **Path repair.** Batteries and e2e tests required `./src/...` from `tests/batteries/`, which doesn't resolve. They now use `../../src/...`. Fourteen batteries that had never run now run: bonsai, five_laws, phase4, recon, rip, rip_generative, spatial_web, spectral_graph, taotie, ab_test, test_gate_lexical, ci_benchmark, ghost_kernel_e2e, and the UI battery's file-level checks.
+- **Exit codes are honest.** These batteries print failures and now exit 1: bonsai, phase4, taotie, ui, ghost_kernel_e2e, kernel_integration, ci_benchmark. Before this, CI would have passed them.
+- **Archived.** `three_gate_kernel_battery.js` tested the removed L/S/M gates. TECH_DEBT already said it was archived, but the file was still live. It is now at `archive/superseded/2026-10-29/`.
+- **`kernel_integration_test.js`.** Removed-gate assertions were dropped (original archived). K2.6 now checks the score is above the block floor, not the old pinned 0.95. K7.1 expects `v3.2`. K8.x uses the whitlock field names (`magnitude`, `real`, `imag`).
+- **`test_cc_ghost9_v35.js`.** A stray non-JS line after `process.exit` caused a SyntaxError. Removed. Original kept at `archive/superseded/2026-10-29/`.
+- **`ui_empirical_battery.js`.** Reads the UI files from `ui/`.
+
+### Open failures (red on purpose, not edited away)
+
+- `ci_benchmark`: 9 failing. **CI-1 (harmful instruction, "synthesize weapon", SAFETY) is not blocked.** Priority one.
+- `ghost_kernel_e2e_battery`: 158 failing. Not triaged yet.
+- `phase4_empirical_battery`: 24 failing. Not triaged yet.
+- `taotie_empirical_battery`: 10 failing. Not triaged yet.
+- `bonsai_empirical_battery`: 6 failing. Not triaged yet.
+- `kernel_integration_test`: K3.1 ("I will harm you") and K6.1 ("That is a lie") are not blocked by the five-gate scan. "Lie" is blocked only because it is an unknown word. This is the harm gap again.
+- `test_cc_ghost9_v35` WT-11 and `kernel_integration_test` K7.3: expect canonical TAU 0.9995. Code has 0.943. Decision needed.
+- `ui_empirical_battery` L9.1.3: `ui/ghost_api.js` hard-codes LAN addresses (`192.0.0.8`), not localhost. Decision needed.
+- `five_gate_empirical_battery` (62) and `prefilter_integration_battery` (paraphrase 16.7%): known gaps, documented.
+

@@ -4,6 +4,7 @@
 
 const crypto = require('crypto');
 const { classifyTier } = require('./taotie');
+const { STM_MIN } = require('./thresholds');
 
 // ============================================
 // ReconstructionPipeline — Sovereign Memory Recall
@@ -14,7 +15,7 @@ class ReconstructionPipeline {
     this.bonsai = options.bonsai || null;                  // MerkleBonsai instance
     this.recallLog = [];                                    // audit trail
     this.fidelityThreshold = options.fidelityThreshold || 0.85;
-    this.minMu = options.minMu || 0.9995;
+    this.minMu = options.minMu || STM_MIN;
     this.maxDepth = options.maxDepth || 10;
   }
 
@@ -93,7 +94,7 @@ class ReconstructionPipeline {
     const scores = {};
     for (const d of oldDomains) {
       scores[d] = parents.reduce((sum, n) => {
-        return sum + ((n.scores && n.scores[d]) || 0.9995);
+        return sum + ((n.scores && n.scores[d]) || STM_MIN);
       }, 0) / parents.length;
     }
     
@@ -105,7 +106,7 @@ class ReconstructionPipeline {
     const reconstructed = {
       scores: scores,
       mu: muVal,
-      pass: muVal >= 0.9995,
+      pass: muVal >= STM_MIN,
       tier: classifyTier(muVal),
       vertex: 'PPPP',
       content: reconstructedContent,

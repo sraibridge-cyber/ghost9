@@ -4,15 +4,16 @@
 
 const crypto = require('crypto');
 const { evaluate, whitlock } = require('./coherence_calculus');
+const { STM_MIN, LTM_MIN } = require('./thresholds');
 
 function classifyTier(mu) {
   if (mu === null || mu === undefined || isNaN(mu) || mu < 0) {
     return null;
   }
-  if (mu >= 0.9998) {
+  if (mu >= LTM_MIN) {
     return 'LTM';
   }
-  if (mu >= 0.9995) {
+  if (mu >= STM_MIN) {
     return 'STM';
   }
   return null;
@@ -55,7 +56,7 @@ class VoidSpace {
       return { skipped: true, merged: [], nodes: nodes || [], survivors: nodes || [], count: inputCount, devoured: [], devoured_count: 0, before: inputCount, after: inputCount, clusterCount: 0, strategy: 'skip_below_threshold' };
     }
 
-    const allLTM = nodes.every(n => (n.mu || 0) >= 0.9998);
+    const allLTM = nodes.every(n => (n.mu || 0) >= LTM_MIN);
     if (allLTM) {
       this.skipped = true;
       this.sweepLog.push({ before: nodes.length, ltmProtected: nodes.length, strategy: 'skip_all_ltm', ts: Date.now(), totalDevoured: this.totalDevoured });
@@ -67,7 +68,7 @@ class VoidSpace {
 
     // Only nodes at or above the constitutional bar are merged. Everything else
     // is kept as-is, so no node disappears from state without being archived.
-    const validNodes = nodes.filter(n => n.mu === undefined || n.mu >= 0.9995);
+    const validNodes = nodes.filter(n => n.mu === undefined || n.mu >= STM_MIN);
     const kept = nodes.filter(n => !validNodes.includes(n));
 
     const merged = [];
@@ -114,10 +115,10 @@ class VoidSpace {
         near_trigger: false
       };
     }
-    const mus = nodes.map(n => n.mu || 0.9995);
-    const tiers = nodes.map(n => classifyTier(n.mu || 0.9995));
-    const ltm = nodes.filter(n => (n.mu || 0) >= 0.9998).length;
-    const stm = nodes.filter(n => (n.mu || 0) >= 0.9995 && (n.mu || 0) < 0.9998).length;
+    const mus = nodes.map(n => n.mu || STM_MIN);
+    const tiers = nodes.map(n => classifyTier(n.mu || STM_MIN));
+    const ltm = nodes.filter(n => (n.mu || 0) >= LTM_MIN).length;
+    const stm = nodes.filter(n => (n.mu || 0) >= STM_MIN && (n.mu || 0) < LTM_MIN).length;
     const capacity_pct = (nodes.length / this.maxNodes) * 100;
     const near_trigger = nodes.length >= this.threshold - 2;
     return {
@@ -150,7 +151,7 @@ function mergeCluster(cluster) {
 
   for (const d of oldDomains) {
     scores[d] = cluster.reduce((sum, n) => {
-      return sum + ((n.scores && n.scores[d]) || 0.9995);
+      return sum + ((n.scores && n.scores[d]) || STM_MIN);
     }, 0) / cluster.length;
   }
 
@@ -170,7 +171,7 @@ function mergeCluster(cluster) {
   return {
     scores: scores,
     mu: muVal,
-    pass: muVal >= 0.9995,
+    pass: muVal >= STM_MIN,
     tier: classifyTier(muVal),
     vertex: 'PPPP',
     hash: hash,

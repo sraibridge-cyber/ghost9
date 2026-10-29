@@ -13,9 +13,10 @@
 
 const { createHash } = require('crypto');
 const { mu, TAU, TAU_LTM } = require('./coherence_calculus');
+const { BONSAI_LTM_TAU } = require('./thresholds');
 
 const BONSAI_TAU = 0.943; // STM = ingestion baseline
-const BONSAI_TAU_LTM = 0.9995; // LTM = Five Laws constitutional threshold
+const BONSAI_TAU_LTM = BONSAI_LTM_TAU; // LTM = Five Laws constitutional threshold
 
 // --- Node Types ---
 const NODE_TYPES = {

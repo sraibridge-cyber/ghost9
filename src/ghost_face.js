@@ -4,7 +4,7 @@
 //
 // Three-layer devouring pipeline:
 //   Layer 1 — CC Gate:    evaluate μ, reject if μ < τ = 0.943 (empirically validated)
-//   Layer 2 — Separation: classify STM (μ < 0.9998) / LTM (μ ≥ 0.9998)
+//   Layer 2 — Separation: classify STM (μ < LTM_MIN) / LTM (μ ≥ LTM_MIN), values in config/thresholds.json
 //   Layer 3 — Taotie:     joint spectral+spatial merge at n=7 (OP3-informed)
 //
 // Fixes applied 2026-06-13:

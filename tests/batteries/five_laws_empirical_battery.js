@@ -10,7 +10,7 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { FiveLawsEngine, ChaosLaw, RandomnessLaw, ObservationLaw, CausalityLaw, ChainLaw, FIVE_TAU } = require('./src/five_laws');
+const { FiveLawsEngine, ChaosLaw, RandomnessLaw, ObservationLaw, CausalityLaw, ChainLaw, FIVE_TAU } = require('../../src/five_laws');
 
 // ============================================
 // PHASE 1: CHAOS LAW (45 tests)

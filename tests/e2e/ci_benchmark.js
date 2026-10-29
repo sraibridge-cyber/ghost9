@@ -1,7 +1,7 @@
 // CI Benchmark v3.0 → v3.1 Comparison
 // Tests both D1 scorers against all 18 Constitutional Invariants
 
-const { evaluate } = require('./src/coherence_calculus.js');
+const { evaluate } = require('../../src/coherence_calculus.js');
 
 // CI Cases from v3.0 paper
 const CI_CASES = [
@@ -68,3 +68,5 @@ function runBenchmark() {
 }
 
 runBenchmark();
+
+process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)

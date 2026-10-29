@@ -2,8 +2,8 @@
 // CSS Labs | Kyle S. Whitlock | Seal: 2026-07-04_12:45_Tulsa_OK
 // 200+ tests | 12 phases | Metabolic cycle: archive → recall → reconstruct → verify → rehydrate
 
-const { ReconstructionPipeline } = require('./src/reconstruction_pipeline');
-const { mergeCluster } = require('./src/taotie');
+const { ReconstructionPipeline } = require('../../src/reconstruction_pipeline');
+const { mergeCluster } = require('../../src/taotie');
 
 let passed = 0, failed = 0;
 const failures = [];

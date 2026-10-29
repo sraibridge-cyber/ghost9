@@ -11,8 +11,8 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + actual + ', expected ' + expected); process.stdout.write('X'); }
 }
 
-const { SpectralGraph } = require('./spectral_graph.js');
-const { SpatialWeb } = require('./spatial_web.js');
+const { SpectralGraph } = require('../../src/spectral_graph.js');
+const { SpatialWeb } = require('../../src/spatial_web.js');
 
 function makeScores(s, e, t, sp, c, eth, d, n) {
   return { signal: s, energy: e, temporal: t, spatial: sp, cognitive: c, ethical: eth, declarative: d, novelty: n };

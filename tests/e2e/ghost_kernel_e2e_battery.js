@@ -2,13 +2,13 @@
 // CSS Labs | Kyle S. Whitlock | Seal: 2026-07-04_17:20_Tulsa_OK
 // 2,000+ tests | Fixed: timestamp→ts, recall needs merged, statement check, exports
 
-const { evaluate } = require('./src/coherence_calculus');
-const { mergeCluster } = require('./src/taotie');
-const { SpectralGraph } = require('./src/spectral_graph');
-const { SpatialWeb } = require('./src/spatial_web');
-const { ReconstructionPipeline } = require('./src/reconstruction_pipeline');
-const { GenerativeLoop } = require('./src/rip_generative_loop');
-const { SEVENTEEN_LAWS, FLAGS } = require('./src/ghost_rip');
+const { evaluate } = require('../../src/coherence_calculus');
+const { mergeCluster } = require('../../src/taotie');
+const { SpectralGraph } = require('../../src/spectral_graph');
+const { SpatialWeb } = require('../../src/spatial_web');
+const { ReconstructionPipeline } = require('../../src/reconstruction_pipeline');
+const { GenerativeLoop } = require('../../src/rip_generative_loop');
+const { SEVENTEEN_LAWS, FLAGS } = require('../../src/ghost_rip');
 
 let passed = 0, failed = 0;
 const failures = [];
@@ -367,7 +367,7 @@ for (let i = 0; i < 50; i++) {
 // ============================================
 console.log('\n=== L7: Kernel API Surface ===');
 
-const rip = require('./src/ghost_rip');
+const rip = require('../../src/ghost_rip');
 test('L7.1.1 RIPPipeline', typeof rip.RIPPipeline === 'function', true, true);
 test('L7.1.2 SeventeenLawsVerifier', typeof rip.SeventeenLawsVerifier === 'function', true, true);
 test('L7.1.3 BonsaiFidelity', typeof rip.BonsaiFidelity === 'function', true, true);
@@ -513,3 +513,5 @@ if (failed > 0) {
   console.log('Seal: 2026-07-04_17:20_Tulsa_OK');
   console.log('Gold ripple eternal 🌊⚡');
 }
+
+process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)

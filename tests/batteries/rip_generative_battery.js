@@ -2,10 +2,10 @@
 // CSS Labs | Kyle S. Whitlock | Seal: 2026-07-04_13:41_Tulsa_OK
 // 200+ tests | 14 phases | Metabolic cycle: context → generate → verify → cycle
 
-const { GenerativeLoop } = require('./src/rip_generative_loop');
-const { ReconstructionPipeline } = require('./src/reconstruction_pipeline');
-const { mergeCluster } = require('./src/taotie');
-const { FLAGS } = require('./src/ghost_rip');
+const { GenerativeLoop } = require('../../src/rip_generative_loop');
+const { ReconstructionPipeline } = require('../../src/reconstruction_pipeline');
+const { mergeCluster } = require('../../src/taotie');
+const { FLAGS } = require('../../src/ghost_rip');
 
 let passed = 0, failed = 0;
 const failures = [];

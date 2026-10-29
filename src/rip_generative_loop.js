@@ -4,6 +4,7 @@
 // Feeds into RIP v3.0 verification (17 Laws) for quality gate
 
 const { evaluate } = require('./coherence_calculus');
+const { STM_MIN, LTM_MIN } = require('./thresholds');
 const { SEVENTEEN_LAWS, FLAGS } = require('./ghost_rip');
 
 // ============================================
@@ -13,7 +14,7 @@ class GenerativeLoop {
   constructor(options = {}) {
     this.noveltyFactor = options.noveltyFactor || 0.05;     // How much randomness to inject
     this.contextWindow = options.contextWindow || 5;         // How many reconstructed memories to use
-    this.minMu = options.minMu || 0.9995;                   // Minimum coherence for generation
+    this.minMu = options.minMu || STM_MIN;                   // Minimum coherence for generation
     this.maxIterations = options.maxIterations || 10;       // Retry limit for failed generations
     this.generationLog = [];                                 // Audit trail
     this.lawVerifier = options.lawVerifier || null;         // SeventeenLawsVerifier instance
@@ -30,7 +31,7 @@ class GenerativeLoop {
       primary: primary,                    // Reconstructed memories from pipeline
       friends: friendMemories.slice(0, 3), // Spatial/spectral neighbors
       combined: [...primary, ...friendMemories.slice(0, 3)],
-      avgMu: primary.length > 0 ? primary.reduce((sum, n) => sum + (n.mu || 0.9995), 0) / primary.length : 0.9995,
+      avgMu: primary.length > 0 ? primary.reduce((sum, n) => sum + (n.mu || STM_MIN), 0) / primary.length : STM_MIN,
       dominantDomain: this._findDominantDomain(primary)
     };
     
@@ -43,7 +44,7 @@ class GenerativeLoop {
     const domains = ['signal', 'energy', 'temporal', 'spatial', 'cognitive', 'ethical', 'declarative', 'novelty'];
     const avgs = {};
     for (const d of domains) {
-      avgs[d] = nodes.reduce((sum, n) => sum + ((n.scores && n.scores[d]) || 0.9995), 0) / nodes.length;
+      avgs[d] = nodes.reduce((sum, n) => sum + ((n.scores && n.scores[d]) || STM_MIN), 0) / nodes.length;
     }
     return domains.reduce((a, b) => avgs[a] > avgs[b] ? a : b);
   }
@@ -72,8 +73,8 @@ class GenerativeLoop {
     // Evaluate using Coherence Calculus
     const scoreValues = Object.values(noveltyScores);
     const muVal = Math.exp(scoreValues.reduce((sum, s) => sum + Math.log(s), 0) / scoreValues.length);
-    const pass = muVal >= 0.9995;
-    const tier = muVal >= 0.9998 ? "LTM" : (muVal >= 0.9995 ? "STM" : null);
+    const pass = muVal >= STM_MIN;
+    const tier = muVal >= LTM_MIN ? "LTM" : (muVal >= STM_MIN ? "STM" : null);
     const evaluation = { mu: muVal, pass, tier, vertex: "PPPP" };
     
     const generated = {
@@ -143,9 +144,9 @@ class GenerativeLoop {
     const scores = {};
     
     for (const d of domains) {
-      const vals = nodes.map(n => (n.scores && n.scores[d]) || 0.9995).filter(v => v > 0);
+      const vals = nodes.map(n => (n.scores && n.scores[d]) || STM_MIN).filter(v => v > 0);
       if (vals.length === 0) {
-        scores[d] = 0.9995;
+        scores[d] = STM_MIN;
       } else {
         // Weighted average: more recent/higher μ nodes count more
         const weighted = vals.reduce((sum, v, i) => sum + v * (i + 1), 0) / 
@@ -163,7 +164,7 @@ class GenerativeLoop {
     for (const [domain, score] of Object.entries(scores)) {
       // Add small random perturbation
       const noise = (Math.random() - 0.5) * this.noveltyFactor;
-      result[domain] = Math.max(0.9995, Math.min(1.0, score + noise));
+      result[domain] = Math.max(STM_MIN, Math.min(1.0, score + noise));
     }
     // Boost novelty domain slightly
     result.novelty = Math.min(1.0, result.novelty + this.noveltyFactor * 0.5);
@@ -179,7 +180,7 @@ class GenerativeLoop {
     }
 
     // Check PRIME law: coherence must be maintained
-    const primeCheck = generatedNode.mu >= 0.9995;
+    const primeCheck = generatedNode.mu >= STM_MIN;
     
     // Check all 16 invariants
     const invariantChecks = [];

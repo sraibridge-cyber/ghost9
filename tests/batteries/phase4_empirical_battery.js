@@ -10,11 +10,11 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { evaluate, N_DOMAINS, TAU, CC_VERSION } = require('./src/coherence_calculus');
-const { RIPPipeline, SeventeenLawsVerifier, BonsaiFidelity, SEVENTEEN_LAWS, FLAGS } = require('./src/ghost_rip');
-const { CausalityLaw, ChaosLaw, RandomnessLaw, ObservationLaw, ChainLaw, FiveLawsEngine, FIVE_TAU } = require('./src/five_laws');
-const tesseract = require('./src/tesseract');
-const { whitlock } = require('./src/coherence_calculus');
+const { evaluate, N_DOMAINS, TAU, CC_VERSION } = require('../../src/coherence_calculus');
+const { RIPPipeline, SeventeenLawsVerifier, BonsaiFidelity, SEVENTEEN_LAWS, FLAGS } = require('../../src/ghost_rip');
+const { CausalityLaw, ChaosLaw, RandomnessLaw, ObservationLaw, ChainLaw, FiveLawsEngine, FIVE_TAU } = require('../../src/five_laws');
+const tesseract = require('../../src/tesseract');
+const { whitlock } = require('../../src/coherence_calculus');
 const fs = require('fs');
 
 // ============================================
@@ -445,3 +445,5 @@ if (failed === 0) {
   failures.forEach(f => console.log('  ' + f));
 }
 
+
+process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)

@@ -10,8 +10,8 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { RIPPipeline, SeventeenLawsVerifier, BonsaiFidelity, SEVENTEEN_LAWS, FLAGS } = require('./src/ghost_rip');
-const { MerkleBonsai } = require('./src/merkle_bonsai');
+const { RIPPipeline, SeventeenLawsVerifier, BonsaiFidelity, SEVENTEEN_LAWS, FLAGS } = require('../../src/ghost_rip');
+const { MerkleBonsai } = require('../../src/merkle_bonsai');
 
 // ============================================
 // PHASE 1: 17 LAWS STRUCTURE (20 tests)
