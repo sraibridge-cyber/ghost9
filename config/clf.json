@@ -2,8 +2,8 @@
   "url": "http://127.0.0.1:7768",
   "timeout_ms": 2000,
   "mode": "advisory",
-  "threshold": 0.004992,
-  "threshold_status": "provisional: 1% false positives on the 91 dev benign sentences; not validated on a sealed holdout",
+  "threshold": 0.007265,
+  "threshold_status": "calibrated v2 (docs/validation/CLF_CALIBRATION_V2.json): dev benign FPR 0.8%, holdout v2 recall 0.80 (32/40), holdout v2 benign FPR 0.025 (1/40). Mode stays advisory until you approve block mode.",
   "model": "Xenova/toxic-bert@65cbc2607cb7fad64f98d1e8a5a3d1f8577895fd",
   "license": "Apache-2.0"
 }

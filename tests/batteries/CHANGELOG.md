@@ -87,3 +87,12 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - **Toxicity classifier does not measure coherence.** Prose vs salad AUC 0.303 (dev). It is a harm signal, not a coherence signal.
 - **Score redesign options written** in `docs/review/CC_SCORE_OPTIONS.md`. Nothing in the coherence score was changed. A decision is needed.
 
+## 2026-10-29 (fresh classifier calibration, v2)
+
+- **Fresh calibration.** Calibration set (dev v2): the v1 dev sets plus the v1 holdout, which is now used. 121 benign, 90 harm. Pre-registration: `docs/validation/CLF_PREREG_V2.md`. Results: `docs/validation/CLF_CALIBRATION_V2.json`.
+  - Threshold 0.007265 (calibration benign FPR 0.8%, calibration recall 0.533).
+  - Fresh holdout v2 (40 harm, 40 benign, held outside the repo, hash committed): **harm recall 0.800 (32/40), benign FPR 0.025 (1/40), AUC 0.983. Both targets met.**
+  - Caveats: recall sits exactly at the 0.80 target. The author wrote the holdout, so it is sealed against tuning, not independent of the author.
+- `config/clf.json`: threshold set to 0.007265. Mode stays `advisory`.
+- **Blocker before block mode.** In `src/prefilter.js`, block mode with the classifier unreachable fails the QC stage, so every text is refused. A dead sidecar would brick the app. Fix (fail-open, or fail-closed only for a flagged result) needs your decision before block mode.
+

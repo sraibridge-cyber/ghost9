@@ -96,3 +96,8 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **K (classifier as harm signal): calibrated, target missed.** Holdout recall 0.80 (target met), holdout benign FPR 0.067 (target 0.05, missed by two sentences). Threshold 0.006103 from dev. Holdout now used, so a new threshold needs a new sealed holdout. Config stays advisory. See `docs/validation/CLF_CALIBRATION.json`.
 - **G (canonical TAU): blocked by the score.** The coherence score cannot separate prose from salad (AUC 0.64 dev, 0.50 holdout). The toxicity classifier can't measure coherence either (AUC 0.30). Options are in `docs/review/CC_SCORE_OPTIONS.md`. Decision needed. Recommendation: option C (pinned local language model perplexity).
 
+## Update 2026-10-29 (fresh classifier calibration)
+
+- **K (classifier as harm gate): v2 targets met on a fresh holdout.** Recall 0.80 (32/40, exactly at target), benign FPR 0.025 (1/40). Threshold 0.007265. Mode is still advisory.
+- **New blocker L: fail-closed in block mode.** `src/prefilter.js` refuses everything when the classifier is unreachable in block mode. Decide fail-open or fail-closed-on-flag before block mode is enabled.
+

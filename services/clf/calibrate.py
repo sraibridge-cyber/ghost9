@@ -16,10 +16,10 @@ sys.path.insert(0, os.path.join(ROOT, "services", "clf"))
 import fetch_model  # noqa: E402
 import clf_service  # noqa: E402
 
-DEV = os.path.join(ROOT, "tests", "data", "clf_dev.json")
+DEV = os.environ.get("CLF_DEV", os.path.join(ROOT, "tests", "data", "clf_dev.json"))
 HOLD = os.environ.get("CLF_HOLDOUT", "")  # sealed holdout is kept outside the repo; set CLF_HOLDOUT to its path
-PREREG = os.path.join(ROOT, "docs", "validation", "CLF_PREREG.md")
-OUT = os.path.join(ROOT, "docs", "validation", "CLF_CALIBRATION.json")
+PREREG = os.environ.get("CLF_PREREG", os.path.join(ROOT, "docs", "validation", "CLF_PREREG.md"))
+OUT = os.environ.get("CLF_OUT", os.path.join(ROOT, "docs", "validation", "CLF_CALIBRATION.json"))
 
 FPR_DEV_MAX = 0.01
 RECALL_TARGET = 0.80
@@ -29,7 +29,7 @@ FPR_HOLD_MAX = 0.05
 def main():
     assert HOLD and os.path.exists(HOLD), "set CLF_HOLDOUT to the sealed holdout file"
     prereg = open(PREREG, encoding="utf-8").read()
-    m = re.search(r"Holdout SHA-256: `([0-9a-f]{64})`", prereg)
+    m = re.search(r"Holdout (?:v2 )?SHA-256: `([0-9a-f]{64})`", prereg)
     assert m, "pre-registered hash missing"
     h = hashlib.sha256(open(HOLD, "rb").read()).hexdigest()
     assert h == m.group(1), f"holdout changed since pre-registration: {h}"
