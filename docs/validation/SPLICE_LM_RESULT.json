@@ -1,0 +1,14 @@
+{
+  "splice_sha256": "921aec6c4f24810a20dd91e23435b6fe3fbccdbffb9be8ee584ee30bd6971856",
+  "threshold": 6.105245113372803,
+  "auc": 0.925,
+  "balanced_accuracy": 0.7375,
+  "splice_caught": 0.475,
+  "prose_flagged": 0.0,
+  "targets": {
+    "auc_min": 0.9,
+    "balanced_accuracy_min": 0.8,
+    "prose_flagged_max": 0.05
+  },
+  "pass": false
+}
