@@ -71,12 +71,14 @@ test('unavailable classifier: advisory passes and reports the error', async () =
   assert.strictEqual(r.stages.QC.error, 'ECONNREFUSED');
 });
 
-test('unavailable classifier: block fails closed', async () => {
+// Was 'block fails closed' (blockedBy QC, pass false). Changed 2026-10-29: the phone build has no classifier,
+// so fail-closed would refuse every sentence. Now fails open and records the reason.
+test('unavailable classifier: block fails open and records the reason', async () => {
   const s = stub({ ok: false, error: 'timeout' });
   const r = await runPrefilterAsync(BENIGN, [], modeWith('block'), { classify: s.classify });
-  assert.strictEqual(r.pass, false);
-  assert.strictEqual(r.blockedBy, 'QC');
-  assert.strictEqual(r.reason, 'classifier_unavailable');
+  assert.strictEqual(r.pass, true);
+  assert.strictEqual(r.blockedBy, null);
+  assert.strictEqual(r.stages.QC.reason, 'classifier_unavailable');
 });
 
 test('list gate short-circuits: classifier is not called', async () => {

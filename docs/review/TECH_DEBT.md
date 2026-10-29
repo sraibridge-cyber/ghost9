@@ -101,3 +101,9 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **K (classifier as harm gate): v2 targets met on a fresh holdout.** Recall 0.80 (32/40, exactly at target), benign FPR 0.025 (1/40). Threshold 0.007265. Mode is still advisory.
 - **New blocker L: fail-closed in block mode.** `src/prefilter.js` refuses everything when the classifier is unreachable in block mode. Decide fail-open or fail-closed-on-flag before block mode is enabled.
 
+## Update 2026-10-29 (fail-open, option C)
+
+- **L (fail-closed in block mode): resolved.** The classifier stage fails open. See CHANGELOG.
+- **C (perplexity signal, option C): feasible, not yet calibrated.** Pinned distilgpt2 quantized. Dev AUC 0.954. Holdout v1 shuffled recall 1.0, prose flag rate 0.064 (target 0.05, missed by one sentence). Needs a fresh sealed holdout. Before it can ship on the phone: bundle the model (83.5 MB, hash-pinned), port the tokenizer, and add an onnxruntime build to the Android runtime.
+- **G (canonical TAU): option C is the planned route.** Once a calibrated perplexity signal exists, TAU can be set from data on the new score.
+

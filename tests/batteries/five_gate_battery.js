@@ -53,7 +53,8 @@ console.log('\n=== P3: QC classifier stage (async, injected) ===');
   const blocked = await runPrefilterAsync(CLEAN, [], { ...DEFAULT_MODE, QC: 'block' }, { classify: async () => ({ ok: true, scores: [0.9], model: 'x' }) });
   test('P3.2 block QC blocks with blockedBy QC', blocked.pass === false && blocked.blockedBy === 'QC', blocked.blockedBy, 'QC');
   const down = await runPrefilterAsync(CLEAN, [], { ...DEFAULT_MODE, QC: 'block' }, { classify: async () => ({ ok: false, error: 'ECONNREFUSED' }) });
-  test('P3.3 block QC fails closed when classifier is down', down.pass === false && down.stages.QC.reason === 'classifier_unavailable', down.stages.QC && down.stages.QC.reason, 'classifier_unavailable');
+  // Was 'block QC fails closed' (pass === false). Changed 2026-10-29 to fail open, see CHANGELOG.
+test('P3.3 block QC fails open when classifier is down', down.pass === true && down.stages.QC.reason === 'classifier_unavailable', down.stages.QC && down.stages.QC.reason, 'classifier_unavailable');
   const off = await runPrefilterAsync(CLEAN, [], { ...DEFAULT_MODE, QC: 'off' }, { classify: async () => { throw new Error('should not run'); } });
   test('P3.4 QC off never calls the classifier', off.stages.QC === undefined, off.stages.QC, undefined);
 

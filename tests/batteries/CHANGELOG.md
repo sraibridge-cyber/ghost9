@@ -96,3 +96,14 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - `config/clf.json`: threshold set to 0.007265. Mode stays `advisory`.
 - **Blocker before block mode.** In `src/prefilter.js`, block mode with the classifier unreachable fails the QC stage, so every text is refused. A dead sidecar would brick the app. Fix (fail-open, or fail-closed only for a flagged result) needs your decision before block mode.
 
+## 2026-10-29 (fail-open, option C feasibility and calibration)
+
+- **Classifier stage fails open** (`src/prefilter.js`). An unreachable classifier is recorded in the trace and the sentence goes on, in both advisory and block mode. Only a flagged score blocks, and only in block mode. Reason: the phone build has no classifier yet, so fail-closed would refuse every sentence. Blocker L in TECH_DEBT is resolved by this.
+  - Two expectations changed, with the old assertions kept in comments: `tests/regression/clf_wiring.js` ("block fails closed" to "fails open"), and `tests/batteries/five_gate_battery.js` P3.3 ("block QC fails closed" to "fails open").
+  - Added `tests/regression/prefilter_failopen.js` (5/5): unreachable in block mode passes; unreachable in advisory passes; flagged in block mode blocks; flagged in advisory reports only; clear passes.
+- **Option C feasibility (perplexity).** Pinned model: Xenova/distilgpt2 quantized (SHA-256 in `docs/validation/LM_PREREG.md`). Score: mean per-token NLL. Probe on dev: salad NLL above prose NLL, AUC 0.954.
+- **Option C calibration, pre-registered** (`docs/validation/LM_PREREG.md`, script `services/lm/perplexity.py`, results `docs/validation/LM_CALIBRATION.json`):
+  - Threshold from dev: NLL 5.94 (smallest threshold with dev prose flag rate at most 5%). Dev salad recall 0.774.
+  - Holdout v1 (47 prose, 47 shuffled, held outside the repo, hash committed): shuffled recall **1.000** (target met). Prose flag rate **0.064 (3/47)**, target 0.05. **Missed.**
+  - Not wired into the prefilter. The holdout is used now, so a new threshold needs a fresh sealed holdout.
+

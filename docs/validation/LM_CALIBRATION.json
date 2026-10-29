@@ -1,0 +1,23 @@
+{
+  "threshold_nll": 5.9395904541015625,
+  "dev": {
+    "prose_n": 91,
+    "salad_n": 31,
+    "prose_flag_rate": 0.04395604395604396,
+    "salad_recall": 0.7741935483870968,
+    "auc_salad_gt_prose": 0.9539170506912442
+  },
+  "holdout": {
+    "prose_n": 47,
+    "shuffled_n": 47,
+    "prose_flag_rate": 0.06382978723404255,
+    "shuffled_recall": 1.0,
+    "auc_shuffled_gt_prose": 1.0
+  },
+  "targets": {
+    "holdout_prose_flag_rate_max": 0.05,
+    "holdout_shuffled_recall_min": 0.8
+  },
+  "pass": false,
+  "holdout_sha256": "cb19acf5e16f7d03d2bfc226685cf2debb0afcf5aad8a457b9ff92b547f88d7c"
+}

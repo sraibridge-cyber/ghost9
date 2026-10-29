@@ -78,8 +78,9 @@ function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
 }
 
 // Sync gates first. If they pass and QC is not 'off', ask the local classifier.
-// Fail-closed only in 'block' mode: an unreachable classifier blocks, in 'advisory'
-// it is reported and the sentence goes on. clf.classify/clf.opts are injectable for tests.
+// Fail-open everywhere: an unreachable classifier is recorded in the trace and the sentence goes on.
+// Only a flagged score blocks, and only in 'block' mode. The phone build has no classifier yet, so
+// fail-closed would refuse every sentence. clf.classify/clf.opts are injectable for tests.
 async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = {}) {
   const pre = runPrefilter(text, context, mode);
   const qcMode = mode.QC || 'off';
@@ -90,7 +91,7 @@ async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = 
   const r = await classifyFn(text, clf.opts || {});
   let stage;
   if (!r.ok) {
-    stage = { mode: qcMode, pass: qcMode !== 'block', reason: 'classifier_unavailable', error: r.error, score: null, flagged: null };
+    stage = { mode: qcMode, pass: true, reason: 'classifier_unavailable', error: r.error, score: null, flagged: null };
   } else {
     const score = r.scores[0];
     const flagged = score >= CLF.threshold;
