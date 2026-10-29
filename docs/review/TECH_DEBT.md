@@ -4,6 +4,8 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 
 ## Closed this round
 
+- Gate router rewritten for the five-gate design; three-gate battery archived; five-gate battery added (40/40). Batteries updated in the same sprint, per Kyle's rule.
+
 - Redundant branches consolidated into `review/ghost9-combined`. Old review branches and `spike/android-apk` deleted after confirming they were contained in the combined branch.
 - Debug APK built in GitHub Actions from the combined branch, arm64-only, 14 MB artifact.
 - CC structural checks added as a separate module with 9 tests (`src/cc_structure.js`). `coherence_calculus.js` unchanged.
@@ -17,13 +19,13 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 | 1 | Classifier threshold (0.004992) is provisional and was chosen on dev benign prose. | Open | Sealed labeled harm-intent holdout. |
 | 2 | Q lists are the only blocking harm check. | Open | A replacement validated on the holdout before the lists come out. |
 | 3 | M gate is off. WordNet hypernym replacement not started. | Open | Build the category set. |
-| 4 | `src/gate_router.js` imports `scanSyntactic` and `scanSemantic`, which do not exist. `threeGateScan` throws. Only `tests/batteries/three_gate_kernel_battery.js` and `tests/e2e/ghost_kernel_e2e_battery.js` reference it. | Open | Decision: retire the router and migrate or retire those batteries to the prefilter, or rewrite the router on the current gate APIs. |
+| 4 | ~~`src/gate_router.js` broken imports~~ | Closed 2026-10-28 | Router rewritten as a thin five-gate entry point. Three-gate battery archived, five-gate battery added (40/40). See `tests/batteries/CHANGELOG.md`. |
 | 5 | Tier thresholds (0.9995, 0.9998) are hard-coded in `src/taotie.js` and `src/ghost_face.js`. | Open | Move to `config/thresholds.json` per engine and tier. Validate per design decision in `ghost9-design-v2.md`. |
 | 6 | CC v4 threshold (0.243) and Taotie tier thresholds (0.9995+) are on different scales. | Open | Decide which scale each engine uses. Never combine them numerically. |
 | 7 | CC v3 is live. CC v4 failed the handwritten word-salad test (AUC 0.638). | Open | Keep v3 until v4 passes pre-registered criteria. |
 | 8 | `cc_structure` floor (1e-6) and max_share (0.5) are provisional. | Open | Validate on labeled data. |
 | 9 | Report §2.2 wording on the geometric mean still differs from the v3 revision. | Open | Author decision on wording. |
-| 10 | Stale files: `src/gate_syntactic.js.bak`, `src/gate_syntactic_v1.2.js`, `test_tmp/`, `archive/`, and repo-root scripts `fix_core.js`, `fix_four.js`, `fix_q.js`, `fix_quotes.js`, `fix_v6.js`, `robust_patch.js`, `surgery.js`, `SEAL_mgate_v11.json`. | Open | Provenance check, then delete or archive. Not deleted without approval. |
+| 10 | Stale files (archive, do not delete. Done 2026-10-28 for `.bak`, `_v1.2`, and root scripts. `test_tmp/` deferred until its two batteries are audited): `src/gate_syntactic.js.bak`, `src/gate_syntactic_v1.2.js`, `test_tmp/`, `archive/`, and repo-root scripts `fix_core.js`, `fix_four.js`, `fix_q.js`, `fix_quotes.js`, `fix_v6.js`, `robust_patch.js`, `surgery.js`, `SEAL_mgate_v11.json`. | Open | Provenance check, then delete or archive. Not deleted without approval. |
 
 ## Open: Android APK and the phone runtime
 
