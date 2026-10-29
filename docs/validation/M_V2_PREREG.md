@@ -27,3 +27,10 @@ M owns semantic coherence across the sentences of a text. It answers: do the sen
 
 ## Config version
 Config hash = SHA-256 of canonical JSON of: model pin, unit rule, content-word rule, stopword list, centroid rule, acceptance threshold. Every verdict records it.
+
+## Coverage check (2026-10-29, before any v2 scoring)
+- Dev and salad sets are single-sentence items. Median sentences per item is 1 for dev_prose (n=91), dev_salad (n=31), BENIGN (n=91) and INCOHERENT (n=31).
+- Under the sentence-unit rule, 0 of 91 prose and 0 of 31 salad items have 2 or more units. M v2 abstains on all of them.
+- The v2 run was stopped before scoring, so no AUC exists and no design decision has been made from outcome data.
+- Consequence: the design as pre-registered cannot be tested on the existing sets. Testing it needs multi-sentence prose and multi-sentence incoherent text, which do not exist yet.
+- Open decision for Kyle: (a) keep v2 multi-sentence only and build a multi-sentence labelled set, or (b) add a single-sentence word-unity method, pre-registered as a separate version. Any new method is registered before scoring.
