@@ -245,6 +245,9 @@ async function runE2E() {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'ghost9-e2e-'));
   copyDir(SRC, path.join(scratch, 'src'));
   copyDir(path.join(ROOT, 'config'), path.join(scratch, 'config'));
+  // This run covers the coherence path. No classifier is running here, so the scratch copy uses advisory mode.
+  // Block-mode holds need the classifier sidecar: see tests/regression/quarantine_live.sh.
+  { const cp = path.join(scratch, 'config', 'clf.json'); const cc = JSON.parse(fs.readFileSync(cp, 'utf8')); cc.mode = 'advisory'; fs.writeFileSync(cp, JSON.stringify(cc, null, 2)); }
   fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(scratch, 'node_modules'), 'dir');
 
   const face = spawn(process.execPath, [path.join(scratch, 'src', 'ghost_face.js')], { cwd: scratch, stdio: 'ignore' });

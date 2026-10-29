@@ -61,7 +61,8 @@ test('P3.3 block QC fails open when classifier is down', down.pass === true && d
   console.log('\n=== P4: module contracts ===');
   const cfg = src('clf_client').config;
   test('P4.1 clf config threshold is a number', typeof cfg.threshold === 'number', typeof cfg.threshold, 'number');
-  test('P4.2 clf config mode is advisory', cfg.mode === 'advisory', cfg.mode, 'advisory');
+  // Was 'advisory'. Changed 2026-10-29: block mode approved for harm detection, see CHANGELOG.
+test('P4.2 clf config mode is block', cfg.mode === 'block', cfg.mode, 'block');
   const S = src('cc_structure');
   test('P4.3 floor keeps mu positive for a zero score', S.muFloored({ a: 0, b: 0.9, c: 0.9 }, { a: 1/3, b: 1/3, c: 1/3 }) > 0, true, true);
   test('P4.4 sensitivity equals weight in the interior', Math.abs(S.logSensitivities({ a: 0.9, b: 0.8, c: 0.7 }, { a: 0.5, b: 0.3, c: 0.2 }).a.sensitivity - 0.5) < 1e-3, true, true);

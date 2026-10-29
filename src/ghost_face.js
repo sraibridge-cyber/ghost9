@@ -21,7 +21,8 @@ const CC      = require('./coherence_calculus');
 const T       = require('./tesseract');
 const { classifyTier, VoidSpace } = require('./taotie');
 const { SpatialWeb }              = require('./spatial_web');
-const { runPrefilterAsync } = require('./prefilter');
+const { runPrefilterAsync, DEFAULT_MODE } = require('./prefilter');
+const { Readable } = require('stream');
 
 const PORT         = 7766;
 const DATA_DIR     = path.join(__dirname, '..', 'data');
@@ -118,6 +119,32 @@ function log(msg) {
   try { fs.appendFileSync(LOG_FILE, line); } catch {}
 }
 
+// Safety net: a blocked sentence is held, never silently dropped. Held items stay in state.quarantine
+// until they are released or superseded. Nothing is deleted.
+function holdItem(state, text, ts, disposition, stage) {
+  state.quarantine = state.quarantine || [];
+  const id = crypto.createHash('sha3-512').update(`${text}|${ts}|${state.quarantine.length}`).digest('hex').slice(0, 16);
+  const item = {
+    id, text, disposition, status: 'held', created_at: ts,
+    score: stage ? stage.score : null, threshold: stage ? stage.threshold : null,
+    reason: stage ? stage.reason : null, model: stage ? stage.model : null,
+  };
+  state.quarantine.push(item);
+  return item;
+}
+
+// Run a route handler in-process and capture its JSON response.
+function captureRoute(handler, req) {
+  return new Promise((resolve, reject) => {
+    const res = {
+      statusCode: 200,
+      writeHead(status) { this.statusCode = status; },
+      end(body) { try { resolve({ status: this.statusCode, body: JSON.parse(body) }); } catch (e) { reject(e); } },
+    };
+    Promise.resolve(handler(req, res)).catch(reject);
+  });
+}
+
 function json(res, data, status = 200) {
   res.writeHead(status, {
     'Content-Type':                'application/json',
@@ -211,7 +238,28 @@ const routes = {
     const state = loadState();
     const ts    = body.ts || Date.now();
 
-    const pre = await runPrefilterAsync(text, state.nodes.slice(-5).map(n => n.content));
+    const skipQc = req.internalOpts && req.internalOpts.skipQc === true;   // set only by /quarantine/release
+    const pre = await runPrefilterAsync(text, state.nodes.slice(-5).map(n => n.content),
+      skipQc ? { ...DEFAULT_MODE, QC: 'off' } : DEFAULT_MODE);
+    if (!pre.pass && pre.blockedBy === 'QC') {
+      const item = holdItem(state, text, ts, 'quarantined', pre.stages.QC);
+      saveState(state);
+      log(`HELD quarantined score=${pre.stages.QC.score} id=${item.id}`);
+      return json(res, {
+        admitted: false, layer: 0, held: true, disposition: 'quarantined', id: item.id,
+        gate: 'QC', reason: pre.reason, score: pre.stages.QC.score, threshold: pre.stages.QC.threshold,
+        elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
+      });
+    }
+    if (pre.stages.QC && pre.stages.QC.mode === 'block' && pre.stages.QC.reason === 'classifier_unavailable' && !skipQc) {
+      const item = holdItem(state, text, ts, 'unscreened', pre.stages.QC);
+      saveState(state);
+      log(`HELD unscreened (classifier unavailable) id=${item.id}`);
+      return json(res, {
+        admitted: false, layer: 0, held: true, disposition: 'unscreened', id: item.id,
+        gate: 'QC', reason: 'classifier_unavailable', elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
+      });
+    }
     if (!pre.pass) {
       log(`PREFILTER BLOCK gate=${pre.blockedBy} reason=${pre.reason} "${text.slice(0, 60)}"`);
       return json(res, {
@@ -271,6 +319,46 @@ const routes = {
       },
       taotie: taotie_report, elapsed_ms: elapsed
     });
+  },
+
+  'GET /quarantine': async (req, res) => {
+    const state = loadState();
+    const all = state.quarantine || [];
+    const held = all.filter(q => q.status === 'held');
+    return json(res, {
+      held: held.length,
+      released: all.filter(q => q.status === 'released').length,
+      overrides: all.filter(q => q.override === true).length,
+      items: held.map(q => ({ id: q.id, disposition: q.disposition, created_at: q.created_at, score: q.score, threshold: q.threshold, reason: q.reason, text: q.text })),
+    });
+  },
+
+  'POST /quarantine/release': async (req, res) => {
+    const body = await readBody(req);
+    const state = loadState();
+    const item = (state.quarantine || []).find(q => q.id === body.id && q.status === 'held');
+    if (!item) return json(res, { error: 'no held item with that id' }, 404);
+    const override = body.override === true;
+    if (override && item.disposition !== 'quarantined') {
+      return json(res, { error: 'override applies only to classifier-quarantined items; unscreened items are rescreened instead' }, 409);
+    }
+    // Same admission path as /devour. CC gate and sync gates still apply. Only a classifier override skips QC.
+    const fake = Readable.from([JSON.stringify({ text: item.text, ts: item.created_at })]);
+    fake.method = 'POST';
+    fake.url = '/devour';
+    fake.internalOpts = { skipQc: override };
+    const r = await captureRoute(routes['POST /devour'], fake);
+    // /devour saved its own state, so reload before recording the outcome. Never write back a stale copy.
+    const fresh = loadState();
+    const row = (fresh.quarantine || []).find(q => q.id === item.id);
+    if (row) {
+      if (r.body.admitted) { row.status = 'released'; row.released_at = Date.now(); row.override = override; }
+      else if (r.body.held) { row.status = 'superseded'; row.superseded_by = r.body.id; }
+      else { row.status = 'rejected'; row.reject_reason = r.body.reason || r.body.error || 'rejected'; }
+      saveState(fresh);
+    }
+    log(`RELEASE id=${item.id} override=${override} outcome=${r.body.admitted ? 'admitted' : (r.body.held ? 'held' : 'rejected')}`);
+    return json(res, { released: r.body.admitted === true, override, outcome: r.body }, r.status);
   },
 
   'GET /state': async (req, res) => {
@@ -458,7 +546,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '127.0.0.1', () => {
   const nodeCount = web.getNodeCount(); const clusterCount = web.getClusterCount();
   log(`GHOST FACE v9.0.9 listening on http://127.0.0.1:${PORT}`);
   log(`3-Layer pipeline: CC Gate → STM/LTM Separation → Taotie (trigger: ${void_space.triggerAt})`);

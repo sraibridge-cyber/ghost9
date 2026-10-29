@@ -132,3 +132,16 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - **Live check** (sidecar running, pinned model): a coherent sentence scored NLL 3.49 and was not flagged. A word salad scored 9.37 and was flagged. Both passed the prefilter.
 - Step 3 (not done): decide whether to move LM from advisory to block. That needs a harm-independent calibration and your approval, since incoherence is not harm.
 
+## 2026-10-29 (block mode approved, quarantine safety net)
+
+- **Classifier block mode** (`config/clf.json`). Approved by you for harm detection. Benign false-positive rate is 2.5% on the v2 holdout (1 of 40). The holdout is small, so the true rate is uncertain.
+- **Safety net: hold, don't drop** (`src/ghost_face.js`).
+  - A classifier flag is held as `quarantined`, with its score and threshold, in `state.quarantine`.
+  - An unreachable classifier in block mode is held as `unscreened`.
+  - `GET /quarantine` lists held items. `POST /quarantine/release` re-runs the normal admission path (CC gate and sync gates still apply). An override that skips the classifier is allowed only for a classifier flag, and only when requested. A re-flagged item is marked `superseded`. Nothing is deleted.
+- **Kernel binds to 127.0.0.1.** It was `0.0.0.0`, which exposed it on the local network.
+- **Live verification** (`tests/regression/quarantine_live.sh`, scratch copy, block mode, classifier sidecar): flagged sentence held (score 0.674); release without override re-holds it; override release admits it; benign sentence admitted.
+- **Test updates**: `run.js` runs its scratch copy in advisory mode, because no classifier runs there, and says so. `five_gate_battery` P4.2 expects `block`, with the old expectation kept in a comment.
+- **Availability cost, not yet decided.** In block mode, if the classifier sidecar is down, every sentence is held as `unscreened`. Nothing is admitted until it is back and the held items are released. Start the sidecar first.
+- **Not held yet.** Sentences blocked by the synchronous S or Q gates are still plain rejections, not holds. That's a policy choice (held text is stored locally).
+

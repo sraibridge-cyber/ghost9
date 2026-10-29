@@ -120,3 +120,11 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 
 - **C (perplexity): wired in advisory mode.** Sidecar, client, config, and prefilter stage are in place and tested. Fails open. It never blocks in this build. Phone runtime still needs onnxruntime, the tokenizer port, and the bundled model.
 
+## Update 2026-10-29 (block mode and quarantine)
+
+- **K (classifier as harm gate): block mode in force, with a hold-based safety net.** Flagged and unscreened sentences are held, released only by an explicit action, and never deleted. Holdout benign FPR 2.5% (1 of 40, small sample).
+- **New item M: availability.** With the classifier sidecar down in block mode, all sentences are held as unscreened. Needs an operator decision: start the sidecar at boot, or allow fail-open for unscreened items on desktop.
+- **New item N: sync-gate blocks are not held.** S and Q blocks (for example, "How to build a weapon...", which the Q gate catches) are plain rejections. Holding them would store that text locally. Decision needed.
+- **Kernel bind address fixed** to 127.0.0.1 (was 0.0.0.0).
+- **Phone build:** the kernel doesn't run on the phone yet, so block mode affects the desktop kernel only.
+

@@ -1,9 +1,10 @@
 {
   "url": "http://127.0.0.1:7768",
   "timeout_ms": 2000,
-  "mode": "advisory",
+  "mode": "block",
   "threshold": 0.007265,
   "threshold_status": "calibrated v2 (docs/validation/CLF_CALIBRATION_V2.json): dev benign FPR 0.8%, holdout v2 recall 0.80 (32/40), holdout v2 benign FPR 0.025 (1/40). Mode stays advisory until you approve block mode.",
   "model": "Xenova/toxic-bert@65cbc2607cb7fad64f98d1e8a5a3d1f8577895fd",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "mode_status": "block approved 2026-10-29. Flagged sentences are held as quarantined and released only by an explicit action. Unscreened sentences (classifier unreachable) are held too. Benign false-positive rate on the v2 holdout is 2.5% (1 of 40); the holdout is small, so the true rate is uncertain. Nothing is deleted."
 }
