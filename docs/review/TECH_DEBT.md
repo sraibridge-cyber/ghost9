@@ -28,6 +28,16 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 | 9 | Report §2.2 wording on the geometric mean still differs from the v3 revision. | Open | Author decision on wording. |
 | 10 | Stale files (archive, do not delete. Done 2026-10-28 for `.bak`, `_v1.2`, and root scripts. `test_tmp/` deferred until its two batteries are audited): `src/gate_syntactic.js.bak`, `src/gate_syntactic_v1.2.js`, `test_tmp/`, `archive/`, and repo-root scripts `fix_core.js`, `fix_four.js`, `fix_q.js`, `fix_quotes.js`, `fix_v6.js`, `robust_patch.js`, `surgery.js`, `SEAL_mgate_v11.json`. | Open | Provenance check, then delete or archive. Not deleted without approval. |
 
+## Open: sovereignty (see docs/architecture/SOVEREIGNTY.md)
+
+| # | Item | Status | Needs |
+|---|------|--------|-------|
+| S1 | The model is fetched from Hugging Face at setup. That breaks rule 2 for the APK. | Open | Chunk the model into repo files under 100 MB, each with a SHA-256 manifest. Reassemble at build time and verify. |
+| S2 | `src/ghost_persistence.js:346` falls back to the network on a cache miss. | Open | Confirm the core works offline, or serve from a bundled cache only. |
+| S3 | GitHub Actions actions are pinned by tag, not by commit SHA. | Open | Pin each action to a commit SHA. The workflow file needs a web UI edit. |
+| S4 | Android build inputs come from Maven Central and Google Maven. | Open | Vendor the AARs or mirror them in the repo. Decide which. |
+| S5 | GitHub is the only copy of the repo and of the releases. | Open | A second copy under the user's control. |
+
 ## Open: Android APK and the phone runtime
 
 | # | Item | Status | Needs |

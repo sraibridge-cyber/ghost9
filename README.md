@@ -1,7 +1,7 @@
 # GHOST9 — CSS Labs
 **Generative Holistic Oracle State Topology, with Taotie Devouring Architecture**
 
-Version 9.1.0 · Kyle S. Whitlock · CC-BY-4.0 · Node ≥18, two required Node dependencies (wink-pos-tagger, wordnet-db) · optional Python classifier in services/clf
+Version 9.1.0 · Kyle S. Whitlock · CC-BY-4.0 · Node ≥18 · two bundled Node dependencies (wink-pos-tagger, wordnet-db) · no runtime dependency on any party · optional local classifier in services/clf · see docs/architecture/SOVEREIGNTY.md
 
 Ghost9 is a working implementation of CSS Labs' Coherence Calculus / Tesseract B⁴ /
 17-Laws theory: a self-contained pipeline that ingests text, scores it for coherence,
