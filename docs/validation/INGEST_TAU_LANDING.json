@@ -1,0 +1,79 @@
+{
+  "status": "descriptive landing, not a validated threshold. Chosen starting point is the research worked-example value 0.96 (labelled illustrative in cc-ss-technical-report-v3 section 04). Candidates above it are shown to see where the score lands. Any threshold used for ingestion must be calibrated on a labelled dev split and then tested once on a held-out split.",
+  "research_refs": [
+    "cc-ss-technical-report-v3: thresholds per layer and per variable set (section 04)",
+    "worked example: mu about 0.9647 halts at 0.9995 and passes at 0.96 (illustrative)",
+    "constitutional tier 0.9995 (config/thresholds.json five_laws_tau)"
+  ],
+  "mu_ranges": {
+    "dev_prose": [
+      "0.9714",
+      "0.9938"
+    ],
+    "dev_salad": [
+      "0.9749",
+      "0.9919"
+    ],
+    "holdout_prose": [
+      "0.9734",
+      "0.9938"
+    ],
+    "kyle_negatives": [
+      "0.9557",
+      "0.9897"
+    ],
+    "splice_negatives": [
+      "0.9471",
+      "0.9887"
+    ]
+  },
+  "pass_rate_by_threshold": {
+    "0.96": {
+      "dev_prose": 1,
+      "dev_salad": 1,
+      "holdout_prose": 1,
+      "kyle_negatives": 0.975,
+      "splice_negatives": 0.9
+    },
+    "0.97": {
+      "dev_prose": 1,
+      "dev_salad": 1,
+      "holdout_prose": 1,
+      "kyle_negatives": 0.95,
+      "splice_negatives": 0.875
+    },
+    "0.975": {
+      "dev_prose": 0.934,
+      "dev_salad": 0.968,
+      "holdout_prose": 0.952,
+      "kyle_negatives": 0.725,
+      "splice_negatives": 0.675
+    },
+    "0.98": {
+      "dev_prose": 0.791,
+      "dev_salad": 0.839,
+      "holdout_prose": 0.81,
+      "kyle_negatives": 0.5,
+      "splice_negatives": 0.525
+    },
+    "0.99": {
+      "dev_prose": 0.253,
+      "dev_salad": 0.065,
+      "holdout_prose": 0.19,
+      "kyle_negatives": 0,
+      "splice_negatives": 0
+    },
+    "0.9995": {
+      "dev_prose": 0,
+      "dev_salad": 0,
+      "holdout_prose": 0,
+      "kyle_negatives": 0,
+      "splice_negatives": 0
+    }
+  },
+  "auc_prose_vs_incoherent": {
+    "dev": 0.6414,
+    "holdout_vs_kyle": 0.7952,
+    "holdout_vs_splice": 0.8107
+  }
+}
