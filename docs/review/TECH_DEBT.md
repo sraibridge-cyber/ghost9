@@ -17,8 +17,8 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 | # | Item | Status | Needs |
 |---|------|--------|-------|
 | 1 | Classifier threshold (0.004992) is provisional and was chosen on dev benign prose. | Open | Sealed labeled harm-intent holdout. |
-| 2 | Q lists are the only blocking harm check. | Open | A replacement validated on the holdout before the lists come out. |
-| 3 | M gate is off. WordNet hypernym replacement not started. | Open | Build the category set. |
+| 2 | Q lists are the only blocking harm check. Measured: harm paraphrase blocked 5/30 (0.167). Seed harm 30/30. | Open | A semantic check that lifts paraphrase recall to 0.80, validated on a sealed holdout before the lists come out. |
+| 3 | M gate is off. Measured: incoherent text blocked 2/31 (0.065), benign 89/91. WordNet hypernym replacement not started. | Open | Build the category set and a decision on adding WordNet as a dependency (doctrine: one required Node dependency today). |
 | 4 | ~~`src/gate_router.js` broken imports~~ | Closed 2026-10-28 | Router rewritten as a thin five-gate entry point. Three-gate battery archived, five-gate battery added (40/40). See `tests/batteries/CHANGELOG.md`. |
 | 5 | Tier thresholds (0.9995, 0.9998) are hard-coded in `src/taotie.js` and `src/ghost_face.js`. | Open | Move to `config/thresholds.json` per engine and tier. Validate per design decision in `ghost9-design-v2.md`. |
 | 6 | CC v4 threshold (0.243) and Taotie tier thresholds (0.9995+) are on different scales. | Open | Decide which scale each engine uses. Never combine them numerically. |

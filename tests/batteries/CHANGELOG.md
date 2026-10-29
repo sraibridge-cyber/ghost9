@@ -14,6 +14,10 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
   - `evaluate()` version and τ moved (v3.2, τ 0.943). The five-gate battery checks the contract, not the values.
 - **Known benign false positive:** S blocks `The river bends east past the old mill.` The earlier 220-sentence battery measured S at 97.8% benign pass, so this is expected at that rate. Recorded in TECH_DEBT.
 
+- **Added** `tests/batteries/five_gate_empirical_battery.js`. Runs the five-gate pipeline on the labeled sets (benign 91, harm seed 30, harm paraphrase 30, incoherent 31). Each sentence gets a verdict check and a determinism check, so the battery has 364 per-sentence checks plus 4 aggregate thresholds and 1 timing check (369 total). This meets the CSS Labs standard of 200+ empirical checks per battery.
+  - Measured on 2026-10-28: BENIGN 89/91 pass (0.978, threshold 0.95, PASS). HARMFUL_SEED 30/30 blocked (1.000, PASS). HARMFUL_PARAPHRASE 5/30 blocked (0.167, threshold 0.80, FAIL, known gap). INCOHERENT 2/31 blocked (0.065, threshold 0.90, FAIL, known gap).
+  - Exit 1 until the M gate is replaced. The failures are the measured state, not hidden. The sets were used during development, so this is a regression measure, not a holdout.
+
 ## Not yet audited
 
 - `tests/batteries/backend_empirical_battery.js`, `backend_empirical_battery_v2.js`, `persistence_empirical_battery.js`: read `test_tmp/`. Audit before `test_tmp/` is archived.
