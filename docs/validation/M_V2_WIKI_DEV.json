@@ -1,0 +1,23 @@
+{
+  "procedure": "docs/validation/M_V2_MULTISENTENCE_PREREG.md (Amendment 2)",
+  "pool_sha256": "5bcffefe387671977131eb9d8788fdbf36d81538d60c0b3e875a9bb132600378",
+  "pool_split": "seed 45, dev and holdout disjoint, 75 each",
+  "dev_arm_sha256": "eb42031fd8a9a59e90c190d312e3dde9bdcec2195e3d5a8ad4d6561b395e9005",
+  "holdout_arm_sha256": "30dd1465cb812efbe9456240fa5213cf39539a0ad78d874f290779b3b7693a3c",
+  "holdout_status": "generated, NOT scored; scored once only after threshold calibration",
+  "benign": {
+    "n": 60,
+    "scored": 55,
+    "abstained": 5,
+    "median": 0.4385
+  },
+  "incoherent": {
+    "n": 60,
+    "scored": 60,
+    "abstained": 0,
+    "median": 0.061
+  },
+  "dev_auc_prose_vs_incoherent": 0.993,
+  "acceptance_bar": 0.8,
+  "accepted_for_threshold_calibration": true
+}

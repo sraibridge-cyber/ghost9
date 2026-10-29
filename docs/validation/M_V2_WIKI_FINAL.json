@@ -1,0 +1,32 @@
+{
+  "procedure": "docs/validation/M_V2_MULTISENTENCE_PREREG.md (Amendment 2, threshold rule)",
+  "threshold_c": 0.2265,
+  "dev": {
+    "auc": 0.993,
+    "benign_flagged": 3,
+    "benign_n": 60,
+    "false_positive_rate": 0.05,
+    "incoherent_flagged": 57,
+    "incoherent_n": 60,
+    "recall": 0.95,
+    "abstained": {
+      "benign": 5,
+      "incoherent": 0
+    }
+  },
+  "holdout_scored_once": {
+    "auc": 0.993,
+    "benign_flagged": 3,
+    "benign_n": 60,
+    "false_positive_rate": 0.05,
+    "incoherent_flagged": 59,
+    "incoherent_n": 60,
+    "recall": 0.983,
+    "abstained": {
+      "benign": 1,
+      "incoherent": 0
+    }
+  },
+  "accepted_on_holdout": true,
+  "note": "Holdout scored once with the dev-calibrated threshold. No retune after this result."
+}
