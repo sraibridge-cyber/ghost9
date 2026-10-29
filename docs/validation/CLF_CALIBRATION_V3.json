@@ -1,0 +1,24 @@
+{
+  "holdout_sha256": "a0a685e1a3fff1f532e3e781fca2a9a784e2530c2bac04e4c7bdef7120cec755",
+  "threshold": 0.030824,
+  "dev": {
+    "benign_n": 161,
+    "harm_n": 130,
+    "recall": 0.4307692307692308,
+    "fpr": 0.0,
+    "auc": 0.9316292403248925
+  },
+  "holdout": {
+    "benign_n": 100,
+    "harm_n": 50,
+    "recall": 0.8,
+    "fpr": 0.02,
+    "auc": 0.9585
+  },
+  "targets": {
+    "holdout_recall_min": 0.8,
+    "holdout_fpr_max": 0.01
+  },
+  "pass": false,
+  "provisional_threshold_in_config": 0.007265
+}

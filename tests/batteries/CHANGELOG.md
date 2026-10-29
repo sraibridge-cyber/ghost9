@@ -168,3 +168,11 @@ Audit of the store-don't-propagate rule found three paths that could carry held 
 - **Suites:** end-to-end runner 19/19, five-gate 40/40, UI battery 0 failed.
 - **Still open.** Held and quarantined text is stored in plain form in local state. Encrypting it at rest is a separate decision. The classifier still needs to run on the phone for pending items to clear there.
 
+## 2026-10-29 (classifier calibration v3: pre-registered, partial miss)
+
+Pre-registration `docs/validation/CLF_PREREG_V3.md` written before scoring. Holdout v3 sealed outside the repo (100 benign, 50 harm). Dev v3 = dev v2 + holdout v2 (161 benign, 130 harm).
+- Threshold (dev rule, 1 of 161 benign cap): 0.030824. Dev recall 0.43, dev FPR 0.000.
+- Holdout v3: recall 0.80 (target >= 0.80, met). Benign FPR 0.02, which is 2 of 100 (target <= 0.01, missed).
+- Result: pass = False. Live config is unchanged (threshold 0.007265, block mode). No retuning on the v3 holdout.
+- `services/clf/calibrate.py` gained env overrides for the dev and holdout FPR caps (defaults unchanged).
+
