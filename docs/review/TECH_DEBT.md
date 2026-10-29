@@ -153,3 +153,8 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **U (embedding model not bundled): open.** all-MiniLM-L6-v2 is pinned by hash in CLF_PREREG_V4.md but not in the repo. Bundling it needs chunks, a manifest, and a sovereignty check on the source. The prefilter does not use the combined rule yet.
 - **V (holdout authorship): open.** Every holdout so far was written by the same author as the dev data. Real-traffic FPR may be higher. A non-author holdout would test this.
 
+## Update 2026-10-29 (harm-vector web learning)
+
+- **W (learned vectors can shift thresholds): open.** Learning a vector moves the centroids, so the margin distribution changes. Any threshold used with the learned web must be re-validated on a fresh holdout before it is trusted. The combined rule (CLF_PREREG_V4) was validated on the v4 web only.
+- **X (learning source is human-only): by design.** learn() requires a reviewer id. Keep it that way: learning from the classifier's own flags would let the web train itself on its own mistakes.
+

@@ -184,3 +184,11 @@ Pre-registration `docs/validation/CLF_PREREG_V4.md` written before the v4 holdou
 - Classifier alone on the same holdout flagged 10 of 100 benign. The combined rule cuts that to 2.
 - Pass = False. Live configuration unchanged. No retuning on the v4 holdout.
 
+## 2026-10-29 (harm-vector web: incremental learning)
+
+- `services/clf/harm_web.py`: per-class running sums of normalized vectors and counts. Adding a vector is exact and O(dim), so the web never needs a rebuild. Equals the batch centroid.
+- Learning requires a human reviewer id. The web never learns from the classifier's own output. The event log holds label, reviewer, source id and count, no text.
+- Seed check against dev v4 uses a float32 tolerance of 1e-7. The observed drift is about 1e-9.
+- `tests/regression/harm_web_incremental.py`: 12 checks, all pass.
+- Not yet wired into the prefilter. The web needs the embedding model bundled first.
+
