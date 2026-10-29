@@ -147,3 +147,9 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **T (classifier benign FPR above target): open.** Fresh holdout v3 flagged 2 of 100 benign items (0.02). Target was 0.01 or lower. Recall 0.80 met. The live threshold stays at 0.007265 until Kyle decides. Options: accept about 2% with held items kept for review (no destruction, see the store-not-propagate design), or collect more hard-negative benign data for a v4 round with its own pre-registration.
 - Holdout v2 text now lives in `tests/data/clf_dev_v3.json` (dev). It is no longer a sealed holdout.
 
+## Update 2026-10-29 (classifier calibration v4: combined rule)
+
+- **T (benign FPR above target): still open, narrowed.** Combined rule (classifier AND harm-vector margin): holdout v4 benign FPR 2 of 100 (down from 10 of 100 for the classifier alone). Recall 0.86. Target 0.01 not met.
+- **U (embedding model not bundled): open.** all-MiniLM-L6-v2 is pinned by hash in CLF_PREREG_V4.md but not in the repo. Bundling it needs chunks, a manifest, and a sovereignty check on the source. The prefilter does not use the combined rule yet.
+- **V (holdout authorship): open.** Every holdout so far was written by the same author as the dev data. Real-traffic FPR may be higher. A non-author holdout would test this.
+

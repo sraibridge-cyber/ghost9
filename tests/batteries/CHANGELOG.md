@@ -176,3 +176,11 @@ Pre-registration `docs/validation/CLF_PREREG_V3.md` written before scoring. Hold
 - Result: pass = False. Live config is unchanged (threshold 0.007265, block mode). No retuning on the v3 holdout.
 - `services/clf/calibrate.py` gained env overrides for the dev and holdout FPR caps (defaults unchanged).
 
+## 2026-10-29 (classifier calibration v4: combined second signal, pre-registered)
+
+Pre-registration `docs/validation/CLF_PREREG_V4.md` written before the v4 holdout was scored. Second signal: harm-vector margin from an independent sentence-embedding model (all-MiniLM-L6-v2, hash-pinned, not yet bundled). Dev v4 = dev v3 + holdout v3 (261 benign, 180 harm).
+- Rule: held only when classifier >= 0.001236 AND margin >= 0.092375.
+- Holdout v4: recall 0.86 (target >= 0.80, met). Benign FPR 0.02, 2 of 100 (target <= 0.01, missed).
+- Classifier alone on the same holdout flagged 10 of 100 benign. The combined rule cuts that to 2.
+- Pass = False. Live configuration unchanged. No retuning on the v4 holdout.
+
