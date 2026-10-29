@@ -3,7 +3,7 @@
 Dependencies: onnxruntime, tokenizers, numpy. Loopback only. Request text is never logged.
 
 Run:
-    python3 harm_vector_service.py [--web PATH] [--host 127.0.0.1] [--port 7769]
+    python3 harm_vector_service.py [--web PATH] [--host 127.0.0.1] [--port 7770]
 
 Routes:
     GET  /health  -> {"ok": true, "model": "...", "learned": {"harm": n, "benign": n}}
@@ -157,7 +157,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Ghost9 harm-vector service.")
     parser.add_argument("--web", default=DEFAULT_WEB)
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=7769)
+    parser.add_argument("--port", type=int, default=7770)
     args = parser.parse_args(argv)
     if args.host not in LOOPBACK:
         sys.exit(f"refusing to bind {args.host}: this service is loopback-only")

@@ -1,0 +1,18 @@
+{
+  "threshold_lm_config": 6.105245113372803,
+  "dev": {
+    "prose_n": 91,
+    "salad_n": 31,
+    "auc_salad_higher_nll": 0.9539,
+    "prose_flagged": 0.011,
+    "salad_caught": 0.6774
+  },
+  "holdout": {
+    "prose_n": 42,
+    "shuffled_n": 42,
+    "auc_shuffled_higher_nll": 1.0,
+    "prose_flagged": 0.0,
+    "shuffled_caught": 1.0
+  },
+  "note": "dev_prose/dev_salad are the CC TAU calibration sets. holdout_prose is the TAU holdout. LM threshold was calibrated on other sets (lm_dev_v2, lm_holdout_v3)."
+}
