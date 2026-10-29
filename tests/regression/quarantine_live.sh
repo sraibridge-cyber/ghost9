@@ -30,6 +30,7 @@ R=$(curl -s -m 120 -X POST http://127.0.0.1:7766/rescreen)
 check "rescreen quarantines the harm sentence" "$(echo "$R" | j "d['quarantined']")" "1"
 check "rescreen passes the benign sentence" "$(echo "$R" | j "d['passed']")" "1"
 check "/nodes serves only the passed sentence" "$(curl -s -m 10 http://127.0.0.1:7766/nodes | j "d['total']")" "1"
+check "logs carry no text of held or pending sentences" "$(curl -s -m 10 http://127.0.0.1:7766/logs | python3 -c "import json,sys; t=json.load(sys.stdin)['lines']; print(sum('breaks your legs' in l or 'quick brown fox' in l for l in t))")" "0"
 echo "override: a human releases the held sync-gate block"
 O=$(curl -s -m 60 -X POST http://127.0.0.1:7766/quarantine/release -H 'Content-Type: application/json' -d "{\"id\":\"$GID\",\"override\":true}")
 check "override release admits the held sentence" "$(echo "$O" | j "d['released']")" "True"

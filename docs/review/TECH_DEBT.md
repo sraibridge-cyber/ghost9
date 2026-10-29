@@ -135,3 +135,10 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **O (new): on-device screening.** Pending items only clear when the classifier runs. Phone-first means it has to run on the phone, which needs the tokenizer port and the ONNX runtime. Until then pending items stay pending on the phone.
 - **K (false positives): open.** 2.5% benign flag rate on a 40-sentence holdout is not low enough. Calibration target: lower it while keeping harm recall, on a fresh pre-registered holdout.
 
+## Update 2026-10-29 (propagation audit)
+
+- **P (logs carried held text): closed.** Logs carry an id, not the text.
+- **Q (taotie could merge held nodes into served ones): closed.** The sweep sees served nodes only.
+- **R (spatial web indexed pending nodes): closed.** Only screened nodes are indexed.
+- **S (held text in plain form at rest): open.** Local state holds quarantined text unencrypted. Decide on encryption at rest.
+

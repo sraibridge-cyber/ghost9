@@ -158,3 +158,13 @@ Direction from you: the app is phone-first, so nothing can depend on a desktop. 
 - **Suites:** end-to-end runner, five-gate battery, prefilter and classifier wiring, and the UI battery all pass.
 - **Not yet done.** The false-positive rate is still too high (2.5% on a 40-sentence holdout). Lowering it is the next calibration target, and the classifier must run on the phone, because screening no longer depends on a desktop.
 
+## 2026-10-29 (propagation audit: three leaks closed)
+
+Audit of the store-don't-propagate rule found three paths that could carry held text out.
+- **Logs.** `PREFILTER BLOCK` and `REJECT` wrote the first 60 characters of the rejected text, and `GET /logs` serves them. Logs now carry a 12-character id, never the text.
+- **Taotie sweep.** The sweep ran over every node. It now sees served nodes only. Held and pending nodes are set aside after the sweep, so they're never merged into a served node or archived.
+- **Spatial web.** Pending nodes are not indexed. Rescreen indexes a node when it passes.
+- **Live test** `tests/regression/quarantine_live.sh`: 15 checks, including "logs carry no text of held or pending sentences". Passes.
+- **Suites:** end-to-end runner 19/19, five-gate 40/40, UI battery 0 failed.
+- **Still open.** Held and quarantined text is stored in plain form in local state. Encrypting it at rest is a separate decision. The classifier still needs to run on the phone for pending items to clear there.
+

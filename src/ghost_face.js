@@ -133,6 +133,16 @@ function holdItem(state, text, ts, disposition, stage) {
   return item;
 }
 
+// Logs are served over HTTP, so they carry an id, never the text.
+function textId(text) {
+  return crypto.createHash('sha3-512').update(text).digest('hex').slice(0, 12);
+}
+
+// Only screened-clean or human-released nodes take part in propagation: served, swept, merged, indexed.
+function isServed(n) {
+  return n.screen === undefined || n.screen === 'passed' || n.screen === 'released';
+}
+
 // Run a route handler in-process and capture its JSON response.
 function captureRoute(handler, req) {
   return new Promise((resolve, reject) => {
@@ -200,12 +210,16 @@ function runTaotie(state) {
   log(`Taotie sweep triggered — nodes: ${state.nodes.length}/${MAX_NODES}`);
   const t0 = performance.now();
 
+  // The sweep sees served nodes only. Held and pending nodes are kept aside and never merged or archived.
+  const held   = state.nodes.filter(n => !isServed(n));
+  const served = state.nodes.filter(isServed);
   const ltmIds = new Set(
-    state.nodes.filter(n => (n.tier || classifyTier(n.mu)) === 'LTM').map(n => n.id || n.hash)
+    served.filter(n => (n.tier || classifyTier(n.mu)) === 'LTM').map(n => n.id || n.hash)
   );
   web.computeVoid(ltmIds);
 
-  const result = void_space.sweep(state.nodes, web);
+  const result = void_space.sweep(served, web);
+  if (!result.skipped) result.survivors = result.survivors.concat(held);
 
   if (!result.skipped) {
     archiveNodes(result.devoured);
@@ -256,7 +270,7 @@ const routes = {
       });
     }
     if (!pre.pass) {
-      log(`PREFILTER BLOCK gate=${pre.blockedBy} reason=${pre.reason} "${text.slice(0, 60)}"`);
+      log(`PREFILTER BLOCK gate=${pre.blockedBy} reason=${pre.reason} id=${textId(text)}`);
       return json(res, {
         admitted: false, layer: 0, gate: pre.blockedBy, reason: pre.reason,
         prefilter: pre.stages, elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
@@ -265,7 +279,7 @@ const routes = {
 
     const cc = runCCGate(text, state, { ts });
     if (!cc.pass) {
-      log(`REJECT μ=${cc.mu.toFixed(6)} "${text.slice(0, 60)}"`);
+      log(`REJECT μ=${cc.mu.toFixed(6)} id=${textId(text)}`);
       return json(res, {
         admitted: false, layer: 1, reason: 'CC gate: μ < τ',
         mu: cc.mu, tau: cc.tau, scores: cc.scores, whitlock: cc.whitlock,
@@ -279,7 +293,7 @@ const routes = {
     state.n = state.nodes.length;
     sep.node.id = `${sep.node.hash}_${state.n - 1}`;
 
-    const webResult = updateSpatialWeb(sep.node);
+    const webResult = sep.node.screen === 'pending' ? { edgesAdded: 0 } : updateSpatialWeb(sep.node);
 
     let taotie_report = null;
     const sweep = runTaotie(state);
@@ -370,6 +384,7 @@ const routes = {
         holdItem(state, n.content, n.ts || Date.now(), 'quarantined', qc);
       } else if (qc && qc.reason === 'ok') {
         n.screen = 'passed'; out.passed++;
+        updateSpatialWeb(n);
       } else {
         out.still_pending++;
       }
