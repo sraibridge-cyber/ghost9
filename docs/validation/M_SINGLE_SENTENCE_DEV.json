@@ -1,0 +1,19 @@
+{
+  "procedure": "docs/validation/M_SINGLE_SENTENCE_PREREG.md",
+  "prose": {
+    "n": 91,
+    "scored": 91,
+    "abstained": 0,
+    "median": 0.4451
+  },
+  "salad": {
+    "n": 31,
+    "scored": 31,
+    "abstained": 0,
+    "median": 0.4494
+  },
+  "dev_auc_prose_vs_salad": 0.437,
+  "acceptance_bar": 0.8,
+  "accepted": false,
+  "caveat": "dev sets reused from M v1 and CC measurements; windows overlap; no threshold set; holdout not used"
+}

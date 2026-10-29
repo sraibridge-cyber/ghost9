@@ -1,0 +1,21 @@
+{
+  "procedure": "docs/validation/M_V2_MULTISENTENCE_PREREG.md (Amendment 1)",
+  "data_sha256": "d19f9459fe9c13d1be0a3c2dab6715560df420f838e261aa2eb110a9783ba8bf",
+  "paragraphs_available": 27,
+  "benign": {
+    "n": 27,
+    "scored": 24,
+    "abstained": 3,
+    "median": 0.2514
+  },
+  "incoherent": {
+    "n": 60,
+    "scored": 60,
+    "abstained": 0,
+    "median": 0.1422
+  },
+  "dev_auc_prose_vs_incoherent": 0.861,
+  "acceptance_bar": 0.8,
+  "accepted_for_threshold_calibration": true,
+  "note": "Dev only. No threshold set. Holdout not used."
+}
