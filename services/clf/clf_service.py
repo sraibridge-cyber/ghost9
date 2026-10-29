@@ -12,7 +12,7 @@ Routes:
 Each score is the highest sigmoid output across the model's labels, in [0, 1].
 It is one signal for the gate, not a verdict. Request text is never logged.
 The service binds to loopback only. Model files are checked against pinned
-SHA-256 hashes (see fetch_model.py) before the server starts.
+SHA3-512 hashes (see fetch_model.py) before the server starts.
 """
 import argparse
 import json
@@ -26,9 +26,8 @@ import numpy as np  # noqa: E402
 import onnxruntime as ort  # noqa: E402
 from tokenizers import Tokenizer  # noqa: E402
 
-from fetch_model import DEFAULT_DIR, REPO, REVISION, verify  # noqa: E402
+from fetch_model import DEFAULT_DIR, MODEL_ID, verify  # noqa: E402
 
-MODEL_ID = f"{REPO}@{REVISION}"
 MAX_LEN = 128
 MAX_TEXTS = 256
 MAX_BODY = 1_000_000

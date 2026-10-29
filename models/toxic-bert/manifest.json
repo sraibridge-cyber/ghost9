@@ -1,0 +1,46 @@
+{
+  "model_id": "Xenova/toxic-bert@65cbc2607cb7fad64f98d1e8a5a3d1f8577895fd",
+  "upstream": "Xenova/toxic-bert (ONNX port of unitary/toxic-bert), Apache-2.0",
+  "algorithm": "sha3-512",
+  "note": "Files are stored in the repo as chunks under GitHub's 100 MB file limit. Assemble with services/clf/fetch_model.py.",
+  "files": [
+    {
+      "name": "model_quantized.onnx",
+      "size": 110720344,
+      "sha3_512": "82859914acec2fb3f4a1cfc55f4d0de0cc875d1812fd52f2bd43b2f317823a497cacaba1b3ecb674bb690dc6ad4a0236efc29e90aabfd4cc9664961d6da41d2b",
+      "chunks": [
+        {
+          "name": "model_quantized.onnx.part-00.bin",
+          "size": 27262976,
+          "sha3_512": "00a2a268a060c348fa270f6e7430f5bdcdd20fd906b9a230460443e3d9b9a7dd82eaa6e7e49738a75f4ac5229c0432abd796735ee5548fd7e7fdae45a2bf60a3"
+        },
+        {
+          "name": "model_quantized.onnx.part-01.bin",
+          "size": 27262976,
+          "sha3_512": "1b194870229e8e734b5a747dabad56a5d0d140a28d25ec57a955b3e045fc3e0d71d72369a33968b5e0898719cf7ffa3fe637d6e328f945f3d5d0e05f97fb091a"
+        },
+        {
+          "name": "model_quantized.onnx.part-02.bin",
+          "size": 27262976,
+          "sha3_512": "7b76a4da066e9f890d8ef7650a260cfc4fba217f8469cfadc3f4060596a36812a4a0ce4fa587765e3e1fa8253372ad0072a77251cd3b4f9d5abaeb0e9c92d354"
+        },
+        {
+          "name": "model_quantized.onnx.part-03.bin",
+          "size": 27262976,
+          "sha3_512": "416ccd372d8ef9ab0ffca3eab28975eda8a3370905e3bfef5c90acc599f02d7a86be598882310facd345670cbd1efd76690ab280768d00a7c20c681b61ca50c9"
+        },
+        {
+          "name": "model_quantized.onnx.part-04.bin",
+          "size": 1668440,
+          "sha3_512": "607524f9415fa086a754ff306d89f26e99fb0e6c2c1ac95fb5d0f2c3cff265a6a34084aefdc62edaf89f01f7ee9f3d1d3024cf463799b12bd30a0be8e0f7e2a1"
+        }
+      ]
+    },
+    {
+      "name": "tokenizer.json",
+      "size": 711396,
+      "sha3_512": "3618c3991c126512571e9945cec86771ce3cb570edd7605e378f8397d1701a6922ab3716597b537543ae25edaf9a364bf97dd6aeea74d3886de885b0392df926",
+      "chunks": []
+    }
+  ]
+}
