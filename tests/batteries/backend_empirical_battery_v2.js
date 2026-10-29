@@ -11,11 +11,14 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { GhostState, GhostChannel, atomicWrite, sha3_512, crashRecovery, STATE_FILE } = require('./src/ghost_backend');
+const { GhostState, GhostChannel, atomicWrite, sha3_512, crashRecovery, STATE_FILE } = require('../../src/ghost_backend');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'ghost-bat-'));
+process.on('exit', () => { try { fs.rmSync(TMP_DIR, { recursive: true, force: true }); } catch (e) {} });
 
-const TEST_DIR = './test_tmp';
+const TEST_DIR = TMP_DIR;
 
 // ============================================
 // PHASE 1: ATOMIC WRITES & CRYPTO (50 tests)
@@ -231,7 +234,7 @@ setTimeout(() => {
 console.log('\n=== P4: Cross-Module Integration ===');
 
 // P4.1: Backend + CC v3.0 (5 tests)
-const { evaluate } = require('./src/coherence_calculus');
+const { evaluate } = require('../../src/coherence_calculus');
 const ccState = new GhostState(TEST_DIR + '/cc_state.json');
 const ccResult = evaluate('coherent test statement', { nodeCount: 5 });
 ccState.set('cc', ccResult);
@@ -255,7 +258,7 @@ test('P4.1.5 CC tier defined', (() => {
 })(), true, true);
 
 // P4.2: Backend + Taotie (5 tests)
-const { mergeCluster } = require('./src/taotie');
+const { mergeCluster } = require('../../src/taotie');
 const taotieState = new GhostState(TEST_DIR + '/taotie_state.json');
 const taotieNodes = [];
 for (let i = 0; i < 3; i++) {
@@ -287,7 +290,7 @@ test('P4.2.5 Taotie scores preserved', (() => {
 })(), true, true);
 
 // P4.3: Backend + Bonsai (5 tests)
-const { MerkleBonsai } = require('./src/merkle_bonsai');
+const { MerkleBonsai } = require('../../src/merkle_bonsai');
 const bonsaiState = new GhostState(TEST_DIR + '/bonsai_state.json');
 const bonsai = new MerkleBonsai();
 for (let i = 0; i < 5; i++) {
@@ -316,7 +319,7 @@ test('P4.3.5 Bonsai stats leafCount', (() => {
 })(), true, true);
 
 // P4.4: Backend + SpectralGraph (5 tests)
-const { SpectralGraph } = require('./src/spectral_graph');
+const { SpectralGraph } = require('../../src/spectral_graph');
 const sgState = new GhostState(TEST_DIR + '/sg_state.json');
 const sg = new SpectralGraph();
 for (let i = 0; i < 4; i++) {

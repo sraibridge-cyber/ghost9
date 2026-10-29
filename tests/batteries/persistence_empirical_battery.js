@@ -262,7 +262,7 @@ test('P5.1.6 GhostState has get', typeof new GhostState('./test.json').get === '
 test('P5.1.7 GhostState has syncSave', typeof new GhostState('./test.json').syncSave === 'function', typeof new GhostState('./test.json').syncSave, 'function');
 test('P5.1.8 GhostState has load', typeof new GhostState('./test.json').load === 'function', typeof new GhostState('./test.json').load, 'function');
 test('P5.1.9 Backend hash compatible', sha3_512('persistence_test').length === 128, true, true);
-test('P5.1.10 State path works', new GhostState('./test_tmp/persist.json').statePath.includes('persist.json'), true, true);
+test('P5.1.10 State path works', new GhostState(require('path').join(require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'ghost-persist-')), 'persist.json')).statePath.includes('persist.json'), true, true);
 
 // P5.2: UI Docs + Backend integration (10 tests)
 test('P5.2.1 Docs reflect backend tests', uiDocs.modules[8].tests === '265/265', uiDocs.modules[8].tests, '265/265');

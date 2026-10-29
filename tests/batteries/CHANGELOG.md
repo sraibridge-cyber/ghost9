@@ -35,7 +35,10 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
   - P1.3.9, P3.3.2: CC version is v3.2. Old: '3.0'.
   - P1.3.10, P3.3.3: UI docs test count claim is 207/207. Old: 315/315. This count is hard-coded, not measured (see TECH_DEBT).
 
+- **Batteries no longer write to `test_tmp/`.** `backend_empirical_battery.js` (91/91), `backend_empirical_battery_v2.js` (265/265) and `persistence_empirical_battery.js` (255/255) now write to a per-run directory under `os.tmpdir()`, removed on exit. Their `require('./src/...')` paths are now `../../src/...`. That was why both backend batteries crashed at startup. The persistence P5.1.10 check now uses a `persist.json` file in its temp directory. `test_tmp/` was never tracked (it is gitignored scratch output), so nothing was in git history. Its 55 local files were moved to `archive/temp/2026-10-28/test_tmp/` in the working copy. They are not committed.
+
+- **Added** `tests/regression/clf_service_contract.py` (16/16). It runs the real classifier server on loopback and checks routes, status codes, score shape, determinism and input errors. The client bypasses `HTTP_PROXY`.
+
 ## Not yet audited
 
-- `tests/batteries/backend_empirical_battery.js`, `backend_empirical_battery_v2.js`, `persistence_empirical_battery.js`: read `test_tmp/`. Audit before `test_tmp/` is archived.
 - `tests/e2e/ghost_kernel_e2e_battery.js`: lists `gate_router` as a core module. Loads fine. Not otherwise audited.

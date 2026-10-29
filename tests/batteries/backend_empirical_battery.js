@@ -11,9 +11,12 @@ function test(name, condition, actual, expected) {
   else { failed++; failures.push(name + ': got ' + JSON.stringify(actual) + ', expected ' + JSON.stringify(expected)); process.stdout.write('X'); }
 }
 
-const { GhostState, GhostChannel, atomicWrite, sha3_512, crashRecovery, STATE_FILE } = require('./src/ghost_backend');
+const { GhostState, GhostChannel, atomicWrite, sha3_512, crashRecovery, STATE_FILE } = require('../../src/ghost_backend');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'ghost-bat-'));
+process.on('exit', () => { try { fs.rmSync(TMP_DIR, { recursive: true, force: true }); } catch (e) {} });
 
 // ============================================
 // PHASE 1: ATOMIC WRITES & CRYPTO (50 tests)
@@ -33,7 +36,7 @@ test('P1.1.9 sha3_512 objects', sha3_512({test: true}).length === 128, sha3_512(
 test('P1.1.10 sha3_512 null', sha3_512(null).length === 128, sha3_512(null).length, 128);
 
 // P1.2: GhostState creation (10 tests)
-const state1 = new GhostState('./test_tmp/ghost_test_state.json');
+const state1 = new GhostState(TMP_DIR + '/ghost_test_state.json');
 test('P1.2.1 GhostState created', state1 instanceof GhostState, true, true);
 test('P1.2.2 Initial state empty', Object.keys(state1.state).length === 0, Object.keys(state1.state).length, 0);
 test('P1.2.3 Initial writeCount 0', state1.writeCount === 0, state1.writeCount, 0);
@@ -46,7 +49,7 @@ test('P1.2.9 set object', (() => { state1.set('obj', {a: 1}); return state1.get(
 test('P1.2.10 stats has keys', state1.stats().keys === 2, state1.stats().keys, 2);
 
 // P1.3: GhostState syncSave (15 tests)
-const state2 = new GhostState('./test_tmp/ghost_test_save.json');
+const state2 = new GhostState(TMP_DIR + '/ghost_test_save.json');
 state2.set('test', 'data');
 const saveResult = state2.syncSave();
 test('P1.3.1 syncSave returns object', typeof saveResult === 'object', typeof saveResult, 'object');
@@ -58,15 +61,15 @@ test('P1.3.6 syncSave writes 1', saveResult.writes === 1, saveResult.writes, 1);
 test('P1.3.7 writeCount incremented', state2.writeCount === 1, state2.writeCount, 1);
 test('P1.3.8 lastHash set', state2.lastHash !== null, state2.lastHash !== null, true);
 test('P1.3.9 lastWriteTs set', state2.lastWriteTs > 0, state2.lastWriteTs, '>0');
-test('P1.3.10 file created', fs.existsSync('./test_tmp/ghost_test_save.json'), true, true);
-test('P1.3.11 file readable', fs.readFileSync('./test_tmp/ghost_test_save.json', 'utf8').length > 0, true, true);
-test('P1.3.12 JSON valid', (() => { try { JSON.parse(fs.readFileSync('./test_tmp/ghost_test_save.json', 'utf8')); return true; } catch(e) { return false; } })(), true, true);
-test('P1.3.13 data preserved', JSON.parse(fs.readFileSync('./test_tmp/ghost_test_save.json', 'utf8')).test === 'data', true, true);
+test('P1.3.10 file created', fs.existsSync(TMP_DIR + '/ghost_test_save.json'), true, true);
+test('P1.3.11 file readable', fs.readFileSync(TMP_DIR + '/ghost_test_save.json', 'utf8').length > 0, true, true);
+test('P1.3.12 JSON valid', (() => { try { JSON.parse(fs.readFileSync(TMP_DIR + '/ghost_test_save.json', 'utf8')); return true; } catch(e) { return false; } })(), true, true);
+test('P1.3.13 data preserved', JSON.parse(fs.readFileSync(TMP_DIR + '/ghost_test_save.json', 'utf8')).test === 'data', true, true);
 test('P1.3.14 second write', state2.syncSave().writes === 2, state2.syncSave().writes, 2);
 test('P1.3.15 different hash', (() => { const h1 = state2.lastHash; state2.set('test', 'data2'); state2.syncSave(); return state2.lastHash !== h1; })(), true, true);
 
 // P1.4: GhostState load (10 tests)
-const state3 = new GhostState('./test_tmp/ghost_test_save.json');
+const state3 = new GhostState(TMP_DIR + '/ghost_test_save.json');
 const loadResult = state3.load();
 test('P1.4.1 load returns object', typeof loadResult === 'object', typeof loadResult, 'object');
 test('P1.4.2 load success', loadResult.success === true, loadResult.success, true);
@@ -74,20 +77,20 @@ test('P1.4.3 load has hash', typeof loadResult.hash === 'string', typeof loadRes
 test('P1.4.4 load hash 128', loadResult.hash.length === 128, loadResult.hash.length, 128);
 test('P1.4.5 state loaded', state3.get('test') !== undefined, true, true);
 test('P1.4.6 lastHash set', state3.lastHash === loadResult.hash, true, true);
-test('P1.4.7 nonexistent file', (() => { const s = new GhostState('./test_tmp/nonexistent.json'); const r = s.load(); return r.success && r.note === 'no_existing_state'; })(), true, true);
+test('P1.4.7 nonexistent file', (() => { const s = new GhostState(TMP_DIR + '/nonexistent.json'); const r = s.load(); return r.success && r.note === 'no_existing_state'; })(), true, true);
 test('P1.4.8 corrupt file recovery', (() => {
-  fs.writeFileSync('./test_tmp/corrupt.json', 'not json');
-  const s = new GhostState('./test_tmp/corrupt.json');
+  fs.writeFileSync(TMP_DIR + '/corrupt.json', 'not json');
+  const s = new GhostState(TMP_DIR + '/corrupt.json');
   const r = s.load();
   return !r.success;
 })(), true, true);
 
 // P1.5: Crash recovery (5 tests)
-test('P1.5.1 crashRecovery returns object', typeof crashRecovery('./test_tmp/ghost_test_save.json') === 'object', typeof crashRecovery('./test_tmp/ghost_test_save.json'), 'object');
-test('P1.5.2 crashRecovery finds state', crashRecovery('./test_tmp/ghost_test_save.json').stateFile === true, true, true);
-test('P1.5.3 crashRecovery has state', crashRecovery('./test_tmp/ghost_test_save.json').state !== null, true, true);
-test('P1.5.4 crashRecovery nonexistent', crashRecovery('./test_tmp/nonexistent.json').stateFile === false, true, true);
-test('P1.5.5 crashRecovery no backup', crashRecovery('./test_tmp/nonexistent.json').backupFile === false, true, true);
+test('P1.5.1 crashRecovery returns object', typeof crashRecovery(TMP_DIR + '/ghost_test_save.json') === 'object', typeof crashRecovery(TMP_DIR + '/ghost_test_save.json'), 'object');
+test('P1.5.2 crashRecovery finds state', crashRecovery(TMP_DIR + '/ghost_test_save.json').stateFile === true, true, true);
+test('P1.5.3 crashRecovery has state', crashRecovery(TMP_DIR + '/ghost_test_save.json').state !== null, true, true);
+test('P1.5.4 crashRecovery nonexistent', crashRecovery(TMP_DIR + '/nonexistent.json').stateFile === false, true, true);
+test('P1.5.5 crashRecovery no backup', crashRecovery(TMP_DIR + '/nonexistent.json').backupFile === false, true, true);
 
 
 // ============================================
@@ -178,8 +181,8 @@ setTimeout(() => {
 console.log('\n=== P3: Cross-Module Integration ===');
 
 // P3.1: Backend + CC v3.0 (5 tests)
-const { evaluate } = require('./src/coherence_calculus');
-const ccState = new GhostState('./test_tmp/ghost_cc_test.json');
+const { evaluate } = require('../../src/coherence_calculus');
+const ccState = new GhostState(TMP_DIR + '/ghost_cc_test.json');
 const ccText = 'This is a coherent statement with high integrity';
 const ccResult = evaluate(ccText, { nodeCount: 5 });
 ccState.set('cc_result', ccResult);
@@ -187,14 +190,14 @@ const ccSave = ccState.syncSave();
 test('P3.1.1 CC state saved', ccSave.writes === 1, ccSave.writes, 1);
 test('P3.1.2 CC hash 128', ccSave.hash.length === 128, ccSave.hash.length, 128);
 test('P3.1.3 CC data preserved', (() => {
-  const s = new GhostState('./test_tmp/ghost_cc_test.json');
+  const s = new GhostState(TMP_DIR + '/ghost_cc_test.json');
   s.load();
   return s.get('cc_result').mu > 0;
 })(), true, true);
 
 // P3.2: Backend + Taotie (5 tests)
-const { VoidSpace, mergeCluster } = require('./src/taotie');
-const taotieState = new GhostState('./test_tmp/ghost_taotie_test.json');
+const { VoidSpace, mergeCluster } = require('../../src/taotie');
+const taotieState = new GhostState(TMP_DIR + '/ghost_taotie_test.json');
 const taotieNodes = [];
 for (let i = 0; i < 3; i++) {
   taotieNodes.push({
@@ -213,8 +216,8 @@ test('P3.2.1 Taotie state saved', taotieSave.writes === 1, taotieSave.writes, 1)
 test('P3.2.2 Taotie hash 128', taotieSave.hash.length === 128, taotieSave.hash.length, 128);
 
 // P3.3: Backend + Bonsai (5 tests)
-const { MerkleBonsai } = require('./src/merkle_bonsai');
-const bonsaiState = new GhostState('./test_tmp/ghost_bonsai_test.json');
+const { MerkleBonsai } = require('../../src/merkle_bonsai');
+const bonsaiState = new GhostState(TMP_DIR + '/ghost_bonsai_test.json');
 const bonsai = new MerkleBonsai();
 for (let i = 0; i < 5; i++) {
   bonsai.addLeaf('bonsai_' + i, { signal: 0.9997, energy: 0.9997, temporal: 0.9997, spatial: 0.9997, cognitive: 0.9997, ethical: 0.9997, declarative: 0.9997, novelty: 0.9997 }, 0.9997);
@@ -227,8 +230,8 @@ test('P3.3.1 Bonsai state saved', bonsaiSave.writes === 1, bonsaiSave.writes, 1)
 test('P3.3.2 Bonsai hash 128', bonsaiSave.hash.length === 128, bonsaiSave.hash.length, 128);
 
 // P3.4: Backend + SpectralGraph (5 tests)
-const { SpectralGraph } = require('./src/spectral_graph');
-const sgState = new GhostState('./test_tmp/ghost_sg_test.json');
+const { SpectralGraph } = require('../../src/spectral_graph');
+const sgState = new GhostState(TMP_DIR + '/ghost_sg_test.json');
 const sg = new SpectralGraph();
 for (let i = 0; i < 4; i++) {
   sg.addNode('sg_' + i, { signal: 0.9997, energy: 0.9997, temporal: 0.9997, spatial: 0.9997, cognitive: 0.9997, ethical: 0.9997, declarative: 0.9997, novelty: 0.9997 }, 0.9997);
@@ -241,7 +244,7 @@ test('P3.4.1 SG state saved', sgSave.writes === 1, sgSave.writes, 1);
 test('P3.4.2 SG hash 128', sgSave.hash.length === 128, sgSave.hash.length, 128);
 
 // P3.5: Full pipeline state (5 tests)
-const pipelineState = new GhostState('./test_tmp/ghost_pipeline_test.json');
+const pipelineState = new GhostState(TMP_DIR + '/ghost_pipeline_test.json');
 pipelineState.set('cc', evaluate('test', { nodeCount: 1 }));
 pipelineState.set('taotie', taotieMerged);
 pipelineState.set('bonsai_root', bonsai.root);
@@ -250,14 +253,14 @@ const pipelineSave = pipelineState.syncSave();
 test('P3.5.1 Pipeline state saved', pipelineSave.writes === 1, pipelineSave.writes, 1);
 test('P3.5.2 Pipeline hash 128', pipelineSave.hash.length === 128, pipelineSave.hash.length, 128);
 test('P3.5.3 Pipeline data preserved', (() => {
-  const s = new GhostState('./test_tmp/ghost_pipeline_test.json');
+  const s = new GhostState(TMP_DIR + '/ghost_pipeline_test.json');
   s.load();
   return s.get('cc') !== undefined && s.get('taotie') !== undefined && s.get('bonsai_root') !== undefined;
 })(), true, true);
 
 // P3.6: State integrity verification (5 tests)
 test('P3.6.1 State hash changes', (() => {
-  const s = new GhostState('./test_tmp/ghost_integrity.json');
+  const s = new GhostState(TMP_DIR + '/ghost_integrity.json');
   s.set('v1', 'a');
   const h1 = s.syncSave().hash;
   s.set('v1', 'b');
@@ -265,10 +268,10 @@ test('P3.6.1 State hash changes', (() => {
   return h1 !== h2;
 })(), true, true);
 test('P3.6.2 Same data same hash', (() => {
-  const s1 = new GhostState('./test_tmp/ghost_hash1.json');
+  const s1 = new GhostState(TMP_DIR + '/ghost_hash1.json');
   s1.set('data', 'test');
   const h1 = s1.syncSave().hash;
-  const s2 = new GhostState('./test_tmp/ghost_hash2.json');
+  const s2 = new GhostState(TMP_DIR + '/ghost_hash2.json');
   s2.set('data', 'test');
   const h2 = s2.syncSave().hash;
   return h1 === h2;
@@ -281,23 +284,23 @@ test('P3.6.2 Same data same hash', (() => {
 console.log('\n=== P4: Stress & Edge Cases ===');
 
 // P4.1: Rapid state writes (5 tests)
-const rapidState = new GhostState('./test_tmp/ghost_rapid.json');
+const rapidState = new GhostState(TMP_DIR + '/ghost_rapid.json');
 for (let i = 0; i < 10; i++) {
   rapidState.set('key_' + i, 'value_' + i);
   rapidState.syncSave();
 }
 test('P4.1.1 Rapid writes 10', rapidState.writeCount === 10, rapidState.writeCount, 10);
 test('P4.1.2 Rapid lastHash set', rapidState.lastHash !== null, rapidState.lastHash !== null, true);
-test('P4.1.3 Rapid file exists', fs.existsSync('./test_tmp/ghost_rapid.json'), true, true);
-test('P4.1.4 Rapid JSON valid', (() => { try { JSON.parse(fs.readFileSync('./test_tmp/ghost_rapid.json', 'utf8')); return true; } catch(e) { return false; } })(), true, true);
+test('P4.1.3 Rapid file exists', fs.existsSync(TMP_DIR + '/ghost_rapid.json'), true, true);
+test('P4.1.4 Rapid JSON valid', (() => { try { JSON.parse(fs.readFileSync(TMP_DIR + '/ghost_rapid.json', 'utf8')); return true; } catch(e) { return false; } })(), true, true);
 test('P4.1.5 Rapid all keys', (() => {
-  const s = new GhostState('./test_tmp/ghost_rapid.json');
+  const s = new GhostState(TMP_DIR + '/ghost_rapid.json');
   s.load();
   return Object.keys(s.state).length === 10;
 })(), true, true);
 
 // P4.2: Large state (5 tests)
-const largeState = new GhostState('./test_tmp/ghost_large.json');
+const largeState = new GhostState(TMP_DIR + '/ghost_large.json');
 const largeData = { data: 'A'.repeat(100000), array: new Array(1000).fill(0).map((_, i) => i) };
 largeState.set('large', largeData);
 const largeSave = largeState.syncSave();
@@ -305,49 +308,49 @@ test('P4.2.1 Large saved', largeSave.writes === 1, largeSave.writes, 1);
 test('P4.2.2 Large hash 128', largeSave.hash.length === 128, largeSave.hash.length, 128);
 test('P4.2.3 Large bytes > 100k', largeSave.bytes > 100000, largeSave.bytes, '>100000');
 test('P4.2.4 Large loadable', (() => {
-  const s = new GhostState('./test_tmp/ghost_large.json');
+  const s = new GhostState(TMP_DIR + '/ghost_large.json');
   s.load();
   return s.get('large').data.length === 100000;
 })(), true, true);
 
 // P4.3: Unicode state (3 tests)
-const unicodeState = new GhostState('./test_tmp/ghost_unicode.json');
+const unicodeState = new GhostState(TMP_DIR + '/ghost_unicode.json');
 unicodeState.set('unicode', { cn: '你好世界', emoji: '🌊⚡🔥', ar: 'مرحبا', jp: 'こんにちは' });
 unicodeState.syncSave();
-test('P4.3.1 Unicode saved', fs.existsSync('./test_tmp/ghost_unicode.json'), true, true);
+test('P4.3.1 Unicode saved', fs.existsSync(TMP_DIR + '/ghost_unicode.json'), true, true);
 test('P4.3.2 Unicode loadable', (() => {
-  const s = new GhostState('./test_tmp/ghost_unicode.json');
+  const s = new GhostState(TMP_DIR + '/ghost_unicode.json');
   s.load();
   return s.get('unicode').emoji === '🌊⚡🔥';
 })(), true, true);
 
 // P4.4: Nested state (5 tests)
-const nestedState = new GhostState('./test_tmp/ghost_nested.json');
+const nestedState = new GhostState(TMP_DIR + '/ghost_nested.json');
 nestedState.set('nested', { level1: { level2: { level3: { value: 'deep' } } } });
 nestedState.syncSave();
-test('P4.4.1 Nested saved', fs.existsSync('./test_tmp/ghost_nested.json'), true, true);
+test('P4.4.1 Nested saved', fs.existsSync(TMP_DIR + '/ghost_nested.json'), true, true);
 test('P4.4.2 Nested loadable', (() => {
-  const s = new GhostState('./test_tmp/ghost_nested.json');
+  const s = new GhostState(TMP_DIR + '/ghost_nested.json');
   s.load();
   return s.get('nested').level1.level2.level3.value === 'deep';
 })(), true, true);
 
 // P4.5: Null/undefined edge cases (4 tests)
-const nullState = new GhostState('./test_tmp/ghost_null.json');
+const nullState = new GhostState(TMP_DIR + '/ghost_null.json');
 nullState.set('null', null);
 nullState.set('undefined', undefined);
 nullState.syncSave();
-test('P4.5.1 Null saved', fs.existsSync('./test_tmp/ghost_null.json'), true, true);
+test('P4.5.1 Null saved', fs.existsSync(TMP_DIR + '/ghost_null.json'), true, true);
 test('P4.5.2 Null loadable', (() => {
-  const s = new GhostState('./test_tmp/ghost_null.json');
+  const s = new GhostState(TMP_DIR + '/ghost_null.json');
   s.load();
   return s.get('null') === null;
 })(), true, true);
 
 // P4.6: Crash recovery simulation (3 tests)
-test('P4.6.1 Recovery existing', crashRecovery('./test_tmp/ghost_rapid.json').stateFile === true, true, true);
-test('P4.6.2 Recovery nonexistent', crashRecovery('./test_tmp/nonexistent_ghost.json').stateFile === false, true, true);
-test('P4.6.3 Recovery has state', crashRecovery('./test_tmp/ghost_rapid.json').state !== null, true, true);
+test('P4.6.1 Recovery existing', crashRecovery(TMP_DIR + '/ghost_rapid.json').stateFile === true, true, true);
+test('P4.6.2 Recovery nonexistent', crashRecovery(TMP_DIR + '/nonexistent_ghost.json').stateFile === false, true, true);
+test('P4.6.3 Recovery has state', crashRecovery(TMP_DIR + '/ghost_rapid.json').state !== null, true, true);
 
 // ============================================
 // RESULTS

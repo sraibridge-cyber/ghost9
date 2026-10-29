@@ -28,7 +28,7 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 | 7 | CC v3 is live. CC v4 failed the handwritten word-salad test (AUC 0.638). | Open | Keep v3 until v4 passes pre-registered criteria. |
 | 8 | `cc_structure` floor (1e-6) and max_share (0.5) are provisional. | Open | Validate on labeled data. |
 | 9 | Report §2.2 wording on the geometric mean still differs from the v3 revision. | Open | Author decision on wording. |
-| 10 | Stale files (archive, do not delete. Done 2026-10-28 for `.bak`, `_v1.2`, and root scripts. `test_tmp/` deferred until its two batteries are audited): `src/gate_syntactic.js.bak`, `src/gate_syntactic_v1.2.js`, `test_tmp/`, `archive/`, and repo-root scripts `fix_core.js`, `fix_four.js`, `fix_q.js`, `fix_quotes.js`, `fix_v6.js`, `robust_patch.js`, `surgery.js`, `SEAL_mgate_v11.json`. | Open | Provenance check, then delete or archive. Not deleted without approval. |
+| 10 | Stale files (archive, do not delete. Done 2026-10-28 for `.bak`, `_v1.2`, and root scripts. `test_tmp/` was never tracked (gitignored scratch). Its local files were moved to `archive/temp/2026-10-28/test_tmp/`, not committed, after the batteries moved to a per-run temp dir): `src/gate_syntactic.js.bak`, `src/gate_syntactic_v1.2.js`, `test_tmp/`, `archive/`, and repo-root scripts `fix_core.js`, `fix_four.js`, `fix_q.js`, `fix_quotes.js`, `fix_v6.js`, `robust_patch.js`, `surgery.js`, `SEAL_mgate_v11.json`. | Open | Provenance check, then delete or archive. Not deleted without approval. |
 
 ## Open: sovereignty (see docs/architecture/SOVEREIGNTY.md)
 
