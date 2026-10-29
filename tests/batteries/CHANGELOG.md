@@ -145,3 +145,16 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - **Availability cost, not yet decided.** In block mode, if the classifier sidecar is down, every sentence is held as `unscreened`. Nothing is admitted until it is back and the held items are released. Start the sidecar first.
 - **Not held yet.** Sentences blocked by the synchronous S or Q gates are still plain rejections, not holds. That's a policy choice (held text is stored locally).
 
+## 2026-10-29 (store, don't propagate: revises the block-mode hold design)
+
+Direction from you: the app is phone-first, so nothing can depend on a desktop. Harmful text may be stored for learning, but it must never propagate.
+
+- **Admission never waits on the classifier.** An unscreened sentence is admitted as `screen: pending`. A classifier-screened sentence is `passed`. An override is `released`.
+- **Propagation filter.** `GET /nodes` serves only `passed` and `released` nodes. Pending and quarantined nodes are stored, not served. Legacy nodes count as passed.
+- **Sync-gate and classifier blocks are held, not dropped.** S, Q, and classifier blocks go to `state.quarantine` (`gate_S`, `gate_Q`, or `quarantined`). They never reach the node list.
+- **`POST /rescreen`.** Screens pending nodes once the classifier is available. Flagged or gate-blocked nodes are marked `quarantined` and stored. Nothing is deleted.
+- **Release.** `POST /quarantine/release` takes an override for any held item after a human decision. The CC gate always applies.
+- **Live test** (`tests/regression/quarantine_live.sh`, 11 checks): device-only operation with no classifier running, rescreen, override release, and propagation filtering.
+- **Suites:** end-to-end runner, five-gate battery, prefilter and classifier wiring, and the UI battery all pass.
+- **Not yet done.** The false-positive rate is still too high (2.5% on a 40-sentence holdout). Lowering it is the next calibration target, and the classifier must run on the phone, because screening no longer depends on a desktop.
+

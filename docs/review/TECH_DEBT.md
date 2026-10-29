@@ -128,3 +128,10 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **Kernel bind address fixed** to 127.0.0.1 (was 0.0.0.0).
 - **Phone build:** the kernel doesn't run on the phone yet, so block mode affects the desktop kernel only.
 
+## Update 2026-10-29 (store, don't propagate)
+
+- **M (availability): resolved by design.** Nothing waits on the classifier. Unscreened sentences are stored as `pending` and served only after screening.
+- **N (sync-gate blocks not held): resolved.** S and Q blocks are held in quarantine, never propagated.
+- **O (new): on-device screening.** Pending items only clear when the classifier runs. Phone-first means it has to run on the phone, which needs the tokenizer port and the ONNX runtime. Until then pending items stay pending on the phone.
+- **K (false positives): open.** 2.5% benign flag rate on a 40-sentence holdout is not low enough. Calibration target: lower it while keeping harm recall, on a fresh pre-registered holdout.
+

@@ -238,26 +238,21 @@ const routes = {
     const state = loadState();
     const ts    = body.ts || Date.now();
 
-    const skipQc = req.internalOpts && req.internalOpts.skipQc === true;   // set only by /quarantine/release
-    const pre = await runPrefilterAsync(text, state.nodes.slice(-5).map(n => n.content),
-      skipQc ? { ...DEFAULT_MODE, QC: 'off' } : DEFAULT_MODE);
-    if (!pre.pass && pre.blockedBy === 'QC') {
-      const item = holdItem(state, text, ts, 'quarantined', pre.stages.QC);
+    const override = req.internalOpts && req.internalOpts.override === true;   // set only by /quarantine/release, after a human decision
+    const pre = override
+      ? { pass: true, blockedBy: null, reason: null, stages: { override: true } }
+      : await runPrefilterAsync(text, state.nodes.slice(-5).map(n => n.content), DEFAULT_MODE);
+    const qcRan = !!(pre.stages && pre.stages.QC && pre.stages.QC.reason === 'ok');
+    const screen = override ? 'released' : (qcRan ? 'passed' : 'pending');
+    // Store, don't propagate. A sync-gate or classifier block is held, never admitted to the node list.
+    if (!pre.pass && ['S', 'Q', 'QC'].includes(pre.blockedBy)) {
+      const disposition = pre.blockedBy === 'QC' ? 'quarantined' : `gate_${pre.blockedBy}`;
+      const item = holdItem(state, text, ts, disposition, pre.stages[pre.blockedBy]);
       saveState(state);
-      log(`HELD quarantined score=${pre.stages.QC.score} id=${item.id}`);
+      log(`HELD ${disposition} id=${item.id}`);
       return json(res, {
-        admitted: false, layer: 0, held: true, disposition: 'quarantined', id: item.id,
-        gate: 'QC', reason: pre.reason, score: pre.stages.QC.score, threshold: pre.stages.QC.threshold,
-        elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
-      });
-    }
-    if (pre.stages.QC && pre.stages.QC.mode === 'block' && pre.stages.QC.reason === 'classifier_unavailable' && !skipQc) {
-      const item = holdItem(state, text, ts, 'unscreened', pre.stages.QC);
-      saveState(state);
-      log(`HELD unscreened (classifier unavailable) id=${item.id}`);
-      return json(res, {
-        admitted: false, layer: 0, held: true, disposition: 'unscreened', id: item.id,
-        gate: 'QC', reason: 'classifier_unavailable', elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
+        admitted: false, layer: 0, held: true, disposition, id: item.id,
+        gate: pre.blockedBy, reason: pre.reason, elapsed_ms: parseFloat((performance.now() - t0).toFixed(3))
       });
     }
     if (!pre.pass) {
@@ -279,6 +274,7 @@ const routes = {
     }
 
     const sep = runSeparation(cc, text, ts);
+    sep.node.screen = screen;
     state.nodes.push(sep.node);
     state.n = state.nodes.length;
     sep.node.id = `${sep.node.hash}_${state.n - 1}`;
@@ -309,7 +305,7 @@ const routes = {
     log(`ADMIT tier=${sep.tier} vertex=${sep.vertex} μ=${cc.mu.toFixed(6)} n=${state.n} edges_added=${webResult.edgesAdded} (${elapsed}ms)`);
 
     return json(res, {
-      admitted: true, layer: 2, prefilter: 'pass', tier: sep.tier, vertex: sep.vertex,
+      admitted: true, layer: 2, prefilter: 'pass', screen, tier: sep.tier, vertex: sep.vertex,
       mu: cc.mu, hash: sep.hash, hash_preview: sep.hash.slice(0, 32) + '…',
       n: state.n, merkle_root: state.merkle_root ? state.merkle_root.slice(0, 32) + '…' : null,
       whitlock: cc.whitlock,
@@ -339,14 +335,11 @@ const routes = {
     const item = (state.quarantine || []).find(q => q.id === body.id && q.status === 'held');
     if (!item) return json(res, { error: 'no held item with that id' }, 404);
     const override = body.override === true;
-    if (override && item.disposition !== 'quarantined') {
-      return json(res, { error: 'override applies only to classifier-quarantined items; unscreened items are rescreened instead' }, 409);
-    }
-    // Same admission path as /devour. CC gate and sync gates still apply. Only a classifier override skips QC.
+    // Same admission path as /devour. The CC gate always applies. An override skips the prefilter for this one item, after a human decision.
     const fake = Readable.from([JSON.stringify({ text: item.text, ts: item.created_at })]);
     fake.method = 'POST';
     fake.url = '/devour';
-    fake.internalOpts = { skipQc: override };
+    fake.internalOpts = { override };
     const r = await captureRoute(routes['POST /devour'], fake);
     // /devour saved its own state, so reload before recording the outcome. Never write back a stale copy.
     const fresh = loadState();
@@ -359,6 +352,31 @@ const routes = {
     }
     log(`RELEASE id=${item.id} override=${override} outcome=${r.body.admitted ? 'admitted' : (r.body.held ? 'held' : 'rejected')}`);
     return json(res, { released: r.body.admitted === true, override, outcome: r.body }, r.status);
+  },
+
+  // Screen pending nodes once the classifier is available. Flagged or gate-blocked nodes stay stored, marked quarantined.
+  'POST /rescreen': async (req, res) => {
+    const state = loadState();
+    const pending = state.nodes.filter(n => n.screen === 'pending');
+    const out = { checked: pending.length, passed: 0, quarantined: 0, still_pending: 0 };
+    for (const n of pending) {
+      const pre = await runPrefilterAsync(n.content, [], DEFAULT_MODE);
+      const qc = pre.stages.QC;
+      if (!pre.pass && ['S', 'Q', 'QC'].includes(pre.blockedBy)) {
+        n.screen = 'quarantined'; out.quarantined++;
+        holdItem(state, n.content, n.ts || Date.now(), pre.blockedBy === 'QC' ? 'quarantined' : `gate_${pre.blockedBy}`, pre.stages[pre.blockedBy]);
+      } else if (qc && qc.reason === 'quarantine_classifier') {
+        n.screen = 'quarantined'; out.quarantined++;
+        holdItem(state, n.content, n.ts || Date.now(), 'quarantined', qc);
+      } else if (qc && qc.reason === 'ok') {
+        n.screen = 'passed'; out.passed++;
+      } else {
+        out.still_pending++;
+      }
+    }
+    saveState(state);
+    log(`RESCREEN checked=${out.checked} passed=${out.passed} quarantined=${out.quarantined} still_pending=${out.still_pending}`);
+    return json(res, out);
   },
 
   'GET /state': async (req, res) => {
@@ -389,7 +407,8 @@ const routes = {
     const limit  = Math.min(parseInt(url.searchParams.get('limit')  || '50'), 200);
     const offset = parseInt(url.searchParams.get('offset') || '0');
     const tier   = url.searchParams.get('tier');
-    let nodes    = state.nodes;
+    // Propagation filter: pending and quarantined nodes are stored but never served. Legacy nodes count as passed.
+    let nodes    = state.nodes.filter(n => n.screen === undefined || n.screen === 'passed' || n.screen === 'released');
     if (tier)    nodes = nodes.filter(n => (n.tier || 'STM') === tier);
     const page   = nodes.slice(offset, offset + limit);
     return json(res, {
