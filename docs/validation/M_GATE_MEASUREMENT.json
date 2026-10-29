@@ -1,0 +1,123 @@
+{
+  "note": "M gate (gate_semantic.js, provisional thresholds from config/m_gate.json) measured on dev and holdout prose. No live change. Kyle 40 sentences and splice set not used (spent).",
+  "thresholds": {
+    "min_category_hits": 2,
+    "cohesion_min": 0.5,
+    "min_words_for_cohesion": 4
+  },
+  "sets": {
+    "dev_benign": {
+      "n": 91,
+      "flagged": 25,
+      "harm_flagged": 0,
+      "cohesion_flagged": 25,
+      "cohesion_skipped": 0,
+      "cohesion_median": 0.625,
+      "top_harm_words": [
+        [
+          "cut",
+          2
+        ],
+        [
+          "run",
+          2
+        ],
+        [
+          "bar",
+          1
+        ]
+      ]
+    },
+    "dev_harm_seed": {
+      "n": 30,
+      "flagged": 8,
+      "harm_flagged": 0,
+      "cohesion_flagged": 8,
+      "cohesion_skipped": 0,
+      "cohesion_median": 0.625,
+      "top_harm_words": [
+        [
+          "hurt",
+          2
+        ],
+        [
+          "pull",
+          1
+        ],
+        [
+          "force",
+          1
+        ],
+        [
+          "weapon",
+          1
+        ]
+      ]
+    },
+    "dev_harm_paraphrase": {
+      "n": 30,
+      "flagged": 9,
+      "harm_flagged": 0,
+      "cohesion_flagged": 9,
+      "cohesion_skipped": 0,
+      "cohesion_median": 0.7,
+      "top_harm_words": [
+        [
+          "break",
+          1
+        ],
+        [
+          "cut",
+          1
+        ],
+        [
+          "poison",
+          1
+        ]
+      ]
+    },
+    "dev_salad": {
+      "n": 31,
+      "flagged": 18,
+      "harm_flagged": 0,
+      "cohesion_flagged": 18,
+      "cohesion_skipped": 0,
+      "cohesion_median": 0.4,
+      "top_harm_words": []
+    },
+    "holdout_prose": {
+      "n": 42,
+      "flagged": 18,
+      "harm_flagged": 0,
+      "cohesion_flagged": 18,
+      "cohesion_skipped": 0,
+      "cohesion_median": 0.556,
+      "top_harm_words": [
+        [
+          "steel",
+          1
+        ],
+        [
+          "ladder",
+          1
+        ],
+        [
+          "arm",
+          1
+        ],
+        [
+          "bar",
+          1
+        ]
+      ]
+    }
+  },
+  "auc_cohesion": {
+    "prose_dev_vs_salad": 0.699,
+    "prose_holdout_vs_salad": 0.601
+  },
+  "harm_fpr_benign": 0,
+  "harm_recall_seed": 0,
+  "harm_recall_paraphrase": 0,
+  "salad_caught_by_cohesion": 0.581
+}
