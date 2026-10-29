@@ -107,3 +107,11 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
   - Holdout v1 (47 prose, 47 shuffled, held outside the repo, hash committed): shuffled recall **1.000** (target met). Prose flag rate **0.064 (3/47)**, target 0.05. **Missed.**
   - Not wired into the prefilter. The holdout is used now, so a new threshold needs a fresh sealed holdout.
 
+## 2026-10-29 (perplexity calibration v2)
+
+- **Pre-registered v2** (`docs/validation/LM_PREREG_V2.md`). Calibration (dev v2) = v1 dev plus the used v1 holdout: 138 prose, 78 salad. Holdout v2 held outside the repo (45 prose, 45 shuffled, hash committed).
+- Threshold NLL 5.949 (smallest with dev prose flag rate at most 5%). Dev salad recall 0.910. Dev AUC 0.981.
+- Holdout v2: shuffled recall **1.000** (met). Prose flag rate **0.067 (3/45)**, target 0.05 (missed).
+- **Systematic gap.** Both fresh holdouts land at 6.4% to 6.7% prose flags, while dev sits at 4.3% to 4.4%. The dev rule is too loose for fresh prose. A stricter dev rule would need a new pre-registration and a third holdout, not a retune on v1 or v2.
+- Not wired into the prefilter. Config unchanged.
+

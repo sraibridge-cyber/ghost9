@@ -107,3 +107,7 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **C (perplexity signal, option C): feasible, not yet calibrated.** Pinned distilgpt2 quantized. Dev AUC 0.954. Holdout v1 shuffled recall 1.0, prose flag rate 0.064 (target 0.05, missed by one sentence). Needs a fresh sealed holdout. Before it can ship on the phone: bundle the model (83.5 MB, hash-pinned), port the tokenizer, and add an onnxruntime build to the Android runtime.
 - **G (canonical TAU): option C is the planned route.** Once a calibrated perplexity signal exists, TAU can be set from data on the new score.
 
+## Update 2026-10-29 (perplexity v2)
+
+- **C (perplexity signal): two fresh holdouts, same miss.** Shuffled recall 1.0 on both. Prose flag rate 0.064 (v1) and 0.067 (v2) against a 0.05 target. Dev prose rate is 0.043, so the dev rule (smallest threshold with dev FPR at most 5%) is too loose for fresh prose. Decision needed: pre-register a stricter dev rule (for example, dev FPR at most 2.5%) with a third holdout, or accept a 6.7% prose flag rate as the signal's operating point. The TAU battery waits on this.
+

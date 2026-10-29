@@ -19,8 +19,9 @@ from tokenizers import Tokenizer
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 LM_DIR = os.environ.get("LM_DIR", "")
 HOLD = os.environ.get("LM_HOLDOUT", "")
-PREREG = os.path.join(ROOT, "docs", "validation", "LM_PREREG.md")
-OUT = os.path.join(ROOT, "docs", "validation", "LM_CALIBRATION.json")
+PREREG = os.environ.get("LM_PREREG", os.path.join(ROOT, "docs", "validation", "LM_PREREG.md"))
+DEV = os.environ.get("LM_DEV", "")
+OUT = os.environ.get("LM_OUT", os.path.join(ROOT, "docs", "validation", "LM_CALIBRATION.json"))
 FLAG_FPR_MAX = 0.05
 RECALL_TARGET = 0.80
 MAX_TOKENS = 512
@@ -68,11 +69,18 @@ def main():
     prereg = open(PREREG, encoding="utf-8").read()
     assert sha256(os.path.join(LM_DIR, "decoder_model_quantized.onnx")) == pinned(prereg, "decoder_model_quantized.onnx SHA-256"), "model hash mismatch"
     assert sha256(os.path.join(LM_DIR, "tokenizer.json")) == pinned(prereg, "tokenizer.json SHA-256"), "tokenizer hash mismatch"
-    assert sha256(HOLD) == pinned(prereg, "Holdout v1 SHA-256"), "holdout changed since pre-registration"
+    m = re.search(r"Holdout v\d+ SHA-256: `([0-9a-f]{64})`", prereg)
+    assert m and sha256(HOLD) == m.group(1), "holdout changed since pre-registration"
 
     sc = Scorer(LM_DIR)
-    dev_prose = [v for v in (sc.nll(t) for t in json.load(open(os.path.join(ROOT, "tests", "data", "dev_prose.json")))) if v is not None]
-    dev_salad = [v for v in (sc.nll(t) for t in json.load(open(os.path.join(ROOT, "tests", "data", "dev_salad.json")))) if v is not None]
+    if DEV:
+        d = json.load(open(DEV, encoding="utf-8"))
+        dev_prose_txt, dev_salad_txt = d["prose"], d["salad"]
+    else:
+        dev_prose_txt = json.load(open(os.path.join(ROOT, "tests", "data", "dev_prose.json")))
+        dev_salad_txt = json.load(open(os.path.join(ROOT, "tests", "data", "dev_salad.json")))
+    dev_prose = [v for v in (sc.nll(t) for t in dev_prose_txt) if v is not None]
+    dev_salad = [v for v in (sc.nll(t) for t in dev_salad_txt) if v is not None]
 
     # Smallest threshold with dev prose flag rate <= 5%. Flag = NLL >= t.
     t_star = None
