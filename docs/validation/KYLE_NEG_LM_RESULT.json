@@ -1,0 +1,16 @@
+{
+  "sealed_sha256": "f59a8a5f8cf18e2b4ea1907b87ae80481df49ab4603e166baf17f4348a11859c",
+  "threshold": 6.105245113372803,
+  "auc": 0.7694,
+  "balanced_accuracy": 0.5375,
+  "negatives_caught": 0.075,
+  "prose_flagged": 0.0,
+  "targets": {
+    "auc_min": 0.9,
+    "balanced_accuracy_min": 0.8,
+    "prose_flagged_max": 0.05
+  },
+  "pass": false,
+  "nll_negatives_median": 5.4659,
+  "nll_prose_median": 4.6332
+}
