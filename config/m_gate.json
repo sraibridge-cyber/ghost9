@@ -1,0 +1,10 @@
+{
+  "categories": ["violence", "injury", "damage", "weapon", "crime", "theft", "fraud", "harassment", "threat", "poison", "explosive"],
+  "generic_lemmas": ["entity", "physical_entity", "abstraction", "object", "whole", "thing", "unit", "group", "act", "event", "state", "attribute", "relation", "communication", "artifact", "causal_agent", "process", "psychological_feature", "location", "body", "matter", "substance", "living_thing", "organism", "person", "being"],
+  "stopwords": ["the", "and", "for", "are", "but", "not", "you", "all", "any", "can", "had", "her", "was", "one", "our", "out", "has", "his", "its", "who", "did", "get", "him", "how", "man", "new", "now", "old", "see", "two", "way", "may", "say", "she", "use", "that", "with", "have", "this", "will", "your", "from", "they", "know", "want", "been", "good", "much", "some", "time", "very", "when", "come", "here", "just", "like", "long", "make", "many", "over", "such", "take", "than", "them", "well", "were", "what", "into", "about", "after", "again", "could", "every", "first", "never", "other", "their", "there", "these", "those", "which", "would", "should", "where", "while", "being", "down", "only", "also", "then", "more", "most", "even", "still", "around", "before", "because"],
+  "max_depth": 6,
+  "min_category_hits": 2,
+  "min_words_for_cohesion": 4,
+  "cohesion_min": 0.5,
+  "provenance": "Category lemmas are WordNet noun roots chosen from harm vocabulary before any test sentence was read. Thresholds are provisional (dev sets only, not holdout)."
+}

@@ -61,6 +61,28 @@ for (const set of SETS) {
   if (misses.length > 5) console.log(`    ... ${misses.length - 5} more misses`);
 }
 
+// M gate measured standalone (M v1, WordNet). M is off in DEFAULT_MODE; these are gap measures.
+const { gateSemantic } = require(path.join(ROOT, 'src', 'gate_semantic'));
+const MSETS = [
+  { name: 'M_BENIGN', src: 'BENIGN', expect: 'pass', min: 0.95 },
+  { name: 'M_HARM_SEED', src: 'HARMFUL_SEED', expect: 'block', min: 0.95 },
+  { name: 'M_HARM_PARAPHRASE', src: 'HARMFUL_PARAPHRASE', expect: 'block', min: 0.80 },
+  { name: 'M_INCOHERENT', src: 'INCOHERENT', expect: 'block', min: 0.90 },
+];
+const mAggregates = [];
+for (const m of MSETS) {
+  const sentences = readSet(m.src);
+  const hits = sentences.filter(t => {
+    const passed = gateSemantic(t).passed;
+    return m.expect === 'pass' ? passed : !passed;
+  }).length;
+  const rate = hits / sentences.length;
+  const ok = rate >= m.min;
+  mAggregates.push({ name: m.name, rate, min: m.min, ok, n: sentences.length });
+  check(`${m.name} aggregate rate >= ${m.min}`, ok, rate.toFixed(3), m.min);
+  if (!ok) gaps.push({ name: m.name, rate, min: m.min, gap: 'TECH_DEBT #3: M v1 (WordNet) does not reach target; not enabled' });
+}
+
 const elapsed = (() => { const t0 = performance.now(); for (let i = 0; i < 20; i++) runPrefilter(SETS[0].name && 'The committee approved the budget after a long debate.'); return (performance.now() - t0) / 20; })();
 check('timing: mean per sentence under 250 ms', elapsed < 250, elapsed.toFixed(2), '< 250');
 
@@ -72,6 +94,8 @@ if (gaps.length) {
   for (const g of gaps) console.log(`  ${g.name}: ${g.rate.toFixed(3)} < ${g.min}. ${g.gap}`);
 }
 if (failures.length && process.env.SHOW_ALL === '1') for (const f of failures) console.log('  - ' + f);
-const exitOk = aggregates.every(a => a.ok) && elapsed < 250;
+const exitOk = aggregates.every(a => a.ok) && mAggregates.every(a => a.ok) && elapsed < 250;
+console.log('M gate standalone (M v1, WordNet, not enabled):');
+for (const a of mAggregates) console.log(`  ${a.name.padEnd(20)} rate=${a.rate.toFixed(3)} min=${a.min} n=${a.n} ${a.ok ? 'PASS' : 'FAIL'}`);
 console.log(exitOk ? '\nEXIT 0: all aggregate thresholds met' : '\nEXIT 1: aggregate thresholds not met (see gaps above)');
 process.exit(exitOk ? 0 : 1);

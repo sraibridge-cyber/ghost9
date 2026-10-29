@@ -18,6 +18,14 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
   - Measured on 2026-10-28: BENIGN 89/91 pass (0.978, threshold 0.95, PASS). HARMFUL_SEED 30/30 blocked (1.000, PASS). HARMFUL_PARAPHRASE 5/30 blocked (0.167, threshold 0.80, FAIL, known gap). INCOHERENT 2/31 blocked (0.065, threshold 0.90, FAIL, known gap).
   - Exit 1 until the M gate is replaced. The failures are the measured state, not hidden. The sets were used during development, so this is a regression measure, not a holdout.
 
+- **Added** `src/wordnet.js`: reader for the WordNet 3.1 dictionary files shipped by the new required dependency `wordnet-db`. Positional reads keep memory low.
+- **Replaced** `src/gate_semantic.js` (list-based M, previously off) with M v1: WordNet harm categories plus a cohesion signal. The list-based version is archived at `archive/superseded/2026-10-28/src/gate_semantic.js`. M stays off in `DEFAULT_MODE`, so production behavior is unchanged.
+  - Measured standalone on 2026-10-28: BENIGN passes 0.725 (threshold 0.95). HARMFUL_SEED blocked 0.267 (0.95). HARMFUL_PARAPHRASE blocked 0.300 (0.80). INCOHERENT blocked 0.581 (0.90). All four fail.
+  - Category signal: zero hits on every set. Harm verbs in the paraphrases (kill, attack, steal, threat, injure) do not reach the harm roots in WordNet's hypernym chain. 'harm' and 'hurt' do.
+  - Cohesion signal: AUC 0.70 on the dev sets (prose 91 vs salad 31). It flags 13% to 27% of prose at thresholds 0.3 to 0.5.
+  - Conclusion: WordNet hypernyms do not capture paraphrased harm intent. A harm-intent signal needs something that reads context, not word-level ancestry. The local classifier (QC) scored paraphrases higher earlier (AUC 0.93), so it is the next candidate.
+- **Added** four M-gate aggregate checks to `five_gate_empirical_battery.js`. They fail and are reported as known gaps.
+
 ## Not yet audited
 
 - `tests/batteries/backend_empirical_battery.js`, `backend_empirical_battery_v2.js`, `persistence_empirical_battery.js`: read `test_tmp/`. Audit before `test_tmp/` is archived.

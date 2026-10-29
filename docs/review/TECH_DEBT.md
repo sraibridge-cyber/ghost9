@@ -4,6 +4,7 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 
 ## Closed this round
 
+- WordNet added as a second required Node dependency (Kyle's decision, 2026-10-28). README updated.
 - Gate router rewritten for the five-gate design; three-gate battery archived; five-gate battery added (40/40). Batteries updated in the same sprint, per Kyle's rule.
 
 - Redundant branches consolidated into `review/ghost9-combined`. Old review branches and `spike/android-apk` deleted after confirming they were contained in the combined branch.
@@ -18,7 +19,7 @@ Updated 2026-10-28. Each item has a status and the decision it needs. "Closed" m
 |---|------|--------|-------|
 | 1 | Classifier threshold (0.004992) is provisional and was chosen on dev benign prose. | Open | Sealed labeled harm-intent holdout. |
 | 2 | Q lists are the only blocking harm check. Measured: harm paraphrase blocked 5/30 (0.167). Seed harm 30/30. | Open | A semantic check that lifts paraphrase recall to 0.80, validated on a sealed holdout before the lists come out. |
-| 3 | M gate is off. Measured: incoherent text blocked 2/31 (0.065), benign 89/91. WordNet hypernym replacement not started. | Open | Build the category set and a decision on adding WordNet as a dependency (doctrine: one required Node dependency today). |
+| 3 | M gate is off. WordNet M v1 built and measured, does not reach target: category signal fires zero times, cohesion AUC 0.70, benign flags 13% to 27%. Incoherent 0.581, paraphrase 0.300 standalone. | Open | A harm-intent signal that reads context. Candidate: the local classifier (QC), calibrated on dev and tested on a sealed holdout. WordNet stays a dependency for cohesion work. |
 | 4 | ~~`src/gate_router.js` broken imports~~ | Closed 2026-10-28 | Router rewritten as a thin five-gate entry point. Three-gate battery archived, five-gate battery added (40/40). See `tests/batteries/CHANGELOG.md`. |
 | 5 | Tier thresholds (0.9995, 0.9998) are hard-coded in `src/taotie.js` and `src/ghost_face.js`. | Open | Move to `config/thresholds.json` per engine and tier. Validate per design decision in `ghost9-design-v2.md`. |
 | 6 | CC v4 threshold (0.243) and Taotie tier thresholds (0.9995+) are on different scales. | Open | Decide which scale each engine uses. Never combine them numerically. |
