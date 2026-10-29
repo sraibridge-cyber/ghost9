@@ -115,3 +115,11 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - **Systematic gap.** Both fresh holdouts land at 6.4% to 6.7% prose flags, while dev sits at 4.3% to 4.4%. The dev rule is too loose for fresh prose. A stricter dev rule would need a new pre-registration and a third holdout, not a retune on v1 or v2.
 - Not wired into the prefilter. Config unchanged.
 
+## 2026-10-29 (perplexity calibration v3, stricter dev rule)
+
+- **Rule changed before the third holdout was written** (`docs/validation/LM_PREREG_V3.md`). Dev prose flag limit lowered from 5% to 2.5%, because v1 and v2 showed the 5% limit was too loose for fresh prose. v1 and v2 remain as recorded.
+- Threshold NLL **6.105** (dev v2: 138 prose, 78 salad). Dev prose flag rate 0.022. Dev salad recall 0.872. Dev AUC 0.981.
+- Holdout v3 (47 prose, 47 shuffled, held outside the repo, hash committed): prose flag rate **0.021 (1/47), target met**. Shuffled recall **1.000, target met**. **Pass.**
+- Caveats: the holdout prose was written by the author. Shuffled negatives are an easier kind of incoherence than dev salad. The signal measures incoherence. It does not detect harm; CI-1 is fluent, so its NLL is low.
+- Not wired into the prefilter. Config unchanged. Wiring waits on the phone runtime (onnxruntime and tokenizer).
+

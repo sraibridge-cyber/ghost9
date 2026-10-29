@@ -111,3 +111,8 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 
 - **C (perplexity signal): two fresh holdouts, same miss.** Shuffled recall 1.0 on both. Prose flag rate 0.064 (v1) and 0.067 (v2) against a 0.05 target. Dev prose rate is 0.043, so the dev rule (smallest threshold with dev FPR at most 5%) is too loose for fresh prose. Decision needed: pre-register a stricter dev rule (for example, dev FPR at most 2.5%) with a third holdout, or accept a 6.7% prose flag rate as the signal's operating point. The TAU battery waits on this.
 
+## Update 2026-10-29 (perplexity v3)
+
+- **C (perplexity signal): calibrated and passing on a third holdout under a stricter, pre-registered dev rule.** Threshold NLL 6.105. Holdout prose flag 0.021, shuffled recall 1.0. Caveats in CHANGELOG. Still not wired. Phone runtime needs onnxruntime, a tokenizer port, and the 83.5 MB model bundled with its hash pinned.
+- **Harm (CI-1) is still not addressed.** Perplexity measures incoherence, not harm. Harm needs the classifier, which is calibrated but advisory.
+

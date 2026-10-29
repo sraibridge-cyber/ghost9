@@ -23,6 +23,7 @@ PREREG = os.environ.get("LM_PREREG", os.path.join(ROOT, "docs", "validation", "L
 DEV = os.environ.get("LM_DEV", "")
 OUT = os.environ.get("LM_OUT", os.path.join(ROOT, "docs", "validation", "LM_CALIBRATION.json"))
 FLAG_FPR_MAX = 0.05
+DEV_FPR_MAX = float(os.environ.get("LM_DEV_FPR_MAX", "0.05"))  # v3 sets 0.025 (see LM_PREREG_V3.md)
 RECALL_TARGET = 0.80
 MAX_TOKENS = 512
 
@@ -70,6 +71,7 @@ def main():
     assert sha256(os.path.join(LM_DIR, "decoder_model_quantized.onnx")) == pinned(prereg, "decoder_model_quantized.onnx SHA-256"), "model hash mismatch"
     assert sha256(os.path.join(LM_DIR, "tokenizer.json")) == pinned(prereg, "tokenizer.json SHA-256"), "tokenizer hash mismatch"
     m = re.search(r"Holdout v\d+ SHA-256: `([0-9a-f]{64})`", prereg)
+    print("dev FPR limit:", DEV_FPR_MAX)
     assert m and sha256(HOLD) == m.group(1), "holdout changed since pre-registration"
 
     sc = Scorer(LM_DIR)
@@ -85,7 +87,7 @@ def main():
     # Smallest threshold with dev prose flag rate <= 5%. Flag = NLL >= t.
     t_star = None
     for t in sorted(set(dev_prose)):
-        if sum(v >= t for v in dev_prose) / len(dev_prose) <= FLAG_FPR_MAX:
+        if sum(v >= t for v in dev_prose) / len(dev_prose) <= DEV_FPR_MAX:
             t_star = t
             break
     assert t_star is not None
@@ -104,6 +106,7 @@ def main():
                 "salad_recall": dev_recall, "auc_salad_gt_prose": auc(dev_salad, dev_prose)},
         "holdout": {"prose_n": len(ho_prose), "shuffled_n": len(ho_shuf), "prose_flag_rate": ho_fpr,
                     "shuffled_recall": ho_recall, "auc_shuffled_gt_prose": auc(ho_shuf, ho_prose)},
+        "dev_fpr_max_rule": DEV_FPR_MAX,
         "targets": {"holdout_prose_flag_rate_max": FLAG_FPR_MAX, "holdout_shuffled_recall_min": RECALL_TARGET},
         "pass": ho_fpr <= FLAG_FPR_MAX and ho_recall >= RECALL_TARGET,
         "holdout_sha256": sha256(HOLD),
