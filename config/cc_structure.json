@@ -1,0 +1,6 @@
+{
+  "floor": 1e-6,
+  "max_share": 0.5,
+  "fd_step": 1e-4,
+  "status": "provisional: floor and max_share chosen by reasoning, not yet validated on a labeled set"
+}
