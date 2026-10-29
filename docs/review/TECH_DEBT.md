@@ -116,3 +116,7 @@ The batteries now run. Several had been crashing since the `./src/` path bug, an
 - **C (perplexity signal): calibrated and passing on a third holdout under a stricter, pre-registered dev rule.** Threshold NLL 6.105. Holdout prose flag 0.021, shuffled recall 1.0. Caveats in CHANGELOG. Still not wired. Phone runtime needs onnxruntime, a tokenizer port, and the 83.5 MB model bundled with its hash pinned.
 - **Harm (CI-1) is still not addressed.** Perplexity measures incoherence, not harm. Harm needs the classifier, which is calibrated but advisory.
 
+## Update 2026-10-29 (perplexity advisory wiring)
+
+- **C (perplexity): wired in advisory mode.** Sidecar, client, config, and prefilter stage are in place and tested. Fails open. It never blocks in this build. Phone runtime still needs onnxruntime, the tokenizer port, and the bundled model.
+

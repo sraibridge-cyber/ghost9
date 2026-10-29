@@ -19,8 +19,9 @@ const { gateSemantic } = require('./gate_semantic');
 const { gatePragmatic } = require('./gate_pragmatic');
 const { gateQuarantine } = require('./gate_quarantine');
 const { classify, config: CLF } = require('./clf_client');
+const { postNll, config: LMCFG } = require('./lm_client');
 
-const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode });
+const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'block', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode });
 const ORDER = ['L', 'S', 'M', 'P', 'Q', 'QC'];
 
 function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
@@ -81,7 +82,7 @@ function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
 // Fail-open everywhere: an unreachable classifier is recorded in the trace and the sentence goes on.
 // Only a flagged score blocks, and only in 'block' mode. The phone build has no classifier yet, so
 // fail-closed would refuse every sentence. clf.classify/clf.opts are injectable for tests.
-async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = {}) {
+async function runQcStage(text, context = [], mode = DEFAULT_MODE, clf = {}) {
   const pre = runPrefilter(text, context, mode);
   const qcMode = mode.QC || 'off';
   if (!pre.pass || qcMode === 'off') return pre;
@@ -113,6 +114,31 @@ async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = 
     pre.reason = stage.reason;
   }
   return pre;
+}
+
+// Full async pipeline: sync gates, then the classifier (QC), then the advisory LM stage.
+async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = {}) {
+  const pre = await runQcStage(text, context, mode, clf);
+  await runLmStage(pre, text, mode, clf);
+  return pre;
+}
+
+// Perplexity stage (option C). Advisory only: it reports and never changes pre.pass in this build.
+// It runs only for sentences that already passed the earlier gates. Fail-open when unreachable.
+async function runLmStage(pre, text, mode, lm = {}) {
+  const lmMode = mode.LM || 'off';
+  if (lmMode === 'off' || !pre.pass) return;
+  if (lmMode !== 'advisory') {
+    throw new Error(`LM stage is advisory-only in this build (got ${lmMode})`);
+  }
+  const r = await (lm.nll || postNll)([text], lm.opts || {});
+  if (!r.ok) {
+    pre.stages.LM = { mode: lmMode, pass: true, reason: 'lm_unavailable', error: r.error, nll: null, threshold: LMCFG.threshold, flagged: null };
+    return;
+  }
+  const v = r.values[0];
+  const flagged = v !== null && v >= LMCFG.threshold;
+  pre.stages.LM = { mode: lmMode, pass: true, reason: flagged ? 'advisory_flag' : 'ok', nll: v, threshold: LMCFG.threshold, flagged, model: r.model };
 }
 
 module.exports = { runPrefilter, runPrefilterAsync, DEFAULT_MODE, ORDER };

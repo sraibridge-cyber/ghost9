@@ -1,0 +1,8 @@
+{
+  "url": "http://127.0.0.1:7769",
+  "timeout_ms": 2000,
+  "mode": "advisory",
+  "threshold": 6.105245113372803,
+  "threshold_status": "calibrated v3 (docs/validation/LM_CALIBRATION_V3.json): dev prose flag 2.2%, holdout v3 prose flag 2.1%, holdout v3 shuffled recall 1.0. Advisory only. Block mode is not implemented in this build.",
+  "model": "Xenova/distilgpt2 quantized, pinned in docs/validation/LM_PREREG_V3.md"
+}

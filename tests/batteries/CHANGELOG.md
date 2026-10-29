@@ -123,3 +123,12 @@ Rule: every fix or update sprint updates the batteries it touches. Superseded ba
 - Caveats: the holdout prose was written by the author. Shuffled negatives are an easier kind of incoherence than dev salad. The signal measures incoherence. It does not detect harm; CI-1 is fluent, so its NLL is low.
 - Not wired into the prefilter. Config unchanged. Wiring waits on the phone runtime (onnxruntime and tokenizer).
 
+## 2026-10-29 (perplexity wired in as advisory, step 2)
+
+- **Sidecar** `services/lm/lm_service.py` (loopback, pinned-hash check, `GET /health`, `POST /nll`). Contract test `tests/regression/lm_service_contract.py`: 14/14 against the pinned model. Skips without `LM_DIR`.
+- **Client** `src/lm_client.js` (loopback only, never throws). Config `config/lm.json`: threshold 6.105 (v3), mode `advisory`.
+- **Prefilter** (`src/prefilter.js`): the classifier stage is unchanged and moved into `runQcStage`. A new advisory LM stage runs after the earlier gates pass. It reports `stages.LM` and never changes `pass`. Block mode for LM throws, so it cannot be enabled by config alone.
+- **Tests:** `tests/regression/prefilter_lm_advisory.js` (6/6). Existing suites unchanged: fail-open 5/5, classifier wiring 11/11, five-gate 40/40.
+- **Live check** (sidecar running, pinned model): a coherent sentence scored NLL 3.49 and was not flagged. A word salad scored 9.37 and was flagged. Both passed the prefilter.
+- Step 3 (not done): decide whether to move LM from advisory to block. That needs a harm-independent calibration and your approval, since incoherence is not harm.
+
