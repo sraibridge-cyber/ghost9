@@ -1,0 +1,38 @@
+{
+  "model_id": "Xenova/distilgpt2 (quantized ONNX decoder and tokenizer)",
+  "upstream": "Xenova/distilgpt2 on Hugging Face. License: check the upstream model card before any public release.",
+  "algorithm": "sha3-512 for chunks and assembled files; sha256 pins match docs/validation/LM_PREREG_V3.md",
+  "note": "Files are stored as chunks under GitHub's 100 MB limit. Assemble with services/lm/fetch_lm_model.py. No network access is needed at runtime.",
+  "files": [
+    {
+      "name": "decoder_model_quantized.onnx",
+      "size": 83502375,
+      "sha256": "1d3ab4d7e08ca9b8ea9a42dda13a05b7ff0f1b0c9bdc4f6eba27e7f0ceff8431",
+      "sha3_512": "f944f6f59a778d5415cec110008a2fb059f2c52ebf49e2f5a9037f5258d199fb139c9217e2e3256e989189b77fd703677c1b94a75400e7e9b017619984f9e330",
+      "chunks": [
+        {
+          "name": "decoder_model_quantized.onnx.part-00.bin",
+          "size": 28000000,
+          "sha3_512": "d7d25869e836aeb1e9f05768db2263035804978c59a178660ec1f594f5a46a7e54939bf7d3cf3c26e7cca636100ecbac93025213cd8107011d659c6adb5aed68"
+        },
+        {
+          "name": "decoder_model_quantized.onnx.part-01.bin",
+          "size": 28000000,
+          "sha3_512": "bdcc5a37eb4b51c6e54609e442e061db1bee7f0a3da533d36fb09a7d8516af5b8e79bdb8f92b2379759edcf8ce9b24f7733556bd43c3d184227747c879271674"
+        },
+        {
+          "name": "decoder_model_quantized.onnx.part-02.bin",
+          "size": 27502375,
+          "sha3_512": "52d53a3e77837b0a792cc9dca05a6d96ada7d1a301b9216266d6b03edfc5a0aef893497900c82c0e738fd503eda43be0fd397946c726c2b0ac74dcc339c5fba5"
+        }
+      ]
+    },
+    {
+      "name": "tokenizer.json",
+      "size": 2107653,
+      "sha256": "cda20b8ca044949aa07ac4078420c80d1a57139d5f9f33700e46fb2d891e7c66",
+      "sha3_512": "4e91afb0fb0c3b987869669f92989d055984e7540ca3d6d9a7809046e3da53e8bb025af6f0fb6b9bbb580b82bd81d174bcfe4435acabfc549dd8aa43117c1974",
+      "chunks": []
+    }
+  ]
+}
