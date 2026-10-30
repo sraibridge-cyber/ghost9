@@ -1,0 +1,24 @@
+{
+  "gate": "M2",
+  "version": "2026-10-29-a",
+  "mode": "advisory-unwired",
+  "model": {
+    "dir": "models/minilm-embed",
+    "file": "model_quantized.onnx",
+    "sha256": "afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1",
+    "tokenizer_file": "tokenizer.json",
+    "tokenizer_sha256": "da0e79933b9ed51798a3ae27893d3c5fa4a201126cef75586296df9b4d2c62a0"
+  },
+  "units": {
+    "min_content_words": 4,
+    "min_word_len": 3,
+    "stopwords_file": "config/m_gate.json"
+  },
+  "tokens": {
+    "max_len": 256
+  },
+  "threshold": 0.2265,
+  "threshold_source": "docs/validation/M_V2_WIKI_FINAL.json (dev-calibrated, FPR 0.05)",
+  "scope": "cross-topic multi-sentence splices only. Same-topic fails (docs/validation/M_V2_SAMETOPIC_DEV.json, Y19).",
+  "config_hash": "5c6179372a8487d1f3473e9e4925be3354f15ddc8dee6e5945701684b6ace96c"
+}
