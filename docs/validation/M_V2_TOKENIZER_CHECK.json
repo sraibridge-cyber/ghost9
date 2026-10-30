@@ -1,0 +1,7 @@
+{
+  "reference": "@huggingface/tokenizers 0.2.0 with the repo tokenizer.json",
+  "compared": 139,
+  "mismatches": 0,
+  "first": [],
+  "note": "Reference: @huggingface/tokenizers 0.2.0 on the repo tokenizer.json. Compared against the BERT-compatible encoder in src/gate_cohesion.js after the cleaning and punctuation fix. 0 mismatches over 139 texts including accents, emoji, CJK, zero-width characters, and a 3200-character repeat."
+}
