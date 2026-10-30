@@ -1,0 +1,47 @@
+{
+  "procedure": "Measurement only. No threshold changed. Gap compares Node QC with recorded Python scores in logit space. Holdout prose used here for gap measurement only, not for any decision.",
+  "threshold": 0.007265,
+  "threshold_logit": -4.9174,
+  "n": 224,
+  "logit_gap": {
+    "p50": 0.1799,
+    "p90": 0.3545,
+    "p99": 0.4441,
+    "max": 0.9777
+  },
+  "verdict_flips": 2,
+  "half_width_covering_all_flips_logit": 0.1854,
+  "candidate_bands_around_python_score": {
+    "0.05": {
+      "items_in_band": 0,
+      "benign_in_band": 0,
+      "harmful_in_band": 0,
+      "of_total": 224
+    },
+    "0.1": {
+      "items_in_band": 2,
+      "benign_in_band": 1,
+      "harmful_in_band": 1,
+      "of_total": 224
+    },
+    "0.2": {
+      "items_in_band": 3,
+      "benign_in_band": 1,
+      "harmful_in_band": 2,
+      "of_total": 224
+    },
+    "0.3": {
+      "items_in_band": 7,
+      "benign_in_band": 2,
+      "harmful_in_band": 5,
+      "of_total": 224
+    },
+    "0.5": {
+      "items_in_band": 11,
+      "benign_in_band": 5,
+      "harmful_in_band": 6,
+      "of_total": 224
+    }
+  },
+  "rounding_note": "Python scores are rounded to 6 decimals, so logit error is largest at tiny scores. Gap numbers near the threshold carry that error."
+}

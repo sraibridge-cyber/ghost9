@@ -1,0 +1,37 @@
+{
+  "model": "Xenova/toxic-bert@65cbc2607cb7fad64f98d1e8a5a3d1f8577895fd",
+  "threshold": 0.007265,
+  "sets": {
+    "benign": {
+      "n": 91,
+      "max_abs_diff": 0.0004045,
+      "over_1e5": 90,
+      "verdict_flips_at_threshold": 0
+    },
+    "harm_seed": {
+      "n": 30,
+      "max_abs_diff": 0.0574387,
+      "over_1e5": 30,
+      "verdict_flips_at_threshold": 0
+    },
+    "harm_para": {
+      "n": 30,
+      "max_abs_diff": 0.028885,
+      "over_1e5": 30,
+      "verdict_flips_at_threshold": 2
+    },
+    "incoherent": {
+      "n": 31,
+      "max_abs_diff": 0.0017336,
+      "over_1e5": 31,
+      "verdict_flips_at_threshold": 0
+    },
+    "holdout_prose": {
+      "n": 42,
+      "max_abs_diff": 0.0007837,
+      "over_1e5": 37,
+      "verdict_flips_at_threshold": 0
+    }
+  },
+  "passes": false
+}
