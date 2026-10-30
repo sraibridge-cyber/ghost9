@@ -20,11 +20,12 @@ const { gatePragmatic } = require('./gate_pragmatic');
 const { gateQuarantine } = require('./gate_quarantine');
 const { classify, config: CLF } = require('./clf_client');
 const { postNll, config: LMCFG } = require('./lm_client');
+const { gateCohesion } = require('./gate_cohesion');
 const { margin: hvMargin, config: HVCFG } = require('./hv_client');
 
 // S was 'block' until 2026-10-29. Moved to advisory after measurement: it flagged 1.5 to 4% of benign
 // sentences and only 2 of 31 salad sentences (docs/validation/S_GATE_MEASUREMENT.json).
-const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'advisory', M: 'off', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode, HV: HVCFG.mode });
+const DEFAULT_MODE = Object.freeze({ L: 'advisory', S: 'advisory', M: 'off', M2: 'advisory', P: 'advisory', Q: 'block', QC: CLF.mode, LM: LMCFG.mode, HV: HVCFG.mode });
 const ORDER = ['L', 'S', 'M', 'P', 'Q', 'QC'];
 
 function runPrefilter(text, context = [], mode = DEFAULT_MODE) {
@@ -119,11 +120,35 @@ async function runQcStage(text, context = [], mode = DEFAULT_MODE, clf = {}) {
   return pre;
 }
 
-// Full async pipeline: sync gates, then the classifier (QC), then the advisory LM stage.
+// M2 cross-check stage (semantic cohesion, gate_cohesion.js). Async because it runs ONNX.
+// Advisory only: it records a verdict and never changes pre.pass. It runs on every text, not only
+// texts that passed earlier gates, so it can cross-check them. Fail-open: any error is recorded and the text goes on.
+async function runM2Stage(pre, text, mode, m2 = {}) {
+  const m2Mode = mode.M2 || 'off';
+  if (m2Mode === 'off') return;
+  if (m2Mode !== 'advisory') {
+    throw new Error(`M2 stage is advisory-only in this build (got ${m2Mode})`);
+  }
+  const t0 = performance.now();
+  try {
+    const r = await (m2.gate || gateCohesion)(text, m2.opts || {});
+    pre.stages.M2 = {
+      mode: m2Mode, pass: true, reason: r.verdict, verdict: r.verdict, blocks: false,
+      score: r.score === undefined ? null : r.score, threshold: r.threshold, units: r.units,
+      config_hash: r.config_hash, flagged: r.verdict === 'flag',
+    };
+  } catch (e) {
+    pre.stages.M2 = { mode: m2Mode, pass: true, reason: 'm2_error', verdict: 'unmeasured', blocks: false, error: String(e.message || e), score: null, flagged: null };
+  }
+  pre.stages.M2.elapsed_ms = parseFloat((performance.now() - t0).toFixed(3));
+}
+
+// Full async pipeline: sync gates, then the classifier (QC), then the advisory LM, HV and M2 stages.
 async function runPrefilterAsync(text, context = [], mode = DEFAULT_MODE, clf = {}) {
   const pre = await runQcStage(text, context, mode, clf);
   await runLmStage(pre, text, mode, clf);
   await runHvStage(pre, text, mode, clf);
+  await runM2Stage(pre, text, mode, clf.m2 || {});
   return pre;
 }
 
@@ -172,4 +197,4 @@ async function runLmStage(pre, text, mode, lm = {}) {
   pre.stages.LM = { mode: lmMode, pass: true, reason: flagged ? 'advisory_flag' : 'ok', nll: v, threshold: LMCFG.threshold, flagged, model: r.model };
 }
 
-module.exports = { runPrefilter, runPrefilterAsync, DEFAULT_MODE, ORDER };
+module.exports = { runPrefilter, runPrefilterAsync, runM2Stage, DEFAULT_MODE, ORDER };
