@@ -1,0 +1,23 @@
+{
+  "procedure": "docs/validation/M_V2_SAMETOPIC_PREREG.md",
+  "threshold_c": 0.2265,
+  "same_topic": {
+    "n": 60,
+    "flagged": 42,
+    "abstained": 0,
+    "recall": 0.7
+  },
+  "benign_dev": {
+    "n": 60,
+    "flagged": 3,
+    "abstained": 5,
+    "false_positive_rate": 0.05
+  },
+  "items_sha256": "99b5e1a43058fbeb7b9f76de7b559627c2c067f16970e21996c654dd7f0c4321",
+  "bar": {
+    "recall": 0.8,
+    "fpr": 0.05
+  },
+  "passes_bar": false,
+  "caveats": "benign FPR optimistic (used to set c); extracts repeat across items; dev only"
+}
