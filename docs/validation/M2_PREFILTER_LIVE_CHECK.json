@@ -1,0 +1,55 @@
+{
+  "note": "Live run through runPrefilterAsync in the sandbox. LM, HV and QC stubbed to fail open (services need Python packages not present here). M2 ran on the real ONNX path. M2 never blocks in advisory mode; verified by runPrefilterAsync contract tests",
+  "results": {
+    "single_prose": {
+      "label": 0,
+      "n": 40,
+      "verdicts": {
+        "abstain": 40
+      },
+      "unmeasured": 0,
+      "p50_ms": 0.4,
+      "p90_ms": 2.2
+    },
+    "single_salad": {
+      "label": 1,
+      "n": 31,
+      "verdicts": {
+        "abstain": 31
+      },
+      "unmeasured": 0,
+      "p50_ms": 0.2,
+      "p90_ms": 0.3
+    },
+    "multi_benign": {
+      "label": 0,
+      "n": 30,
+      "verdicts": {
+        "abstain": 2,
+        "pass": 26,
+        "flag": 2
+      },
+      "unmeasured": 0,
+      "p50_ms": 27.8,
+      "p90_ms": 41.1
+    },
+    "multi_splice": {
+      "label": 1,
+      "n": 30,
+      "verdicts": {
+        "flag": 28,
+        "pass": 2
+      },
+      "unmeasured": 0,
+      "p50_ms": 32.3,
+      "p90_ms": 46.2
+    }
+  },
+  "summary": {
+    "multi_benign_30": "pass 26, flag 2, abstain 2 (false positive rate 2 of 28 scored)",
+    "multi_splice_30": "flag 28, pass 2 (recall 28 of 30)",
+    "single_sentence": "abstain on all 71 (out of coverage by design)",
+    "latency_p50_ms": "about 28 to 32 ms per multi-sentence text in the sandbox, under 1 ms for abstentions",
+    "caveat": "The multi-sentence arm is the threshold-calibration arm, so these numbers are optimistic. Not a fresh test. LM, HV and QC were stubbed, so no three-way cross-check was possible here."
+  }
+}
