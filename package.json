@@ -14,7 +14,8 @@
     "op3": "node scripts/op3_harness.js"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^9.4.3"
+    "better-sqlite3": "^9.4.3",
+    "onnxruntime-node": "1.21.1"
   },
   "keywords": [
     "ghost",
