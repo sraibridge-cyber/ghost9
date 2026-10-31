@@ -87,4 +87,30 @@ function hypernymClosure(lemma, pos = 'n', maxDepth = 6) {
   return seen;
 }
 
-module.exports = { synsets, synset, hypernymClosure, DICT };
+
+// Closure over the first (most common) noun sense only. Polysemous nouns such as "rock" have a
+// rarer sense under an animate root, so the all-senses closure would call them animate.
+function firstSenseClosure(lemma, pos = 'n', maxDepth = 10) {
+  const seen = new Set();
+  const first = synsets(lemma, pos)[0];
+  if (first === undefined) return seen;
+  let frontier = [{ pos, offset: first, depth: 0 }];
+  while (frontier.length) {
+    const next = [];
+    for (const node of frontier) {
+      const key = `${node.pos}:${node.offset}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (node.depth >= maxDepth) continue;
+      const sy = synset(node.pos, node.offset);
+      for (const p of sy.pointers) {
+        if (!HYPERNYM_POINTERS.has(p.symbol)) continue;
+        next.push({ pos: p.pos, offset: p.offset, depth: node.depth + 1 });
+      }
+    }
+    frontier = next;
+  }
+  return seen;
+}
+
+module.exports = { synsets, synset, hypernymClosure, firstSenseClosure, DICT };
