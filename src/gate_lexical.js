@@ -52,6 +52,8 @@ function lemmaCandidates(w) {
     const s = w.slice(0, -3); c.add(s); c.add(s + 'e');
     if (/([bdgklmnprt])\1$/.test(s)) c.add(s.slice(0, -1));
   }
+  if (w.endsWith('ier') && w.length > 4) c.add(w.slice(0, -3) + 'y');
+  if (w.endsWith('iest') && w.length > 5) c.add(w.slice(0, -4) + 'y');
   if (w.endsWith('ly') && w.length > 3) c.add(w.slice(0, -2));
   if (w.endsWith('er') && w.length > 3) { c.add(w.slice(0, -2)); c.add(w.slice(0, -1)); }
   if (w.endsWith('est') && w.length > 4) { c.add(w.slice(0, -3)); c.add(w.slice(0, -2)); }
