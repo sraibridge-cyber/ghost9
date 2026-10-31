@@ -128,7 +128,7 @@ assert('T83: Foreign - German', scanLexical('guten tag').pass === false, scanLex
 assert('T84: Foreign - Latin', scanLexical('lorem ipsum').pass === false, scanLexical('lorem ipsum'));
 assert('T85: Foreign - Japanese romanized', scanLexical('konichiwa sayonara').pass === false, scanLexical('konichiwa sayonara'));
 assert('T86: Mixed English and foreign', scanLexical('The hello world bonjour').pass === false, scanLexical('The hello world bonjour'));
-assert('T87: Fake technical', scanLexical('The quantum flux capacitor').pass === false, scanLexical('The quantum flux capacitor'));
+assert('T87: Technical English nouns pass (v2.3: real words, not harm)', scanLexical('The quantum flux capacitor').pass === true, scanLexical('The quantum flux capacitor'));
 assert('T88: Fake medical', scanLexical('Patient has severe glorbritis').pass === false, scanLexical('Patient has severe glorbritis'));
 assert('T89: Fake legal', scanLexical('The defendant committed blargfraud').pass === false, scanLexical('The defendant committed blargfraud'));
 assert('T90: Fake scientific', scanLexical('The snorp particle was detected').pass === false, scanLexical('The snorp particle was detected'));
@@ -357,7 +357,7 @@ assert('T252: long text checked', scanLexical(longValid).checked === 180, scanLe
 
 const longMixed = 'The quick brown fox jumps over the lazy dog xyzzy '.repeat(10).trim();
 assert('T253: long mixed false', scanLexical(longMixed).pass === false, scanLexical(longMixed));
-assert('T254: long mixed unknown count', scanLexical(longMixed).unknown.length === 10, scanLexical(longMixed));
+assert('T254: long mixed unknown count (v2.3 reports unique unknown tokens)', scanLexical(longMixed).unknown.length === 1, scanLexical(longMixed));
 
 const manyWords = Array(50).fill('hello').join(' ');
 assert('T255: repeated word valid', scanLexical(manyWords).pass === true, scanLexical(manyWords));
@@ -387,7 +387,7 @@ assert('T270: Description', scanLexical('The spectral graph shows node connectio
 // SECTION 10: NEGATIVE REAL-WORLD (Tests 271-290)
 // ============================================================
 
-assert('T271: Spam', scanLexical('Buy cheap viagra now').pass === false, scanLexical('Buy cheap viagra now'));
+assert('T271: Real English words pass the lexical check (v2.3: harm is a later gate)', scanLexical('Buy cheap viagra now').pass === true, scanLexical('Buy cheap viagra now'));
 assert('T272: Gibberish sentence', scanLexical('The glorb snorp blarg of xyzzy').pass === false, scanLexical('The glorb snorp blarg of xyzzy'));
 assert('T273: Mixed spam', scanLexical('Hello buy now xyzzy').pass === false, scanLexical('Hello buy now xyzzy'));
 assert('T274: Fake technical', scanLexical('The quantum flux capacitor needs more jiggawatts').pass === false, scanLexical('The quantum flux capacitor needs more jiggawatts'));
