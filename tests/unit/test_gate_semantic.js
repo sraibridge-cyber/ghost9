@@ -1,4 +1,4 @@
-const g = require("./src/gate_semantic.js");
+const g = require("../../src/gate_semantic.js");
 let passed = 0, failed = 0;
 const failures = [];
 function run(id, text, shouldPass, description) {

@@ -1,4 +1,4 @@
-const g = require("./src/gate_quarantine.js");
+const g = require("../../src/gate_quarantine.js");
 let passed = 0, failed = 0;
 const failures = [];
 function run(id, u, sp, desc) {

@@ -1,4 +1,4 @@
-const g = require("./src/gate_pragmatic.js");
+const g = require("../../src/gate_pragmatic.js");
 let passed = 0, failed = 0;
 const failures = [];
 function run(id, u, c, sp, desc) {

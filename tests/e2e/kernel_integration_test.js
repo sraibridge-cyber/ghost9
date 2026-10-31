@@ -53,7 +53,9 @@ test('K6.1 Lie blocked', lie.scores.D7 === 0.001, lie.scores.D7, 0.001);
 // Was 'v3.1.0'. Current CC version is v3.2.
 test('K7.1 CC_VERSION', CC_VERSION === 'v3.2', CC_VERSION, 'v3.2');
 test('K7.2 N_DOMAINS', N_DOMAINS === 8, N_DOMAINS, 8);
-test('K7.3 TAU', TAU === 0.9995, TAU, 0.9995);
+// TAU 0.943 is the empirically validated ingestion threshold (docs/architecture/TAU_VALUES.md).
+// 0.9995 is the canonical target and is checked separately via thresholds.json, not against TAU.
+test('K7.3 TAU empirical', TAU === 0.943, TAU, 0.943);
 
 // Test 8: Whitlock still works
 const w = whitlock(5);

@@ -1,4 +1,4 @@
-const g = require('./src/gate_syntactic.js');
+const g = require('../../src/gate_syntactic.js');
 let passed = 0, failed = 0;
 const failures = [];
 
