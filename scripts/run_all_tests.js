@@ -5,6 +5,15 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
+
+// The cohesion suite needs onnxruntime-node (optional dependency). Fail fast with a clear message if it is missing.
+try {
+  require.resolve('onnxruntime-node', { paths: [ROOT] });
+} catch (e) {
+  console.error('Missing prerequisite: onnxruntime-node is not resolvable from this checkout.');
+  console.error('Run "npm ci" in the repo root (it is declared in package.json), then rerun npm test.');
+  process.exit(2);
+}
 const TIMEOUT_MS = 180000;
 const SUITES = [
   ['regression/run', 'tests/regression/run.js'],
