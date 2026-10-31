@@ -13,6 +13,7 @@ const crypto = require('crypto');
 const CC     = require('./coherence_calculus');
 const T      = require('./tesseract');
 const { classifyTier }  = require('./taotie');
+const { readSealedJson } = require('./at_rest');
 
 const PORT       = 7767;
 const DATA_DIR   = path.join(__dirname, '..', 'data');
@@ -37,8 +38,8 @@ let _state = { nodes: [], merkle_root: null, n: 0 };
 
 function loadState() {
   try {
-    if (fs.existsSync(STATE_FILE))
-      _state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+    const next = readSealedJson(STATE_FILE, null);
+    if (next && Array.isArray(next.nodes)) _state = next;
   } catch {}
   return _state;
 }
