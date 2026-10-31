@@ -60,7 +60,7 @@ for (let i = 0; i < 100; i++) {
   test('L1.1.' + i + 'b pass', typeof result.pass === 'boolean', typeof result.pass, 'boolean');
   test('L1.1.' + i + 'c tier', typeof result.tier === 'string' || result.tier === null, true, true);
   test('L1.1.' + i + 'd 8 scores', Object.keys(result.scores).length === 8, Object.keys(result.scores).length, 8);
-  test('L1.1.' + i + 'e version', result.version === 'v3.1.0', result.version, 'v3.1.0');
+  test('L1.1.' + i + 'e version', result.version === 'v3.2', result.version, 'v3.2');
 }
 
 const formats = [
@@ -89,8 +89,8 @@ for (let batch = 1; batch <= 10; batch++) {
   test('L1.3.' + batch + 'b valid', results.every(r => r.mu >= 0 && r.mu <= 1), true, true);
   test('L1.3.' + batch + 'c scored', results.every(r => Object.keys(r.scores).length === 8), true, true);
   // FIX: evaluate() returns 'version' not 'timestamp' — check version exists instead
-  test('L1.3.' + batch + 'd versioned', results.every(r => r.version === 'v3.1.0'), true, true);
-  test('L1.3.' + batch + 'e ver', results.every(r => r.version === 'v3.1.0'), true, true);
+  test('L1.3.' + batch + 'd versioned', results.every(r => r.version === 'v3.2'), true, true);
+  test('L1.3.' + batch + 'e ver', results.every(r => r.version === 'v3.2'), true, true);
 }
 
 // ============================================
@@ -461,7 +461,7 @@ for (let i = 0; i < 25; i++) {
   test('L9.2.' + i + 'd tier', 'tier' in result, true, true);
   // FIX: evaluate() has no timestamp — check version instead
   test('L9.2.' + i + 'e version', 'version' in result, true, true);
-  test('L9.2.' + i + 'f versionVal', result.version === 'v3.1.0', result.version, 'v3.1.0');
+  test('L9.2.' + i + 'f versionVal', result.version === 'v3.2', result.version, 'v3.2');
 }
 
 // ============================================
@@ -470,10 +470,10 @@ for (let i = 0; i < 25; i++) {
 console.log('\n=== L10: Security & Sovereignty ===');
 
 const coreModules = [
-  './src/coherence_calculus', './src/taotie', './src/spectral_graph',
-  './src/spatial_web', './src/reconstruction_pipeline', './src/ghost_rip',
-  './src/ghost_kernel', './src/ghost_face', './src/merkle_bonsai',
-  './src/gate_lexical', './src/gate_syntactic', './src/gate_semantic', './src/gate_router'
+  '../../src/coherence_calculus', '../../src/taotie', '../../src/spectral_graph',
+  '../../src/spatial_web', '../../src/reconstruction_pipeline', '../../src/ghost_rip',
+  '../../src/ghost_kernel', '../../src/ghost_face', '../../src/merkle_bonsai',
+  '../../src/gate_lexical', '../../src/gate_syntactic', '../../src/gate_semantic', '../../src/gate_router'
 ];
 for (let i = 0; i < coreModules.length; i++) {
   try {
@@ -515,3 +515,5 @@ if (failed > 0) {
 }
 
 process.on('exit', () => { if (failed > 0) process.exitCode = 1; }); // exit 1 on any failure (no hidden failures)
+// The kernel starts timers and a server on require; exit explicitly so the battery terminates.
+process.exit(failed > 0 ? 1 : 0);
