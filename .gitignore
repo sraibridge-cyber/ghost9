@@ -28,3 +28,5 @@ data/*.log
 
 # Test scratch output (fixtures used for a single run — historical ones live in tests/fixtures/)
 test_tmp/
+__pycache__/
+*.pyc
